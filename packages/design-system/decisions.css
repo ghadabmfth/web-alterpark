@@ -19,4 +19,9 @@
   --text-body: 300 16px/var(--lh-body) var(--font-sans);
   --text-link: 700 16px/var(--lh-body) var(--font-sans);
   --text-nav: 700 16px/24px var(--font-sans);
+
+  /* Présents dans tokens.json mais absents de la copie de tokens.css ; utilisés par bundle.css. */
+  --container-width: 90%;
+  --fs-body: 16px;
+  --ls-body: clamp(0.5px, 0.2px + 0.08vw, 1.28px);
 }
