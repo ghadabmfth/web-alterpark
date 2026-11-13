@@ -1,0 +1,12 @@
+/* DateTimeField et DateTimeRange (proposés) : tokens uniquement. Seuils : 768px = bp-md. */
+.ap-datetime { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; margin: 0; padding: 0; border: 0; }
+.ap-datetime__legend { padding: 0; margin-bottom: var(--space-2); font: var(--text-h6); color: var(--primary); }
+.ap-datetime__inputs { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-3); align-items: start; }
+.ap-datetime__inputs .ap-field { max-width: none; }
+/* Icônes natives du calendrier et de l'horloge lisibles sur fond sombre. */
+.ap-datetime .ap-input { color-scheme: dark; }
+.ap-stay { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-4); }
+.ap-stay__fields { display: grid; gap: var(--space-6); }
+@container (min-width: 768px) { .ap-stay__fields { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+.ap-stay__duration { min-height: var(--space-6); margin: 0; font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-stay__duration b { color: var(--primary); }

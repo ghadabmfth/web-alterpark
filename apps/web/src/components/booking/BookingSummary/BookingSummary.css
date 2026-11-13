@@ -1,0 +1,18 @@
+/* BookingSummary (proposé) : tokens uniquement. */
+.ap-summary { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--surface-raised); }
+.ap-summary__title { margin: 0; font: var(--text-h6); color: var(--primary); }
+.ap-summary__group { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding-bottom: var(--space-4);
+  background-image: linear-gradient(to right, var(--border-divider) var(--border-3), transparent var(--border-3)); background-size: var(--space-2) var(--border-1); background-repeat: repeat-x; background-position: bottom; }
+.ap-summary__list, .ap-summary__prices { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
+.ap-summary__list { flex: 1; min-width: 0; }
+.ap-summary__list > div, .ap-summary__prices > div { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--space-4); }
+.ap-summary dt { font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-summary dd { display: flex; flex-direction: column; margin: 0; font: var(--text-body-sm); color: var(--text-primary); overflow-wrap: anywhere; }
+.ap-summary dd b { font: var(--text-label); }
+.ap-summary dd span { color: var(--text-secondary); }
+.ap-summary__edit { flex: none; font: var(--text-label); color: var(--primary); text-decoration: none; }
+.ap-summary__edit:hover { color: var(--primary-hover); text-decoration: underline; text-underline-offset: var(--space-1); }
+.ap-summary__prices dd { text-align: right; font-variant-numeric: tabular-nums; }
+.ap-summary__total { padding-top: var(--space-3); border-top: var(--border-1) solid var(--border); }
+.ap-summary__total dt, .ap-summary__total dd { font: var(--text-h6); color: var(--text-primary); }
+.ap-summary__total dd { color: var(--primary); }

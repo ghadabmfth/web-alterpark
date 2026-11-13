@@ -1,0 +1,29 @@
+/* BookingStepper (proposé) : tokens uniquement. Seuil 768px = bp-md (les variables sont interdites dans @container). */
+.ap-stepper { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-3); }
+.ap-stepper__compact { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); margin: 0; font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-stepper__now { font: var(--text-label); color: var(--text-primary); }
+.ap-stepper__bar { height: var(--space-1); border-radius: var(--radius-pill); background: var(--surface-raised); overflow: hidden; }
+.ap-stepper__bar > span { display: block; height: 100%; width: calc(var(--progress, 0) * 100%); border-radius: inherit; background: var(--primary); transition: width var(--duration-base) var(--ease-standard); }
+.ap-stepper__list { display: flex; justify-content: space-between; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.ap-stepper__item { position: relative; flex: 1 1 0; display: flex; justify-content: center; min-width: 0; }
+/* Filet pointillé de la marque entre deux pastilles. */
+.ap-stepper__item:not(:last-child)::after { content: ""; position: absolute; top: calc(var(--space-8) / 2); left: calc(50% + var(--space-4) + var(--space-1)); right: calc(-50% + var(--space-4) + var(--space-1)); height: var(--border-1);
+  background-image: linear-gradient(to right, var(--border-divider) var(--border-3), transparent var(--border-3)); background-size: var(--space-2) var(--border-1); opacity: 0.5; }
+.ap-stepper__item.is-complete:not(:last-child)::after { background: var(--primary); opacity: 1; }
+.ap-stepper__link { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-width: 0; color: var(--text-muted); text-decoration: none; border-radius: var(--radius-sm); }
+a.ap-stepper__link:hover .ap-stepper__label { color: var(--primary); text-decoration: underline; text-underline-offset: var(--space-1); }
+a.ap-stepper__link:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.ap-stepper__dot { display: grid; place-items: center; width: var(--space-8); height: var(--space-8); border: var(--border-2) solid var(--border); border-radius: 50%; background: var(--surface); font: var(--text-label); color: var(--text-muted); }
+.ap-stepper__dot svg { width: var(--icon-sm); height: var(--icon-sm); }
+.ap-stepper__item.is-complete .ap-stepper__dot { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
+.ap-stepper__item.is-current .ap-stepper__dot { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 var(--space-1) var(--surface-raised); }
+/* Mobile : seules les pastilles, le libellé de l'étape en cours est au-dessus. */
+.ap-stepper__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@container (min-width: 768px) {
+  .ap-stepper__compact { display: none; }
+  .ap-stepper__bar { display: none; }
+  .ap-stepper__label { position: static; width: auto; height: auto; overflow: visible; clip: auto; font: var(--text-body-sm); text-align: center; white-space: normal; }
+  .ap-stepper__item.is-complete .ap-stepper__label { color: var(--text-secondary); }
+  .ap-stepper__item.is-current .ap-stepper__label { font: var(--text-label); color: var(--text-primary); }
+}
+@media (prefers-reduced-motion: reduce) { .ap-stepper__bar > span { transition: none; } }

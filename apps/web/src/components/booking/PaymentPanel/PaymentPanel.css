@@ -1,0 +1,11 @@
+/* PaymentPanel (proposé) : tokens uniquement. */
+.ap-pay { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--surface-raised); }
+.ap-pay__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-4); }
+.ap-pay__title { margin: 0; font: var(--text-h6); color: var(--primary); }
+.ap-pay__amount { display: flex; align-items: baseline; gap: var(--space-2); margin: 0; font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-pay__amount b { font: var(--text-h6); color: var(--text-primary); font-variant-numeric: tabular-nums; }
+/* Le Payment Element (iframe Stripe) se monte ici ; hauteur minimale pour éviter un saut de mise en page. */
+.ap-pay__element { min-height: var(--space-40); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); }
+.ap-pay__element[aria-busy="true"] { display: grid; place-items: center; }
+.ap-pay__note { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-pay__note .ap-bk__ico { margin-top: var(--space-1); color: var(--primary); }

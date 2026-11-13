@@ -1,0 +1,5 @@
+/* BookingSearchForm (proposé) : tokens uniquement. Seuil : 768px = bp-md. */
+.ap-search { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-8); }
+.ap-search > .ap-field { max-width: none; }
+.ap-search__submit { width: 100%; }
+@container (min-width: 768px) { .ap-search > .ap-field { max-width: var(--container-col); } .ap-search__submit { width: auto; align-self: flex-start; } }

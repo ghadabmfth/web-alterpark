@@ -1,0 +1,25 @@
+/* OfferCard (proposé) : tokens uniquement. */
+.ap-offer { position: relative; display: flex; flex-direction: column; gap: var(--space-4); height: 100%; padding: var(--space-6); border: var(--border-2) solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); }
+.ap-offer.is-highlight { border-color: var(--primary); }
+.ap-offer.is-selected { border-color: var(--text-primary); box-shadow: var(--shadow-elevated); }
+.ap-offer__badge { align-self: flex-start; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--primary); color: var(--on-primary); font: var(--text-label); }
+
+.ap-offer__desc { margin: 0; font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-offer__features { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font: var(--text-body-sm); color: var(--text-primary); }
+.ap-offer__features li { display: flex; align-items: flex-start; gap: var(--space-2); }
+.ap-offer__features svg { flex: none; width: var(--icon-sm); height: var(--icon-sm); margin-top: var(--space-1); color: var(--primary); }
+.ap-offer__price { display: flex; flex-direction: column; margin: auto 0 0; padding-top: var(--space-4); }
+.ap-offer__price b { font: var(--text-h3); color: var(--primary); }
+.ap-offer__price small { font: var(--text-body-sm); color: var(--text-secondary); }
+.ap-offer__full { display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--space-12); margin: 0; border-radius: var(--radius-pill); background: var(--warning-soft); color: var(--warning); font: var(--text-label); }
+.ap-offer__full svg { width: var(--space-6); height: var(--space-6); }
+.ap-offer.is-unavailable .ap-offer__price b { color: var(--text-muted); }
+/* Squelette de chargement (OfferList) */
+.ap-offer--skeleton { gap: var(--space-3); }
+.ap-skeleton { display: block; height: var(--space-4); border-radius: var(--radius-sm); background: var(--surface); animation: ap-skeleton calc(var(--duration-slow) * 3) var(--ease-standard) infinite alternate; }
+.ap-skeleton--title { width: 60%; height: var(--space-8); }
+.ap-skeleton--line { width: 85%; }
+.ap-skeleton--short { width: 45%; }
+.ap-skeleton--button { height: var(--space-12); margin-top: auto; border-radius: var(--radius-pill); }
+@keyframes ap-skeleton { from { opacity: 1; } to { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .ap-skeleton { animation: none; } }

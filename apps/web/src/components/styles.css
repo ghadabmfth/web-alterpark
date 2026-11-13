@@ -42,3 +42,14 @@
 @import "./feedback/Modal/Modal.css";
 @import "./patterns/AppShowcase/AppShowcase.css";
 @import "./styles/reduced-motion.css";
+/* Composants du tunnel de réservation (proposés, phase 2) */
+@import "./booking/BookingStepper/BookingStepper.css";
+@import "./booking/BookingState/BookingState.css";
+@import "./booking/DateTimeField/DateTimeField.css";
+@import "./booking/BookingSearchForm/BookingSearchForm.css";
+@import "./booking/OfferCard/OfferCard.css";
+@import "./booking/OfferList/OfferList.css";
+@import "./booking/CustomerForm/CustomerForm.css";
+@import "./booking/BookingSummary/BookingSummary.css";
+@import "./booking/PaymentPanel/PaymentPanel.css";
+@import "./booking/BookingConfirmation/BookingConfirmation.css";
