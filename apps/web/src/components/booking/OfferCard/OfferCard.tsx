@@ -1,3 +1,5 @@
+"use client";
+
 /* Proposé : carte d'offre du tunnel, construite sur Button et les tokens. */
 import { useId } from "react";
 import { cx } from "../../lib/cx";

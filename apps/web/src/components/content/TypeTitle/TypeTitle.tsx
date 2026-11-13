@@ -2,7 +2,7 @@
 
 import { Fragment, createElement, isValidElement, useEffect, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { cx } from "../../lib/cx";
-import { plainText } from "../../lib/accentTitle";
+import { accentTitle, plainText } from "../../lib/accentTitle";
 import { useInView, useReducedMotion } from "../../lib/hooks";
 
 export interface TypeTitleProps {
@@ -11,12 +11,18 @@ export interface TypeTitleProps {
   className?: string;
   /** ms par caractère (défaut 32) */
   speed?: number;
+  /**
+   * Applique accentTitle() ici, côté client, à un titre texte. Les éléments construits par un
+   * composant serveur arrivent au client sous forme différée et ne peuvent pas être parcourus.
+   */
+  accent?: boolean;
   children: ReactNode;
 }
 
 /* Titre tapé à la machine quand il entre à l'écran : chaque lettre apparaît avec un curseur orange.
    Les mots restent insécables, le texte complet est lu d'un bloc par les lecteurs d'écran (aria-label). */
-export function TypeTitle({ as: Tag = "h2", id, className, speed = 32, children }: TypeTitleProps) {
+export function TypeTitle({ as: Tag = "h2", id, className, speed = 32, accent, children: raw }: TypeTitleProps) {
+  const children = accent ? accentTitle(raw) : raw;
   const ref = useRef<HTMLHeadingElement>(null);
   const seen = useInView(ref);
   const reduced = useReducedMotion();

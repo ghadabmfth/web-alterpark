@@ -27,8 +27,8 @@ export function SectionHeading({ title, typing, subtitle, eyebrow, align, as: Ta
       {typing === false ? (
         <Tag className={titleCls}>{accentTitle(title)}</Tag>
       ) : (
-        <TypeTitle as={Tag} className={titleCls}>
-          {accentTitle(title)}
+        <TypeTitle as={Tag} className={titleCls} accent>
+          {title}
         </TypeTitle>
       )}
       {subtitle ? <p className="h3 ap-h3 ap-heading__subtitle">{subtitle}</p> : null}

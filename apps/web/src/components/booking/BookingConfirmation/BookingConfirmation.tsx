@@ -1,6 +1,7 @@
 /* Proposé : confirmation de réservation, avec l'état d'attente du webhook Stripe. */
 import { useId, type ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { accentTitle } from "../../lib/accentTitle";
 import { SuccessIcon } from "../../icons/ui";
 import { Alert } from "../../feedback/Alert/Alert";
 import { BookingLoading } from "../BookingState/BookingState";
@@ -34,7 +35,7 @@ export function BookingConfirmation({ status, reference, email, summary, nextSte
     return (
       <section className={cx("ap-root ap-confirm ap-confirm--pending", className)} aria-labelledby={titleId}>
         <H className="h2 ap-h2 ap-confirm__title" id={titleId}>
-          Paiement reçu, confirmation en cours
+          {accentTitle("Paiement reçu, confirmation en cours")}
         </H>
         <BookingLoading size="block" label="Nous finalisons votre réservation. Cette page se met à jour automatiquement." />
         <p className="ap-confirm__text">Ne relancez pas le paiement et ne fermez pas cette page.</p>
@@ -49,7 +50,7 @@ export function BookingConfirmation({ status, reference, email, summary, nextSte
     return (
       <section className={cx("ap-root ap-confirm", className)} aria-labelledby={titleId}>
         <H className="h2 ap-h2 ap-confirm__title" id={titleId}>
-          Confirmation en attente
+          {accentTitle("Confirmation en attente")}
         </H>
         <Alert tone="warning" title="La confirmation prend plus de temps que prévu">
           {`Votre paiement a été accepté. Dès que la réservation est confirmée, vous recevez un e-mail à ${email}. Sans nouvelles d’ici une heure, contactez-nous en indiquant la référence ${reference}.`}
@@ -76,7 +77,7 @@ export function BookingConfirmation({ status, reference, email, summary, nextSte
         <span>Réservation confirmée</span>
       </div>
       <H className="h2 ap-h2 ap-confirm__title" id={titleId}>
-        Votre place est réservée !
+        {accentTitle("Votre place est réservée !")}
       </H>
       <p className="ap-confirm__ref">
         <span>Référence de réservation</span>

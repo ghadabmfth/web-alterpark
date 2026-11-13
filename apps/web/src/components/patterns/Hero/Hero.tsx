@@ -36,8 +36,8 @@ export function Hero({ title, typing, intro, image, steps, cta, booking, id = "h
             {accentTitle(title)}
           </h1>
         ) : (
-          <TypeTitle as="h1" id={id} className="display ap-display">
-            {accentTitle(title)}
+          <TypeTitle as="h1" id={id} className="display ap-display" accent>
+            {title}
           </TypeTitle>
         )}
         {intro ? <p className="body ap-body">{intro}</p> : null}

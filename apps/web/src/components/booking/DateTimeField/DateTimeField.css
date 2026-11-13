@@ -1,7 +1,9 @@
-/* DateTimeField et DateTimeRange (proposés) : tokens uniquement. Seuils : 768px = bp-md. */
+/* DateTimeField et DateTimeRange (proposés) : tokens uniquement. Seuils : 480px (repris de BookingBar), 768px = bp-md. */
 .ap-datetime { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; margin: 0; padding: 0; border: 0; }
 .ap-datetime__legend { padding: 0; margin-bottom: var(--space-2); font: var(--text-h6); color: var(--primary); }
-.ap-datetime__inputs { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-3); align-items: start; }
+.ap-datetime__inputs { display: grid; gap: var(--space-4); align-items: start; }
+/* Date et heure côte à côte quand la place le permet ; empilées en mobile pour des messages lisibles. */
+@container (min-width: 480px) { .ap-datetime__inputs { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-3); } }
 .ap-datetime__inputs .ap-field { max-width: none; }
 /* Icônes natives du calendrier et de l'horloge lisibles sur fond sombre. */
 .ap-datetime .ap-input { color-scheme: dark; }
