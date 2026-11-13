@@ -1,5 +1,6 @@
 @import "@alterpark/design-system/tokens.css";
 @import "@alterpark/design-system/decisions.css";
+@import "../components/styles.css";
 
 *,
 *::before,

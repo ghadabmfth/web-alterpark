@@ -1,0 +1,8 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+/* ---------- SVG intégrés ---------- */
+.ap-svg { display: inline-block; line-height: 0; }
+.ap-svg svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ap-logo { color: var(--text-primary); }
+.ap-logo svg { height: auto; }
+.ap-logo .lg-o { fill: var(--primary); }
+.ap-logo .lg-bg { fill: var(--surface); }

@@ -1,0 +1,8 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+.ap-banner { position: relative; isolation: isolate; text-align: center; }
+.ap-banner__media { position: relative; height: clamp(200px, 22vw, 435px); border-radius: var(--radius-lg); overflow: hidden; }
+.ap-banner__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, var(--surface) 0%, var(--overlay-hero) 25%, var(--overlay-hero) 75%, var(--surface) 100%); }
+.ap-banner__media img.ap-banner__photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ap-banner__content { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-8); width: var(--container-width); max-width: var(--container-max); margin: calc(var(--space-10) * -1) auto 0; }
+.ap-banner__logo { height: clamp(48px, 30px + 2.5vw, 69px); width: auto; max-width: 100%; }
+.ap-banner__content > .ap-body { max-width: 1493px; }

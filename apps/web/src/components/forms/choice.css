@@ -1,0 +1,14 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+.ap-choice { display: inline-flex; align-items: center; gap: var(--space-3); font: 400 16px/24px var(--font-sans); cursor: pointer; }
+.ap-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ap-choice__box { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: var(--border-2) solid var(--border); border-radius: 5px; background: var(--surface-raised); color: var(--surface);
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+.ap-choice__box svg { width: 16px; height: 16px; opacity: 0; }
+.ap-choice--radio .ap-choice__box { border-radius: 50%; }
+.ap-choice--radio .ap-choice__box::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); opacity: 0; }
+.ap-choice:hover .ap-choice__box { border-color: var(--text-secondary); }
+.ap-choice input:checked + .ap-choice__box { background: var(--primary); border-color: var(--primary); }
+.ap-choice input:checked + .ap-choice__box svg, .ap-choice--radio input:checked + .ap-choice__box::after { opacity: 1; }
+.ap-choice input:focus-visible + .ap-choice__box { box-shadow: var(--shadow-focus); }
+.ap-choice input[aria-invalid="true"] + .ap-choice__box { border-color: var(--error); }
+.ap-choice input:disabled + .ap-choice__box, .ap-choice input:disabled ~ span { opacity: 0.5; cursor: not-allowed; }

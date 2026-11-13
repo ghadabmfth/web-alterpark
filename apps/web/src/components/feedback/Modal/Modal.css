@@ -1,0 +1,12 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+/* ---------- Modal ---------- */
+.ap-modal { position: fixed; inset: 0; z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; padding: var(--space-4); background: var(--overlay-modal); }
+.ap-modal--inline { position: relative; inset: auto; min-height: 100%; }
+.ap-modal__panel { position: relative; width: 100%; max-width: 560px; max-height: calc(100vh - 2 * var(--space-4)); overflow: auto; background: var(--surface-raised); border-radius: var(--radius-lg); box-shadow: var(--shadow-elevated); }
+.ap-modal__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-6) var(--space-6) 0; }
+.ap-modal__title { margin: 0; font: 700 22px/30px var(--font-sans); color: var(--primary); }
+.ap-modal__body { padding: var(--space-4) var(--space-6) var(--space-6); font: 300 16px/26px var(--font-sans); letter-spacing: var(--ls-body); }
+.ap-modal__foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); padding: var(--space-4) var(--space-6); background: var(--surface-sunken); }
+.ap-modal__close { width: 44px; height: 44px; padding: 10px; border: 0; border-radius: var(--radius-sm); background: none; color: var(--text-primary); cursor: pointer; }
+.ap-modal__close:hover { color: var(--primary-hover); }
+.ap-modal__close:focus-visible { outline: none; box-shadow: var(--shadow-focus); }

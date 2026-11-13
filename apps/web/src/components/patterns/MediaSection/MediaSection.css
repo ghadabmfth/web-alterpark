@@ -1,0 +1,14 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+.ap-media__after { margin-top: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); }
+/* ---------- Photo / MediaSection ---------- */
+.ap-photo { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-xl); box-shadow: var(--shadow-photo); }
+.ap-media { container-type: inline-size; }
+.ap-media__grid { display: grid; gap: var(--space-12); align-items: center; }
+.ap-media__cta { margin-top: var(--space-8); }
+@container (min-width: 1024px) {
+  /* Proportions de la maquette : texte 778 / visuel 818 sur 1666 px, alignés en haut. */
+  .ap-media__grid { grid-template-columns: minmax(0, 47fr) minmax(0, 49fr); column-gap: 4%; align-items: start; }
+  .ap-media--reverse .ap-media__grid { grid-template-columns: minmax(0, 1fr) minmax(0, var(--container-col)); }
+  .ap-media--reverse .ap-media__text { order: 2; }
+  .ap-media__cta { margin-top: var(--space-12); }
+}

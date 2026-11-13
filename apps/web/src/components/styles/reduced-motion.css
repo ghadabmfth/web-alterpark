@@ -1,0 +1,2 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+@media (prefers-reduced-motion: reduce) { .ap-root *, .ap-root *::before, .ap-root *::after { transition-duration: 1ms !important; scroll-behavior: auto !important; } }

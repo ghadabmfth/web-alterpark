@@ -1,0 +1,11 @@
+/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
+/* ---------- Accordion ---------- */
+.ap-accordion { margin: 0; }
+.ap-acc__item { background-image: linear-gradient(to right, var(--border-divider) 3px, transparent 3px); background-size: 8px 1px; background-repeat: repeat-x; background-position: bottom; }
+.ap-acc__btn { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: var(--space-6); padding: var(--space-6) 0; border: 0; background: none; color: var(--text-primary); font: 700 18px/28px var(--font-sans); text-align: left; cursor: pointer; }
+.ap-acc__btn:hover, .ap-acc__btn.is-hover { color: var(--primary-hover); }
+.ap-acc__btn[aria-expanded="true"] { color: var(--primary); }
+.ap-acc__btn svg { flex: none; width: 20px; height: 20px; color: var(--primary); transition: transform var(--duration-base) var(--ease-standard); }
+.ap-acc__btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.ap-acc__panel { padding: 0 0 var(--space-6); font-weight: 300; font-family: var(--font-sans); font-size: var(--fs-body); line-height: var(--lh-body); letter-spacing: var(--ls-body); }
+.ap-acc__panel[hidden] { display: none; }
