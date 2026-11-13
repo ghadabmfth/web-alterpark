@@ -1,0 +1,22 @@
+/*
+ * Arbitrages validés le 13/11/2026 entre le README du design system et tokens.json (ADR-004).
+ * Chargé APRÈS tokens.css. À reporter dans le design system source, puis à retirer d'ici.
+ * Tailles et texte : README (demandes client). Reste : tokens.json.
+ * Exception : texte des boutons orange en #313131 (5,6:1) pour l'accessibilité.
+ */
+:root,
+[data-theme="dark"] {
+  --on-primary: #313131;
+
+  /* Titres réduits à la demande du client : interpolation linéaire 375 px -> 1920 px */
+  --fs-display: clamp(26px, 1.352rem + 1.165vw, 44px);
+  --fs-h2: clamp(22px, 1.163rem + 0.906vw, 36px);
+  --fs-h4: clamp(20px, 1.189rem + 0.259vw, 24px);
+  --fs-numeral: clamp(72px, 3.924rem + 2.46vw, 110px);
+
+  /* Texte courant : 16 px partout, interligne 26 -> 32 px */
+  --lh-body: clamp(26px, 1.534rem + 0.388vw, 32px);
+  --text-body: 300 16px/var(--lh-body) var(--font-sans);
+  --text-link: 700 16px/var(--lh-body) var(--font-sans);
+  --text-nav: 700 16px/24px var(--font-sans);
+}

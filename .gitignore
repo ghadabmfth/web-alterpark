@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env*.local
+.vercel/
+.DS_Store
+dist/
+wordpress/plugins/alterpark-booking/vendor/
+# Police sous licence « personal use » : jamais dans le dépôt (voir packages/design-system/README.md)
+apps/web/public/fonts/Crossroads-*

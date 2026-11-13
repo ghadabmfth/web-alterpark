@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Next.js (lint, types, tests, build)
+    runs-on: ubuntu-24.04
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Valeurs factices pour le build : aucune page n'appelle WordPress au build.
+      WP_API_URL: https://wp.example.invalid/wp-json
+      APBS_API_SECRET: ci-only-secret-not-used-in-production-xx
+      REVALIDATE_SECRET: ci-only-secret-not-used-in-production-yy
+      NEXT_PUBLIC_SITE_URL: https://www.example.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install -g npm@11.6.2
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  wordpress:
+    name: WordPress (PHP lint, Composer)
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        php: ["8.1", "8.3"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+      - name: Syntaxe PHP
+        run: find wordpress -name '*.php' -not -path '*/vendor/*' -print0 | xargs -0 -n1 php -l
+      - name: Composer (plugin)
+        working-directory: wordpress/plugins/alterpark-booking
+        run: |
+          composer validate --no-check-publish
+          composer install --no-interaction --no-progress
+
+  plugin-zip:
+    name: ZIP du plugin
+    needs: [wordpress]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer:v2
+      - run: bash wordpress/plugins/alterpark-booking/bin/build-zip.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alterpark-booking
+          path: dist/alterpark-booking-*.zip

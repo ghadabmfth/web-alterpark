@@ -1,0 +1,10 @@
+/*
+Theme Name: Alterpark Headless
+Description: Thème d'administration headless pour ALTERPARK. Aucun rendu public : le site est servi par Next.js (Vercel). Fournit les réglages du site, les sections de pages et l'API alterpark/v1.
+Version: 0.1.0
+Requires at least: 6.6
+Requires PHP: 8.1
+Author: Alterpark
+Text Domain: alterpark-headless
+License: Propriétaire
+*/

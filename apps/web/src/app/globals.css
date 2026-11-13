@@ -1,0 +1,33 @@
+@import "@alterpark/design-system/tokens.css";
+@import "@alterpark/design-system/decisions.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+body {
+  margin: 0;
+  font: var(--text-body);
+  letter-spacing: var(--ls-body, 0.08em);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
