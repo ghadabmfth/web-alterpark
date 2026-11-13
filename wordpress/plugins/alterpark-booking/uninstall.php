@@ -20,9 +20,9 @@ delete_option( 'apbs_db_version' );
 delete_option( 'apbs_delete_data_on_uninstall' );
 remove_role( 'apbs_operator' );
 foreach ( array( 'administrator' ) as $role_name ) {
-	$role = get_role( $role_name );
-	if ( $role ) {
-		$role->remove_cap( 'apbs_manage_bookings' );
-		$role->remove_cap( 'apbs_manage_settings' );
+	$apbs_role = get_role( $role_name );
+	if ( $apbs_role ) {
+		$apbs_role->remove_cap( 'apbs_manage_bookings' );
+		$apbs_role->remove_cap( 'apbs_manage_settings' );
 	}
 }
