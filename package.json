@@ -17,7 +17,8 @@
     "test": "npm run test -w @alterpark/web",
     "wp:start": "wp-env start",
     "wp:stop": "wp-env stop",
-    "plugin:zip": "bash wordpress/plugins/alterpark-booking/bin/build-zip.sh"
+    "plugin:zip": "bash wordpress/plugins/alterpark-booking/bin/build-zip.sh",
+    "wordpress:package": "bash wordpress/bin/build-site.sh"
   },
   "devDependencies": {
     "@wordpress/env": "12.0.0"

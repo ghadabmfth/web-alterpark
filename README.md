@@ -8,6 +8,7 @@ Site de réservation de parkings (Roissy, Nantes, Marseille) en architecture **N
 | `packages/design-system` | Tokens, polices et arbitrages du design system AlterPark | Consommé par `apps/web` |
 | `wordpress/themes/alterpark-headless` | Thème d'administration headless, API `alterpark/v1` | Hébergement WordPress |
 | `wordpress/plugins/alterpark-booking` | Plugin autonome de réservation et paiement Stripe, API `apbs/v1` | Hébergement WordPress (ZIP) |
+| `wordpress/site` | Installation WordPress complète : cœur figé (Composer), `wp-config.php` sans secret, `.htaccess` | `npm run wordpress:package` → `dist/alterpark-wordpress-*.zip` |
 | `docs` | Architecture, décisions, installation, API | — |
 
 ## Démarrage local

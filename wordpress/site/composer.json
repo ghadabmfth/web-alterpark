@@ -1,0 +1,20 @@
+{
+  "name": "alterpark/wordpress-site",
+  "description": "Installation WordPress complète d'ALTERPARK : cœur WordPress (version figée), thème alterpark-headless et plugin alterpark-booking. Construite par wordpress/bin/build-site.sh.",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": ">=8.1",
+    "johnpbloch/wordpress-core-installer": "2.0.0",
+    "johnpbloch/wordpress-core": "7.1.4"
+  },
+  "extra": {
+    "wordpress-install-dir": "public"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "johnpbloch/wordpress-core-installer": true
+    }
+  }
+}

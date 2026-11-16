@@ -6,24 +6,26 @@ Voir le `README.md` à la racine. WordPress local tourne avec `wp-env` (Docker),
 
 ## WordPress (production)
 
-1. WordPress à jour, PHP 8.1 minimum (8.3 recommandé), MySQL 8 ou MariaDB 10.6 (InnoDB obligatoire), HTTPS.
-2. Ajouter à `wp-config.php` (valeurs générées, jamais réutilisées entre environnements) :
+Le dépôt ne versionne pas le cœur WordPress : sa version est figée dans `wordpress/site/composer.lock` (WordPress 7.1.4) et le paquet complet se construit en une commande (PHP 8.1+, Composer, `zip`) :
 
-```php
-define( 'ALTERPARK_FRONTEND_URL', 'https://www.alterpark.fr' );
-define( 'ALTERPARK_REVALIDATE_SECRET', '…64 caractères aléatoires…' );
-define( 'APBS_API_SECRET', '…64 caractères aléatoires…' );
-define( 'APBS_STRIPE_SECRET_KEY', 'rk_live_…' );
-define( 'APBS_STRIPE_WEBHOOK_SECRET', 'whsec_…' );
-define( 'DISABLE_WP_CRON', true ); // remplacé par un cron système toutes les minutes
+```bash
+npm run wordpress:package
 ```
 
-Générer un secret : `openssl rand -hex 32`.
+Résultat : `dist/alterpark-wordpress-<wordpress>-<plugin>.zip` (aussi produit par la CI, artefact `alterpark-wordpress`). Le dossier `alterpark-wordpress/` qu'il contient est la racine web du site : cœur WordPress, thème `alterpark-headless`, plugin `alterpark-booking` avec ses dépendances, `wp-config.php` et `.htaccess`. Thèmes et plugins par défaut sont retirés.
 
-3. Installer le thème `alterpark-headless` et l'activer.
-4. Installer `alterpark-booking-<version>.zip` (artefact de la CI) et l'activer.
-5. Cron système : `* * * * * curl -s https://<wordpress>/wp-cron.php?doing_wp_cron >/dev/null`.
-6. Stripe : créer un endpoint de webhook vers `https://<wordpress>/wp-json/apbs/v1/stripe/webhook` (événements `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`).
+1. Hébergement : PHP 8.1 minimum (8.3 recommandé), MySQL 8 ou MariaDB 10.6 (InnoDB obligatoire), HTTPS, Apache avec `mod_rewrite` (sous Nginx, reprendre les règles de `.htaccess`).
+2. Créer une base de données et son utilisateur.
+3. Décompresser le ZIP et pointer la racine du domaine (ex. `admin.alterpark.fr`) sur `alterpark-wordpress/`.
+4. Secrets : `wp-config.php` n'en contient aucun. Copier `wp-config-secrets.sample.php` en `wp-config-secrets.php`, le remplir (base de données, clés et sels, `APBS_API_SECRET`, `ALTERPARK_REVALIDATE_SECRET`, `ALTERPARK_FRONTEND_URL`, Stripe plus tard), puis `chmod 640`. Variante : définir les mêmes noms en variables d'environnement du serveur. Une valeur manquante affiche « Configuration incomplète : … » (erreur 503). Générer un secret : `openssl rand -hex 32` ; clés et sels : https://api.wordpress.org/secret-key/1.1/salt/. Valeurs jamais réutilisées entre environnements.
+5. Ouvrir le site pour lancer l'installation de WordPress (ou `wp core install`), puis dans l'administration : Réglages → Permaliens → « Titre de la publication » ; Apparence → activer « Alterpark Headless » ; Extensions → activer « Alterpark Booking System » (crée les 9 tables et les parkings en brouillon).
+6. Vérifier : `https://<wordpress>/wp-json/alterpark/v1/health` répond `{"theme":"0.1.0","frontend":true}`.
+7. Cron système (le cron WordPress est désactivé en production) : `* * * * * curl -s https://<wordpress>/wp-cron.php?doing_wp_cron >/dev/null`.
+8. Stripe (phase 5) : créer un endpoint de webhook vers `https://<wordpress>/wp-json/apbs/v1/stripe/webhook` (événements `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`).
+
+Mise à jour : reconstruire le paquet et remplacer les fichiers, en conservant `wp-config-secrets.php` et `wp-content/uploads/`. Pour changer de version de WordPress : modifier la version dans `wordpress/site/composer.json`, puis `composer update` dans ce dossier et versionner `composer.lock`.
+
+Si l'hébergeur fournit déjà WordPress, on peut aussi n'installer que le thème (dossier `wordpress/themes/alterpark-headless`) et le plugin (`dist/alterpark-booking-<version>.zip`), avec les mêmes constantes dans son `wp-config.php`.
 
 ## Vercel
 

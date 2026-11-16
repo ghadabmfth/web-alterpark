@@ -1,0 +1,20 @@
+# Réécritures WordPress (permaliens, nécessaires à /wp-json/).
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# Fichiers de configuration jamais servis.
+<FilesMatch "^(wp-config\.php|wp-config-secrets\.php|wp-config-secrets\.sample\.php|composer\.(json|lock))$">
+  Require all denied
+</FilesMatch>
+
+# XML-RPC désactivé (voir docs/ARCHITECTURE.md, Sécurité).
+<Files xmlrpc.php>
+  Require all denied
+</Files>
