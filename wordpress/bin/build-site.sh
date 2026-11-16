@@ -22,7 +22,8 @@ cp "$ROOT/wordpress/site/config/index-silence.php" "$WEB/wp-content/plugins/inde
 cp "$ROOT/wordpress/site/config/index-silence.php" "$WEB/wp-content/themes/index.php"
 
 # 3. Thème headless.
-cp -R "$ROOT/wordpress/themes/alterpark-headless" "$WEB/wp-content/themes/"
+THEME_ZIP=$(cd "$ROOT" && bash wordpress/themes/alterpark-headless/bin/build-zip.sh | tail -1)
+unzip -q "$ROOT/$THEME_ZIP" -d "$WEB/wp-content/themes/"
 
 # 4. Plugin de réservation, construit par son propre script (vendor/ de production).
 PLUGIN_ZIP=$(cd "$ROOT" && bash wordpress/plugins/alterpark-booking/bin/build-zip.sh | tail -1)

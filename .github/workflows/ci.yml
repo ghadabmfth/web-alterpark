@@ -74,6 +74,11 @@ jobs:
         with:
           name: alterpark-booking
           path: dist/alterpark-booking-*.zip
+      - run: bash wordpress/themes/alterpark-headless/bin/build-zip.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alterpark-headless
+          path: dist/alterpark-headless-*.zip
       - name: WordPress complet (cœur + thème + plugin)
         run: bash wordpress/bin/build-site.sh
       - uses: actions/upload-artifact@v4
