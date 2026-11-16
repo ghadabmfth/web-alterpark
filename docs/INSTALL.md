@@ -27,6 +27,6 @@ Générer un secret : `openssl rand -hex 32`.
 
 ## Vercel
 
-1. Importer le dépôt, répertoire racine `apps/web`, framework Next.js.
+1. Importer le dépôt. Dans **Settings → Build and Deployment** : *Root Directory* = `apps/web` (option « Include files outside the root directory » activée), *Framework Preset* = Next.js, aucune surcharge d'*Output Directory*. Le reste vient de `apps/web/vercel.json` (installation avec npm 11 à la racine du monorepo, ADR-007). Sans ce réglage, Vercel construit le dépôt comme un site statique et échoue avec « No Output Directory named "public" ».
 2. Variables d'environnement (Production et Preview, valeurs distinctes) : `WP_API_URL`, `APBS_API_SECRET`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
 3. Déposer `Crossroads-Regular.ttf` (licence commerciale) dans `apps/web/public/fonts/` avant la mise en ligne.
