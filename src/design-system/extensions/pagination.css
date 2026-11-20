@@ -1,0 +1,10 @@
+/* Proposé (extension). Pagination: round 44 px targets (touch minimum of the charter), current page
+   filled `primary` like the buttons, arrows from the system. */
+.ap-pagination ol { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.ap-pagination a, .ap-pagination span[aria-current], .ap-pagination .ap-pagination__gap { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 var(--space-3); border-radius: var(--radius-pill); font: 700 16px/24px var(--font-sans); color: var(--text-primary); text-decoration: none; }
+.ap-pagination a { transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.ap-pagination a:hover { background: var(--surface-raised); color: var(--primary); }
+.ap-pagination span[aria-current] { background: var(--primary); color: var(--on-primary); }
+.ap-pagination__gap { color: var(--text-muted); }
+.ap-pagination svg { width: 18px; height: 18px; }
+.ap-pagination [aria-disabled="true"] { opacity: 0.45; pointer-events: none; }

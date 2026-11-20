@@ -13,6 +13,7 @@
 @import "../design-system/typography.css" layer(base);
 @import "../design-system/overrides.css" layer(base);
 @import "../design-system/components/index.css" layer(components);
+@import "../design-system/extensions/index.css" layer(components);
 @import "../design-system/overrides-components.css" layer(components);
 
 @layer base {

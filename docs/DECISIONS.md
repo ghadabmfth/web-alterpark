@@ -1,6 +1,6 @@
 # Architecture decisions
 
-Short records: context → decision → consequences. "Pending" = awaiting client/OuiDev approval.
+Short records: context → decision → consequences. All records below were **approved on 20/11/2026**.
 
 ## ADR-001 — Restart from zero (20/11/2026, client request)
 
@@ -32,10 +32,16 @@ forbidden by convention and colour literals outside `src/design-system` fail a t
 `reference` is required because several Tailwind namespaces share names with the system
 (`--radius-md`, `--shadow-*`, `--font-sans`) and would otherwise emit self-referencing variables.
 
-## ADR-005 — Text colour on orange buttons (pending client confirmation)
+## ADR-005 — Text colour on orange buttons
 
 The system keeps white on orange (2.32:1, fails WCAG AA) at the client's request. We use #313131,
 the system's own surface colour (5.6:1). Reverting = deleting one line in `overrides.css`.
+
+*Extended in Phase 2 (same principle, same palette):* the identical orange/white pair also occurs
+inside three supplied components (BookingBar badge, ServiceCard badge, selected "dès" price) and the
+orange eyebrow pill reaches only 4.37:1. `overrides-components.css` uses `on-primary` / `surface`
+for the first three and `primary-hover` for the eyebrow. axe-core then reports no violation on any
+component at 390, 768 and 1440 px.
 
 ## ADR-006 — Font licences
 
@@ -51,7 +57,7 @@ Prisma **7.10.1**: the npm `latest` tag points to 8.0.0-rc, so the last stable l
 Exact versions everywhere. npm 11 is required (npm 10's resolver crashes on Vitest's optional peers).
 `effect` (a dependency of the Prisma CLI only) is overridden to 3.22.5 to fix a ReDoS advisory.
 
-## ADR-008 — Authentication: Auth.js v5 (pending approval)
+## ADR-008 — Authentication: Auth.js v5
 
 The brief asks for Auth.js. Its App Router version (v5) is still published under the `beta` tag
 (5.0.0-beta.32) although widely used in production; v4 is stable but designed for the Pages Router.
@@ -72,7 +78,7 @@ Booking runs in a transaction that locks the offer row (`SELECT … FOR UPDATE`)
 overlapping occupancy for the requested interval and inserts the hold. Simple, always consistent,
 no counters to drift; contention is per offer only. Upgrade path (per-day buckets) documented.
 
-## ADR-011 — Bookings belong to an account (pending client confirmation)
+## ADR-011 — Bookings belong to an account
 
 A reservation always has a `User`. The funnel offers sign-in or quick sign-up inline at step 4, so
 "customers only see their own data" is enforced by ownership, and history/cancellation work
@@ -83,7 +89,19 @@ uniformly. Guest checkout would need a signed access link per booking; possible 
 Rate limiting and the e-mail outbox use PostgreSQL tables; scheduled work (expiring holds, sending
 e-mails) uses Vercel Cron with a bearer secret. Redis/queues can replace them if traffic requires.
 
-## ADR-013 — E-mail provider: Resend (pending approval)
+## ADR-013 — E-mail provider: Resend
 
 HTTP API, simple domain verification, good Vercel integration. Behind an `EmailTransport` interface;
 `console` transport in development.
+
+## ADR-014 — Component architecture (Phase 2)
+
+Supplied component CSS is kept **verbatim**, split per component under `src/design-system/components`
+(a test proves every file is a slice of the bundle); TSX components in `src/components/ui` only
+render the system's `ap-*` classes and contain no colour. Components are Server Components unless
+they need state or browser APIs (client: Header, TypeTitle, RatingBadge, ReviewCard, ReviewCarousel,
+Accordion, TextField, Alert, Modal, VideoModal, BookingBar, Toast, ConfirmDialog, DropdownMenu,
+AppShell and the global CircleFx). Form fields forward `ref` and
+native props (React 19), ready for React Hook Form. Extensions follow the same rules and are
+documented before wide use. The gallery `/dev/design-system` is the review surface; it is absent
+from production builds unless `DESIGN_SYSTEM_GALLERY=true`.

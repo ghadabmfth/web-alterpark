@@ -1,0 +1,8 @@
+/* Proposé (extension). Toasts: the system's Alert, stacked bottom-right (full width on mobile),
+   lifted with `shadow-elevated`; slide-in disabled under reduced motion. */
+.ap-toasts { position: fixed; z-index: var(--z-modal); right: var(--space-4); bottom: var(--space-4); left: var(--space-4); display: flex; flex-direction: column; align-items: stretch; gap: var(--space-3); margin: 0; padding: 0; list-style: none; pointer-events: none; }
+@media (min-width: 576px) { .ap-toasts { left: auto; width: 420px; } }
+.ap-toasts > li { pointer-events: auto; animation: ap-toast-in var(--duration-base) var(--ease-standard); }
+.ap-toasts .ap-alert { box-shadow: var(--shadow-elevated); }
+@keyframes ap-toast-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .ap-toasts > li { animation: none; } }
