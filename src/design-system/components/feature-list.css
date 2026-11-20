@@ -1,0 +1,21 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 272–292). Do not edit: replace with a new delivery. */
+/* ---------- FeatureList ---------- */
+.ap-features { container-type: inline-size; display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+@container (min-width: 520px) { .ap-features:not(.ap-features--one) { grid-template-columns: 1fr 1fr; } }
+.ap-feature { display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4); align-items: start; padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-raised); transition: transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard); }
+.ap-feature:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(246, 146, 30, 0.5); }
+.ap-feature__ico { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(246, 146, 30, 0.14); color: var(--primary); }
+.ap-feature__ico svg { width: 22px; height: 22px; }
+.ap-feature__title { display: block; font: 700 16px/24px var(--font-sans); color: var(--text-primary); }
+.ap-feature__text { display: block; margin-top: 2px; font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+@media (prefers-reduced-motion: reduce) { .ap-feature:hover { transform: none; } }
+
+/* RatingBadge mini : bulle compacte, pointe en haut au centre (info-bulle) */
+.ap-rating.ap-rating--mini { gap: var(--space-2); padding: 6px 14px 6px 6px; white-space: nowrap; animation: none !important; opacity: 1 !important; transform: none !important; }
+.ap-rating.ap-rating--mini::after { left: 50%; top: -9px; bottom: auto; width: 18px; height: 10px; transform: translateX(-50%); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.ap-rating.ap-rating--mini .ap-rating__logo { width: 34px; height: 34px; }
+.ap-rating.ap-rating--mini .ap-rating__logo::before { animation: none; }
+.ap-rating.ap-rating--mini .ap-rating__logo img { width: 20px; height: 20px; }
+.ap-rating.ap-rating--mini .ap-rating__label { font-size: 15px; line-height: 18px; }
+.ap-rating.ap-rating--mini .ap-rating__star, .ap-rating--mini .ap-rating__star svg { width: 13px; height: 12px; }
+.ap-rating.ap-rating--mini .ap-rating__count { font-size: 12px; line-height: 16px; }

@@ -1,0 +1,21 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 393–414). Do not edit: replace with a new delivery. */
+/* ---------- ReviewCarousel ---------- */
+.ap-carousel { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-6); }
+.ap-carousel__track { display: grid; grid-auto-flow: column; grid-auto-columns: 88%; gap: var(--space-6); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: var(--space-4) var(--space-6) var(--space-10); margin: calc(var(--space-4) * -1) calc(var(--space-6) * -1) calc(var(--space-6) * -1); scroll-padding-inline: var(--space-6); }
+.ap-carousel__track::-webkit-scrollbar { display: none; }
+.ap-carousel__track > * { scroll-snap-align: start; }
+.ap-carousel__track:focus-visible { outline: none; box-shadow: var(--shadow-focus); border-radius: 24px; }
+@media (max-width: 767px) { .ap-carousel__track { padding-inline: var(--space-4); margin-inline: calc(var(--space-4) * -1); scroll-padding-inline: var(--space-4); } }
+@container (min-width: 700px) { .ap-carousel__track { grid-auto-columns: calc((100% - var(--space-6)) / 2); } }
+@container (min-width: 1100px) { .ap-carousel__track { grid-auto-columns: calc((100% - 2 * var(--space-6)) / 3); } }
+.ap-carousel__nav { display: flex; align-items: center; justify-content: center; gap: var(--space-6); }
+.ap-carousel__arrow { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 1px solid rgba(246, 146, 30, 0.5); background: transparent; color: var(--primary); cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard); }
+.ap-carousel__arrow svg { width: 18px; height: 18px; }
+.ap-carousel__arrow:hover { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+.ap-carousel__arrow:active { transform: scale(0.94); }
+.ap-carousel__arrow:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.ap-carousel__dots { display: flex; align-items: center; gap: var(--space-2); }
+.ap-carousel__dot { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 99px; background: rgba(255, 255, 255, 0.25); cursor: pointer; transition: width var(--duration-base) var(--ease-standard), background-color var(--duration-base) var(--ease-standard); }
+.ap-carousel__dot.is-on { width: 28px; background: var(--primary); }
+.ap-carousel__dot:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+@media (prefers-reduced-motion: reduce) { .ap-review:hover { transform: none; } .ap-carousel__track { scroll-behavior: auto; } }

@@ -1,9 +1,10 @@
 /*
  * Global stylesheet. Order matters:
  *  1. Tailwind (preflight + utilities), generated from the design system theme only;
- *  2. design-system tokens (verbatim), fonts, declared overrides — in the `base` layer so any
- *     utility can refine them;
- *  3. page-level base rules.
+ *  2. design-system tokens (verbatim), fonts, typography, declared overrides — `base` layer;
+ *  3. design-system component styles (verbatim, one file per component) — `components` layer;
+ *  4. page-level base rules.
+ * Utilities come last in the cascade, so a utility can always refine a component.
  */
 @import "tailwindcss";
 @import "../design-system/theme.css";
@@ -11,6 +12,8 @@
 @import "../design-system/fonts.css" layer(base);
 @import "../design-system/typography.css" layer(base);
 @import "../design-system/overrides.css" layer(base);
+@import "../design-system/components/index.css" layer(components);
+@import "../design-system/overrides-components.css" layer(components);
 
 @layer base {
   html {
@@ -19,9 +22,10 @@
     color-scheme: dark;
   }
 
+  /* As the reference bundle: family only. Running text opts into the body style (light weight,
+     fluid line-height, tracking) with `.ap-body`; labels, controls and navigation have no tracking. */
   body {
-    font: var(--text-body);
-    letter-spacing: var(--ls-body);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
