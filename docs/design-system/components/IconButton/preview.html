@@ -1,0 +1,12 @@
+<!-- @dsCard group="Actions" height=140 -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>IconButton — aperçu</title></head>
+<body>
+<div id="root" class="ap-root ap-row"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(A.IconButton,{icon:'arrowLeft',label:'Précédent'}),h(A.IconButton,{icon:'arrowRight',label:'Suivant'}),h(A.IconButton,{icon:'arrowRight',label:'Suivant (survol)',state:'hover'}),h(A.IconButton,{icon:'arrowRight',label:'Suivant (focus)',state:'focus'}),h(A.IconButton,{icon:'arrowRight',label:'Suivant',disabled:true}),h(A.IconButton,{variant:'play',label:'Lire la vidéo'}),h(A.IconButton,{variant:'play',label:'Lire la vidéo (focus)',state:'focus'})));
+</script>
+</body>
+</html>

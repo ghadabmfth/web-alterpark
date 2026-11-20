@@ -1,0 +1,17 @@
+/*
+ * Typography rules of the design system, copied verbatim from the reference bundle
+ * (docs/design-system/reference/bundle.css, section "Typographie"). They complete the classes
+ * generated in tokens.css: headings use the fluid sizes (fs-display 26 → 44 px, etc.).
+ * Use: <h1 class="display ap-display">, <h2 class="h2 ap-h2">, <h3 class="h3 ap-h3">, <div class="ap-body">.
+ */
+.ap-display, .ap-h2, .ap-h4, .ap-h5 { font-family: var(--font-display); text-transform: uppercase; color: var(--text-primary); font-weight: 400; font-synthesis: none; margin: 0; }
+.ap-display { font-size: var(--fs-display); line-height: 1; }
+.ap-h2 { font-size: var(--fs-h2); line-height: 1.1; }
+.ap-h4 { font-size: var(--fs-h4); line-height: 0.9; }
+/* Dans les titres, mots en blanc ; chiffres et ponctuation en orange (maquette) — posés par accentTitle() dans bundle.js. */
+.ap-accent { color: var(--primary); }
+.ap-h3 { margin: 0; color: var(--primary); }
+.ap-body { margin: 0; font-size: var(--fs-body); line-height: var(--lh-body); letter-spacing: var(--ls-body); }
+.ap-body p { margin: 0 0 var(--lh-body); }
+.ap-body p:last-child { margin-bottom: 0; }
+.ap-body strong { font-weight: 700; }

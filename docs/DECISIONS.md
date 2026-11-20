@@ -1,33 +1,89 @@
-# Décisions d'architecture
+# Architecture decisions
 
-Format court : contexte, décision, conséquences. Validées le 13/11/2026.
+Short records: context → decision → consequences. "Pending" = awaiting client/OuiDev approval.
 
-## ADR-001 — Monorepo, nouveau départ
+## ADR-001 — Restart from zero (20/11/2026, client request)
 
-Le dépôt `web-alterpark` était vide à l'audit (aucun commit) ; aucun WordPress existant n'a été signalé. Le frontend, le thème et le plugin vivent dans un même dépôt npm workspaces, testés par la même CI. Versions figées : Next.js 16.4.3, React 19.3.1, TypeScript 5.9.3, PHP 8.1 minimum, WordPress dernière version stable.
+The repository held a WordPress-headless monorepo (Next.js + PHP booking plugin) whose build failed
+on a vulnerable Next.js version and whose stack contradicts the brief. At the client's request, all
+previous work was removed; only the supplied design system was re-imported. History remains in Git
+(last commit of the previous approach: `e8ef96d`).
 
-## ADR-002 — Next.js comme BFF, le navigateur ne parle jamais à WordPress
+## ADR-002 — One full-stack Next.js application
 
-Tous les appels à WordPress partent du serveur Next.js (`src/lib/wp/client.ts`, marqué `server-only`). Les routes sensibles du plugin exigent une signature HMAC-SHA256 avec horodatage (fenêtre de 5 min, anti-rejeu). Les secrets ne sont que dans les variables serveur Vercel et dans `wp-config.php`, jamais en base ni dans le bundle client.
+Next.js (App Router) hosts the public site, the customer area, the back office and the API; PostgreSQL
+via Prisma is the single system of record. Single app at the repository root (no monorepo): one
+build, one Vercel project, one CI job. Modules by business feature inside `src/modules`.
 
-## ADR-003 — REST API native, sans ACF Pro
+## ADR-003 — Design-system integration
 
-Deux espaces de noms : `alterpark/v1` (thème) et `apbs/v1` (plugin). Le plugin n'utilise rien du thème et reste installable seul. Réglages via les API natives (`register_setting`, `register_post_meta`) et une interface d'administration React (`@wordpress/components`).
+`tokens.json` and `tokens.css` are kept **verbatim** (only font paths adjusted), so a new delivery
+replaces them as-is and a test detects drift. Typography rules are ported verbatim from the
+reference bundle. Deviations live in one file (`overrides.css`), each with a justification.
+Components are re-implemented in TSX (React 19, Server Components) from the reference bundle,
+keeping its class names, props and states.
 
-## ADR-004 — Arbitrages du design system
+## ADR-004 — Tailwind CSS restricted to the design system
 
-Entre le README du design system et `tokens.json` : tailles des titres et du texte selon le README (demandes du client), reste selon `tokens.json`. Texte des boutons orange en `#313131` (5,6:1) au lieu de `#613400` ou du blanc (2,3:1). Appliqué dans `packages/design-system/decisions.css`, à reporter dans le design system source.
+Tailwind v4 is configured with every default scale reset and a theme that only *references*
+design-system variables (`@theme inline reference`). Utilities therefore exist only for system
+values (colours, 13 spacing steps, 5 radii, 4 shadows, 5 breakpoints); arbitrary values are
+forbidden by convention and colour literals outside `src/design-system` fail a test.
+`reference` is required because several Tailwind namespaces share names with the system
+(`--radius-md`, `--shadow-*`, `--font-sans`) and would otherwise emit self-referencing variables.
 
-Rectification de l'audit : le bundle du design system contient aussi `BookingBar` (recherche parking, dates, offres), `ServiceCard`, `Highlights`, `FeatureList`, `AppShowcase` et `VideoModal`, non listés dans son index. `BookingBar` sert de base à l'étape « recherche » du parcours ; le reste du tunnel (offres, coordonnées, paiement, confirmation) est à concevoir à partir des tokens.
+## ADR-005 — Text colour on orange buttons (pending client confirmation)
 
-## ADR-005 — Paiement Stripe, piloté par WordPress
+The system keeps white on orange (2.32:1, fails WCAG AA) at the client's request. We use #313131,
+the system's own surface colour (5.6:1). Reverting = deleting one line in `overrides.css`.
 
-Le plugin détient la clé secrète Stripe et reçoit les webhooks, car c'est lui qui fait foi sur les réservations et doit valider paiement et réservation dans la même transaction. Next.js n'a que la clé publiable et affiche le Payment Element. Détail dans `ARCHITECTURE.md`, section Paiement.
+## ADR-006 — Font licences
 
-## ADR-006 — Licences
+Crossroads is supplied under a "personal use" licence: not committed, git-ignored; headings fall back
+to Montserrat until a commercial web licence is bought and the file is placed in `public/fonts/`.
+Stars use Font Awesome 6 Pro paths: licence to confirm. Montserrat (OFL) is committed.
 
-Crossroads (« personal use ») et les étoiles Font Awesome 6 Pro exigent des licences commerciales avant la mise en ligne. Crossroads n'est pas versionnée.
+## ADR-007 — Versions
 
-## ADR-007 — npm 11
+Next.js **16.4.6** (16.4.3 is blocked by `SecurityFatalError`: seven advisories), React 19.3,
+TypeScript 5.9 strict (+ `noUncheckedIndexedAccess`), Tailwind 4.3.3, Zod 4.6, Vitest 4.1.
+Prisma **7.10.1**: the npm `latest` tag points to 8.0.0-rc, so the last stable line is used.
+Exact versions everywhere. npm 11 is required (npm 10's resolver crashes on Vitest's optional peers).
+`effect` (a dependency of the Prisma CLI only) is overridden to 3.22.5 to fix a ReDoS advisory.
 
-npm 10.9 échoue à résoudre l'arbre de dépendances (bug d'Arborist sur les peer dependencies optionnelles de Vitest). npm 11 est requis (`packageManager`, `engines`), en local comme en CI.
+## ADR-008 — Authentication: Auth.js v5 (pending approval)
+
+The brief asks for Auth.js. Its App Router version (v5) is still published under the `beta` tag
+(5.0.0-beta.32) although widely used in production; v4 is stable but designed for the Pages Router.
+Proposal: Auth.js v5 pinned to an exact version, credentials provider, Argon2id, JWT session cookie
+with a server-side `sessionVersion` check (revocation). The rest of the app depends only on our
+`src/server/auth` helpers, so the library can be swapped (e.g. Better Auth) without touching modules.
+
+## ADR-009 — Payments: Stripe Checkout behind a provider interface
+
+Stripe Checkout Sessions (hosted page): no card data on our side (PCI SAQ A), 3-D Secure and wallets
+handled by Stripe, fewer client states to build. The `PaymentProvider` interface isolates Stripe.
+Checkout Sessions live at least 30 minutes, so the default capacity hold is 30 minutes
+(configurable per site). Confirmation only by verified, idempotent webhook.
+
+## ADR-010 — Overbooking prevention by row lock
+
+Booking runs in a transaction that locks the offer row (`SELECT … FOR UPDATE`), computes the peak
+overlapping occupancy for the requested interval and inserts the hold. Simple, always consistent,
+no counters to drift; contention is per offer only. Upgrade path (per-day buckets) documented.
+
+## ADR-011 — Bookings belong to an account (pending client confirmation)
+
+A reservation always has a `User`. The funnel offers sign-in or quick sign-up inline at step 4, so
+"customers only see their own data" is enforced by ownership, and history/cancellation work
+uniformly. Guest checkout would need a signed access link per booking; possible later.
+
+## ADR-012 — Serverless-safe infrastructure without extra services
+
+Rate limiting and the e-mail outbox use PostgreSQL tables; scheduled work (expiring holds, sending
+e-mails) uses Vercel Cron with a bearer secret. Redis/queues can replace them if traffic requires.
+
+## ADR-013 — E-mail provider: Resend (pending approval)
+
+HTTP API, simple domain verification, good Vercel integration. Behind an `EmailTransport` interface;
+`console` transport in development.

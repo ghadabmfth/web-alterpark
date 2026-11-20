@@ -1,0 +1,14 @@
+<!-- @dsCard group="Actions" height=300 subtitle="primary · secondary · outline · ghost — Default, Hover, Focus, Active, Disabled" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Button — aperçu</title></head>
+<body>
+<div id="root" class="ap-root ap-stack"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  var V = ['primary','secondary','outline','ghost'], S = [null,'hover','focus','active'];
+  function row(v){ return h('div',{key:v,className:'ap-row',style:{padding:0}}, S.map(function(s){ return h(A.Button,{key:s||'d',variant:v,state:s||undefined}, s ? s.charAt(0).toUpperCase()+s.slice(1) : 'Réservez ma place !'); }).concat([h(A.Button,{key:'x',variant:v,disabled:true},'Désactivé')])); }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,V.map(row),h('div',{className:'ap-row',style:{padding:0}},h(A.Button,{size:'sm'},'Petit (mobile)'),h(A.Button,{size:'sm',variant:'outline'},'En savoir +'))));
+</script>
+</body>
+</html>

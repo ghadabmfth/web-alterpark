@@ -1,0 +1,16 @@
+<!-- @dsCard group="Patterns" height=720 subtitle="Texte + visuel ; reverse pour inverser" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>MediaSection — aperçu</title></head>
+<body>
+<div id="root" style="padding:40px 24px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  var media = h('div',{style:{position:'relative',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'26px',alignItems:'start'}},
+    h('img',{className:'ap-photo',src:A.assets.ombrieresPhoto,alt:'Ombrières photovoltaïques du parking',style:{aspectRatio:'397/539',marginTop:'254px'}}),
+    h('div',{style:{display:'flex',flexDirection:'column',gap:'20px'}}, h('img',{className:'ap-photo',src:A.assets.entreePhoto,alt:'Entrée du parking AlterPark',style:{aspectRatio:'395/535'}}), h(A.IconButton,{variant:'play',label:'Lire la vidéo de présentation'})),
+    h('div',{style:{position:'absolute',left:'calc(50% - 246px)',top:'117px'}}, h(A.RatingBadge,{count:1375,rating:4.4})));
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.MediaSection,{title:'Que de changements chez ALTERPARK depuis le 20 mars !',media:media,cta:{label:'Découvrez nos services +',href:'#'}}, h('p',null,'ALTERPARK a apporté de nombreux changements pour améliorer votre expérience. Nous avons agrandi et modernisé notre hall d’accueil pour vous offrir un espace plus vaste, confortable et chaleureux.'), h('p',null,'Enfin, nous proposons une offre imbattable en termes de service, de sécurité et de prix.')));
+</script>
+</body>
+</html>

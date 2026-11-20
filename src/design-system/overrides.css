@@ -1,0 +1,21 @@
+/*
+ * Declared deviations from the supplied design system. tokens.css stays a verbatim copy;
+ * anything that differs is written here, justified, and listed in docs/DECISIONS.md (ADR-005).
+ */
+:root,
+[data-theme="dark"] {
+  /*
+   * Accessibility. The system sets white text on orange buttons (2.32:1, below WCAG AA) at the
+   * client's request, and itself names a readable alternative. We use #313131 — the system's own
+   * `surface` value — which reaches 5.6:1 without leaving the palette.
+   * PENDING CLIENT CONFIRMATION: to follow the system literally, delete this declaration.
+   */
+  --on-primary: #313131;
+
+  /*
+   * The system README sets body line-height to 26 → 32 px (`lh-body`), while the `text-body` and
+   * `text-link` shorthands in tokens.css freeze 32 px. We follow the README rule.
+   */
+  --text-body: 300 var(--fs-body) / var(--lh-body) var(--font-sans);
+  --text-link: 700 var(--fs-body) / var(--lh-body) var(--font-sans);
+}

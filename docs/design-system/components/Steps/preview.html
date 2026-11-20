@@ -1,0 +1,14 @@
+<!-- @dsCard group="Contenu" height=620 subtitle="variant hero (4 étapes) · variant loyalty (3 étapes)" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Steps — aperçu</title></head>
+<body>
+<div id="root" class="ap-stack" style="gap:72px;padding:40px 24px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  var steps = [{icon:'stepReserver',title:'Réservez votre place en ligne',text:'7 jours/7 et 24h/24'},{icon:'stepDeposer',title:'Déposez votre véhicule au parking',text:'Vidéo surveillance & gardiennage'},{icon:'stepNavette',title:'Nous vous déposons à l’aéroport',text:'Navette gratuite sans attente'},{icon:'stepVacances',title:'Profitez de vos vacances',text:'Découvrez nos Services Plus'}];
+  var loyalty = [{icon:'fideliteCumulez',title:'Cumulez',text:'des points à chaque achat. Chaque euro dépensé vous rapporte 10 points'},{icon:'fideliteCapitalisez',title:'Capitalisez',text:'vos points. Pour chaque tranche de 100 points, vous obtenez 1 € de réduction'},{icon:'fideliteUtilisez',title:'Utilisez',text:'vos points en ligne pour bénéficier d’une remise sur votre prochaine réservation.'}];
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(A.Steps,{items:steps}),h(A.Steps,{variant:'loyalty',items:loyalty})));
+</script>
+</body>
+</html>

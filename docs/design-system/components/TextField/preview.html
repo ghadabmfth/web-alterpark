@@ -1,0 +1,12 @@
+<!-- @dsCard group="Formulaires" height=760 subtitle="Proposé — texte, e-mail, mot de passe, zone de texte ; erreur, succès, désactivé" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>TextField — aperçu</title></head>
+<body>
+<div id="root" class="ap-stack" style="max-width:520px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(A.TextField,{label:'Nom',placeholder:'Votre nom',required:true}),h(A.TextField,{label:'E-mail',type:'email',defaultValue:'camille@exemple',error:'Saisissez une adresse e-mail valide, par exemple nom@domaine.fr.'}),h(A.TextField,{label:'Immatriculation',defaultValue:'AB-123-CD',success:'Véhicule reconnu.',help:'Format attendu : AB-123-CD'}),h(A.TextField,{label:'Mot de passe',type:'password',defaultValue:'secret123'}),h(A.TextField,{label:'Message',multiline:true,placeholder:'Votre demande…'}),h(A.TextField,{label:'Code promo',disabled:true,placeholder:'Indisponible'})));
+</script>
+</body>
+</html>

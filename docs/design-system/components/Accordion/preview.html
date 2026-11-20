@@ -1,0 +1,12 @@
+<!-- @dsCard group="Contenu" height=380 subtitle="Proposé — FAQ, détail des tarifs" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Accordion — aperçu</title></head>
+<body>
+<div id="root" style="max-width:900px;padding:24px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.Accordion,{defaultOpen:0,items:[{title:'Combien de temps faut-il entre le parking et l’aérogare ?',content:'Comptez 15 minutes entre l’accueil et votre arrivée au terminal (hors périodes d’affluence).'},{title:'La navette est-elle gratuite ?',content:'Oui, la navette est gratuite et sans attente, avec le service standard.'},{title:'Comment utiliser mes points de fidélité ?',content:'Dès 1 000 points, une remise vous est proposée automatiquement lors de la réservation.'}]}));
+</script>
+</body>
+</html>

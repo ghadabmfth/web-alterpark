@@ -1,14 +1,33 @@
-node_modules/
-.next/
-out/
-coverage/
-*.tsbuildinfo
+# dependencies
+/node_modules
+
+# testing
+/coverage
+/playwright-report
+/test-results
+
+# next.js
+/.next/
+/out/
+/build
 next-env.d.ts
+*.tsbuildinfo
+
+# generated Prisma client (rebuilt by `prisma generate`)
+/src/generated/
+
+# env files: only the documented example is committed
 .env
-.env*.local
-.vercel/
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# misc
 .DS_Store
-dist/
-wordpress/plugins/alterpark-booking/vendor/
-# Police sous licence « personal use » : jamais dans le dépôt (voir packages/design-system/README.md)
-apps/web/public/fonts/Crossroads-*
+*.pem
+npm-debug.log*
+
+# Crossroads is licensed "personal use" only: never commit it (see docs/DECISIONS.md, ADR-006)
+/public/fonts/Crossroads-*

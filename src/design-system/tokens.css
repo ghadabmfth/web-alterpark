@@ -1,0 +1,273 @@
+/* AlterPark — generated from tokens.json */
+:root, [data-theme="dark"] {
+  --surface: #313131; /* Observé (Figma). Fond de page unique du site (toutes les sections, header, footer). Sol de tout le texte `text-*`. */
+  --surface-raised: #3d3d3d; /* Proposé. Champs de formulaire, menus déroulants, cartes, modale. Un cran au-dessus de `surface` pour séparer sans ombre. */
+  --surface-sunken: #262626; /* Proposé. Panneau du menu mobile et pied de modale ; zones en retrait. */
+  --overlay-hero: rgba(49, 49, 49, 0.55); /* Observé (Figma). Voile du dégradé sur les photos plein cadre (hero, bandeau Rallye) : `surface` opaque → 55 %. Garantit la lisibilité du texte posé sur photo. */
+  --overlay-modal: rgba(0, 0, 0, 0.6); /* Proposé. Fond derrière une modale ou le menu mobile ouvert. */
+  --primary: #f6921e; /* Observé (Figma). Orange AlterPark : ponctuation et chiffres des titres, sous-titres (`h3`), boutons principaux, icônes, liens, filets de 10 px du header et du footer. Texte orange lisible sur `surface` (5,6:1) et `surface-raised` (4,7:1). */
+  --primary-hover: #f9a548; /* Proposé. Survol des boutons et liens orange (éclaircit, lisible sur `surface` 6,5:1). */
+  --primary-active: #e8850f; /* Proposé. État pressé des boutons orange. */
+  --on-primary: #ffffff; /* Texte et icônes sur un fond orange (boutons), en blanc à la demande du client, comme la maquette. ⚠ 2,32:1 sur `primary` : sous le seuil WCAG AA (3:1 pour ce texte gras). Pour un texte plus lisible, utilisez #613400 (4,5:1). */
+  --secondary: #f05a28; /* Observé (Figma). Orange-rouge présent uniquement dans le logo. Ne pas l'utiliser en interface (3,8:1 sur `surface`, insuffisant pour du texte courant). */
+  --accent: #f6bb04; /* Observé (Figma). Jaune des étoiles de notation Google. Réservé aux notes (7,5:1 sur `surface`). */
+  --text-primary: #ffffff; /* Observé (Figma). Mots des titres en Crossroads, texte courant, navigation, footer, sur `surface` (13:1), `surface-raised` (10,9:1) et les photos voilées par `overlay-hero`. */
+  --text-secondary: #d9d9d9; /* Proposé. Texte d'aide des formulaires, métadonnées, sur `surface` (9,2:1) et `surface-raised` (7,7:1). */
+  --text-muted: #adadad; /* Proposé. Placeholders, texte désactivé lisible, sur `surface` et `surface-raised` (≥ 4,5:1). */
+  --numeral-ghost: rgba(255, 255, 255, 0.16); /* Observé (Figma). Grands chiffres d'étape (1, 2, 3, 4) derrière les icônes orange. Décoratif : jamais porteur d'information seul. */
+  --border: #8a8a8a; /* Proposé. Bordure des champs, cases et interrupteurs (3,8:1 sur `surface`, 3,2:1 sur `surface-raised`). */
+  --border-divider: #ffffff; /* Observé (Figma). Filets pointillés 1 px (tirets 3/5) entre les étapes. Décoratif. */
+  --focus: #ffffff; /* Proposé. Anneau de focus clavier : 2 px `surface` puis 2 px blanc (13:1 sur `surface`). */
+  --success: #4cc38a; /* Proposé. Validation (texte et icône) sur `surface` (5,9:1) et `success-soft`. Toujours accompagné d'une icône et d'un mot. */
+  --success-soft: #25392f; /* Proposé. Fond des alertes de succès. */
+  --warning: #ffd166; /* Proposé. Avertissement sur `surface` (9:1) et `warning-soft`. Toujours avec icône et mot. */
+  --warning-soft: #3d3825; /* Proposé. Fond des alertes d'avertissement. */
+  --error: #ff8a80; /* Proposé. Erreurs de saisie et alertes d'erreur sur `surface` (5,7:1) et `error-soft`. Toujours avec icône et message. */
+  --error-soft: #43302e; /* Proposé. Fond des alertes d'erreur. */
+  --info: #6cb6ff; /* Proposé. Information sur `surface` (6:1) et `info-soft`. Toujours avec icône et mot. */
+  --info-soft: #26364a; /* Proposé. Fond des alertes d'information. */
+  --shadow-photo: 0 24px 48px rgba(0, 0, 0, 0.55); /* Ombre portée noire sous les photos arrondies, comme les téléphones de l'AppShowcase (demande client ; la maquette utilisait un halo blanc 0 3px 6px #ffffff). */
+  --shadow-tab: 0 3px 6px rgba(255, 255, 255, 0.2), inset 0 3px 6px #ffffff; /* Observé (Figma). Onglets du rail social à droite. */
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.5); /* Proposé. Menus déroulants, modale, menu mobile. */
+  --shadow-focus: 0 0 0 2px #313131, 0 0 0 4px #ffffff; /* Proposé. Anneau de focus clavier, sur tout élément interactif. */
+}
+:root {
+  --space-1: 4px; /* Proposé. Écart icône/texte minimal, étoiles (observé 3–5 px). */
+  --space-2: 8px; /* Proposé. Écart entre libellé et champ, entre étoiles et texte. */
+  --space-3: 12px; /* Observé (Figma). Marge interne verticale du libellé de bouton (12 px). */
+  --space-4: 16px; /* Proposé. Gouttière mobile, padding des champs. */
+  --space-6: 24px; /* Proposé. Écart entre éléments d'une carte ; padding des alertes. */
+  --space-8: 32px; /* Observé (Figma). Titre → paragraphe (observé 29 px, arrondi). */
+  --space-10: 40px; /* Observé (Figma). Padding horizontal des boutons (observé 40–46 px, unifié). */
+  --space-12: 48px; /* Proposé. Écart entre colonnes ; titre de section → contenu en mobile. */
+  --space-16: 64px; /* Observé (Figma). Paragraphe → bouton (observé 59 px). */
+  --space-20: 80px; /* Proposé. Écart vertical entre sections en tablette. */
+  --space-24: 96px; /* Proposé. Écart vertical entre sections en laptop. */
+  --space-30: 120px; /* Observé (Figma). Écart entre sections desktop (observé 120 à 180 px, unifié à 120 ; 160 pour le hero). */
+  --space-40: 160px; /* Observé (Figma). Hero → première section en desktop. */
+  --gutter-page: 127px; /* Observé (Figma). Marge latérale du contenu sur la maquette 1920 px (contenu 1666 px). En dessous de 1920 px, la largeur est plafonnée par `container-max`. */
+  --radius-sm: 10px; /* Observé (Figma). Onglets du rail social (coins côté page). */
+  --radius-md: 15px; /* Observé (Figma). Badge de note Google ; proposé pour les champs, cases (4 px réduits), menus. */
+  --radius-lg: 20px; /* Observé (Figma). Bandeau image plein cadre (Rallye du Cœur). */
+  --radius-xl: 33px; /* Observé (Figma). Photos des sections texte + visuel. */
+  --radius-pill: 999px; /* Observé (Figma). Boutons (64 px de haut, coins entièrement arrondis) et bouton lecture. */
+  --border-1: 1px; /* Observé (Figma). Filets séparateurs pointillés. */
+  --border-2: 2px; /* Proposé. Champs de formulaire, cases, bouton outline. */
+  --border-3: 3px; /* Observé (Figma). Contour orange du badge de note Google. */
+  --container-width: 90%; /* Demandé par le client. Largeur du contenu : 90 % de la fenêtre, centré (5 % de marge de chaque côté), plafonnée à `container-max`. Remplace les gouttières fixes. */
+  --container-max: 1666px; /* Observé (Figma). Largeur max du contenu (1920 − 2 × 127). */
+  --container-nav: 1500px; /* Observé (Figma). Largeur de la navigation desktop (1499 px). */
+  --container-text: 1160px; /* Observé (Figma). Paragraphes centrés (observé 1131–1193 px). */
+  --container-col: 780px; /* Observé (Figma). Colonne de texte d'une section texte + visuel (778 px). */
+  --bp-sm: 576px; /* Proposé. Grands mobiles. */
+  --bp-md: 768px; /* Proposé. Tablette : 2 colonnes. */
+  --bp-lg: 1024px; /* Proposé. Laptop : navigation desktop visible. */
+  --bp-xl: 1280px; /* Proposé. Desktop. */
+  --bp-xxl: 1920px; /* Observé (Figma). Largeur de la maquette. */
+  --z-base: 0; /* Contenu. */
+  --z-raised: 10; /* Éléments superposés dans une section (badge sur photo). */
+  --z-header: 100; /* Header collant. */
+  --z-rail: 200; /* Rail social fixe. */
+  --z-dropdown: 300; /* Menus déroulants. */
+  --z-overlay: 900; /* Voile de modale / menu mobile. */
+  --z-modal: 1000; /* Modale et menu mobile. */
+  --icon-xs: 10px; /* Observé (Figma). Étoiles du badge, flèche de bouton. */
+  --icon-sm: 17px; /* Observé (Figma). Étoiles des avis. */
+  --icon-md: 27px; /* Observé (Figma). Flèches du carrousel ; glyphes du rail social (≈ 24 px). */
+  --icon-lg: 56px; /* Observé (Figma). Onglet du rail social (56 × 60). */
+  --icon-xl: 80px; /* Observé (Figma). Pictogrammes d'étape (80 px hero, 75 px fidélité). */
+  --icon-play: 89px; /* Observé (Figma). Bouton lecture vidéo. */
+  --fs-display: clamp(26px, 1.3rem + 1.4vw, 44px); /* Demandé par le client : titres réduits. Taille du H1 : 26 px en mobile → 44 px. */
+  --fs-h2: clamp(22px, 1.15rem + 1vw, 36px); /* Demandé par le client : titres réduits. Titres de section : 22 px en mobile → 36 px. */
+  --fs-h4: clamp(20px, 1.1rem + 0.3vw, 24px); /* Titres d'étape de fidélité : 20 → 24 px. */
+  --fs-numeral: clamp(72px, 3.8rem + 2.6vw, 110px); /* Chiffres fantômes des étapes : 72 → 110 px. */
+  --lh-body: clamp(26px, 1.5rem + 0.3vw, 32px); /* Interligne du texte courant : 26 px en mobile → 32 px. */
+  --fs-body: 16px; /* Demandé par le client. Texte courant à 16 px sur toutes les largeurs. */
+  --ls-body: clamp(0.5px, 0.2px + 0.08vw, 1.28px); /* Approche du texte courant : 0,08em (1,28 px) en desktop, 0,5 px en mobile. */
+  --duration-fast: 150ms; /* Proposé. Survol, focus, couleur. */
+  --duration-base: 250ms; /* Proposé. Ouverture d'accordéon, menu déroulant. */
+  --duration-slow: 400ms; /* Proposé. Menu mobile, modale, carrousel. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* Proposé. Courbe de toutes les transitions. */
+  --font-display: Crossroads, Montserrat, sans-serif;
+  --font-sans: Montserrat, system-ui, sans-serif;
+  --font-rounded: Nunito, Montserrat, sans-serif;
+  --text-display: 400 44px/48px var(--font-display); /* Observé : titre du hero (H1 unique de la page). Mobile : `fs-display`. Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-h2: 400 36px/42px var(--font-display); /* Observé : titre de chaque section. Mobile : `fs-h2`. Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-h4: 400 24px/24px var(--font-display); /* Observé : titres d'étape du programme de fidélité (Cumulez, Capitalisez, Utilisez). */
+  --text-h5: 400 20px/22px var(--font-display); /* Observé : titres d'étape du hero (Réservez votre place en ligne…). */
+  --text-h3: 700 22px/32px var(--font-sans); /* Observé : sous-titre de section (« Comment ça marche ? ») et nom de l'auteur d'un avis. Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-h6: 700 18px/26px var(--font-sans); /* Proposé : intitulés de blocs internes (cartes, tarifs, FAQ). Même graisse que la navigation. */
+  --text-body-lg: 400 16px/26px var(--font-sans); /* Observé : footer (adresse, contact, mentions). Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-body: 300 16px/32px var(--font-sans); /* Observé : paragraphes de toutes les sections, extraits d'avis. Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-body-compact: 300 16px/26px var(--font-sans); /* Observé : légendes des étapes de fidélité, sous un titre `h4`. Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-body-sm: 400 16px/24px var(--font-sans); /* Proposé : texte d'aide et messages de validation des formulaires, fil d'Ariane. */
+  --text-nav: 700 16px/24px var(--font-sans); /* Observé : liens du menu principal (interligne 100 % arrondi à 24 px). Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-button: 700 16px/24px var(--font-sans); /* Libellé des boutons, 16 px à la demande du client (20 px dans la maquette). Bouton de 52 px de haut (64 px dans la maquette à 1920 px). */
+  --text-link: 700 16px/32px var(--font-sans); /* Observé : lien « Lire plus » en `primary`. Ajusté à la demande du client (titres plus petits, texte et liens à 16 px). */
+  --text-label: 700 16px/24px var(--font-sans); /* Proposé : libellés de champs, onglets, en-têtes d'accordéon compacts. */
+  --text-numeral: 800 110px/48px var(--font-sans); /* Observé : chiffres d'étape en `numeral-ghost` (115 px dans le hero, 130 px dans la fidélité). */
+  --text-caption: 300 16px/33px var(--font-sans); /* Observé : légende sous les titres d'étape du hero (« 7 jours/7 et 24h/24 »). */
+  --text-caption-sm: 300 13px/26px var(--font-sans); /* Observé : « Basée sur 843 avis » dans le badge Google. */
+  --text-rating-label: 900 21px/27px var(--font-sans); /* Observé : « EXCELLENT » du badge Google, en majuscules. */
+}
+.display {
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 48px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.h2 {
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 42px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.h4 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.h5 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 22px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.h3 {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.h6 {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.body-lg {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 32px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+}
+.body-compact {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+}
+.body-sm {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.nav {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.button {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.link {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.label {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.numeral {
+  font-family: var(--font-sans);
+  font-size: 110px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.caption {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 33px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+}
+.caption-sm {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 26px;
+  font-weight: 300;
+  letter-spacing: 0;
+}
+.rating-label {
+  font-family: var(--font-sans);
+  font-size: 21px;
+  line-height: 27px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+@font-face {
+  font-family: "Crossroads";
+  src: url("/fonts/Crossroads-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-300.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-800.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}

@@ -1,0 +1,13 @@
+<!-- @dsCard group="Patterns" height=900 subtitle="Photo + voile, H1, introduction, étapes, bouton" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Hero — aperçu</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  var steps = [{icon:'stepReserver',title:'Réservez votre place en ligne',text:'7 jours/7 et 24h/24'},{icon:'stepDeposer',title:'Déposez votre véhicule au parking',text:'Vidéo surveillance & gardiennage'},{icon:'stepNavette',title:'Nous vous déposons à l’aéroport',text:'Navette gratuite sans attente'},{icon:'stepVacances',title:'Profitez de vos vacances',text:'Découvrez nos Services Plus'}];
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.Hero,{title:'Votre parking à proximité de l’aéroport de Nantes, commencez vos vacances en toute sérénité !',intro:'Simplifiez vos départs avec AlterPark, votre solution de stationnement pratique et sécurisée à proximité de l’aéroport de Nantes.',steps:steps,cta:{label:'Réservez ma place !',href:'#'}}));
+</script>
+</body>
+</html>

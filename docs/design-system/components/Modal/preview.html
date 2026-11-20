@@ -1,0 +1,12 @@
+<!-- @dsCard group="Feedback" height=360 subtitle="Proposé — affichée ici en ligne ; sur le site, centrée sur un voile" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Modal — aperçu</title></head>
+<body>
+<div id="root" style="height:360px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.Modal,{open:true,inline:true,title:'Annuler la réservation ?',onClose:function(){},footer:h(React.Fragment,null,h(A.Button,{variant:'ghost',size:'sm'},'Garder ma place'),h(A.Button,{size:'sm'},'Annuler la réservation'))},'Votre réservation du 12 au 20 août sera annulée. Les points de fidélité utilisés vous seront recrédités.'));
+</script>
+</body>
+</html>

@@ -1,4 +1,0 @@
-/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
-.ap-input--has-action { padding-right: 112px; }
-.ap-input-wrap__action { position: absolute; right: var(--space-2); top: 50%; transform: translateY(-50%); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-sm); background: none; color: var(--primary); font: 700 16px/24px var(--font-sans); cursor: pointer; }
-.ap-input-wrap__action:hover { color: var(--primary-hover); }

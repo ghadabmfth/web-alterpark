@@ -1,0 +1,12 @@
+<!-- @dsCard group="Navigation" height=240 subtitle="Fixé à droite de la fenêtre sur le site" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>SocialRail — aperçu</title></head>
+<body>
+<div id="root" style="display:flex;justify-content:flex-end;padding:24px 0"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.SocialRail,{fixed:false}));
+</script>
+</body>
+</html>

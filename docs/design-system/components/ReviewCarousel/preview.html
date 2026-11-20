@@ -1,0 +1,13 @@
+<!-- @dsCard group="Contenu" height=420 subtitle="3 avis visibles ≥ 1200 px, 2 en tablette, 1 en mobile" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>ReviewCarousel — aperçu</title></head>
+<body>
+<div id="root" style="padding:24px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  var reviews = [{name:'Claire M.',date:'il y a 3 jours',rating:5,text:'Première fois chez AlterPark : accueil chaleureux, navette prête à notre arrivée et voiture récupérée sans attente au retour. Je recommande sans hésiter pour un départ depuis Nantes.'},{name:'Julien P.',date:'il y a 1 semaine',rating:5,text:'Service fluide du début à la fin, personnel très sympathique et parking facile d’accès.'},{name:'Nadia B.',date:'il y a 2 semaines',rating:5,text:'Équipe efficace et navette rapide, nous étions au terminal en un quart d’heure.'},{name:'Thomas G.',date:'il y a 1 mois',rating:4,text:'Très pratique pour un vol tôt le matin, tout était prêt à notre arrivée.'}];
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.ReviewCarousel,{items:reviews}));
+</script>
+</body>
+</html>

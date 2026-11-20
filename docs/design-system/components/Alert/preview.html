@@ -1,0 +1,12 @@
+<!-- @dsCard group="Feedback" height=420 subtitle="Proposé — toujours icône + mot, jamais la couleur seule" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Alert — aperçu</title></head>
+<body>
+<div id="root" class="ap-stack" style="max-width:720px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(A.Alert,{tone:'success',title:'Réservation confirmée'},'Votre place est réservée du 12 au 20 août. Un e-mail de confirmation vous a été envoyé.'),h(A.Alert,{tone:'info'},'Comptez 15 minutes entre l’accueil et votre arrivée au terminal.'),h(A.Alert,{tone:'warning',dismissible:true},'Forte affluence prévue ce week-end : arrivez 30 minutes plus tôt.'),h(A.Alert,{tone:'error',title:'Paiement refusé'},'Vérifiez les informations de votre carte et réessayez.')));
+</script>
+</body>
+</html>

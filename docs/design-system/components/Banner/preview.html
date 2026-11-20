@@ -1,0 +1,12 @@
+<!-- @dsCard group="Patterns" height=700 -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Banner — aperçu</title></head>
+<body>
+<div id="root" style="padding:24px 0"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.Banner,{logo:A.assets.rallyeLogo,logoAlt:'Le Rallye du Cœur',title:'ALTERPARK soutient le “Rallye du Cœur”',cta:{label:'En savoir +',href:'#'}},'Pour chaque réservation effectuée, ALTERPARK reverse 0,50 € au Rallye du Cœur, une initiative qui soutient la lutte contre le cancer chez l’enfant.'));
+</script>
+</body>
+</html>

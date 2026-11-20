@@ -1,0 +1,12 @@
+<!-- @dsCard group="Feedback" height=520 subtitle="Ici en mode aperçu (lien YouTube) ; sur le site, la vidéo se lit dans la fenêtre" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>VideoModal — aperçu</title><style>.ap-video{position:absolute}</style></head>
+<body style="position:relative;min-height:520px">
+<div id="root"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.VideoModal, { open: true, video: 'https://youtu.be/zrJMs72gTJg', title: 'Découvrez ALTERPARK', embed: false, onClose: function () {} }));
+</script>
+</body>
+</html>

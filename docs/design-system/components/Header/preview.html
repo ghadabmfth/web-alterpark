@@ -1,0 +1,14 @@
+<!-- @dsCard group="Navigation" height=780 subtitle="Desktop ≥ 1024 px : logo centré · mobile : burger + panneau" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Header — aperçu</title></head>
+<body>
+<div id="desk" style="background:var(--surface)"></div><p style="margin:24px 16px 8px;font:700 14px/20px var(--font-sans);color:var(--text-secondary)">Mobile (375 px), menu ouvert</p><div id="mob" style="width:375px;height:640px;position:relative;margin-left:16px;outline:1px dashed var(--border)"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  var links = [{label:'Accueil',href:'#',active:true},{label:'Comment ça marche ?',href:'#'},{label:'Nos tarifs',href:'#'},{label:'Services Plus',children:[{label:'Lavage',href:'#'},{label:'Recharge électrique',href:'#'},{label:'ALTERECO (sans navette)',href:'#'}]},{label:'Plan accès',href:'#'},{label:'Contactez-nous',href:'#'}];
+  ReactDOM.createRoot(document.getElementById('desk')).render(h(A.Header,{links:links}));
+  ReactDOM.createRoot(document.getElementById('mob')).render(h(A.Header,{links:links,defaultOpen:true,cta:{label:'Réservez ma place !',href:'#'}}));
+</script>
+</body>
+</html>

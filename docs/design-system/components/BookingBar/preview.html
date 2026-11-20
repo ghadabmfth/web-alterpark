@@ -1,0 +1,18 @@
+<!-- @dsCard group="Patterns" height=640 subtitle="Barre dates + heures, puis choix entre Parking ALTERPARK et ALTERECO (exemple : recherche déjà lancée)" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>BookingBar — aperçu</title></head>
+<body>
+<div id="root" style="padding:32px 24px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.BookingBar, {}));
+  setTimeout(function () {
+    var set = function (el, v) { var d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value'); d.set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); };
+    var ins = document.querySelectorAll('.ap-bk input'), y = new Date().getFullYear() + 1;
+    set(ins[0], y + '-07-12'); set(ins[1], '06:30'); set(ins[2], y + '-07-20'); set(ins[3], '22:10');
+    var b = document.querySelector('.ap-bk__submit'); if (b) b.click();
+  }, 300);
+</script>
+</body>
+</html>

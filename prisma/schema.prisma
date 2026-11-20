@@ -1,0 +1,590 @@
+// ALTERPARK — data model (PHASE 1 PROPOSAL, pending approval).
+// Explained in docs/DATA-MODEL.md. No migration is generated before approval (Phase 4).
+//
+// Conventions
+// - Primary keys: UUID v7 (time-ordered, native `uuid` column).
+// - Instants: `timestamptz(3)`, always UTC. Wall-clock input is converted with the parking's time zone.
+// - Money: integer cents + ISO 4217 currency. Never floating point.
+// - Soft deletion only where history must survive: User (GDPR anonymisation), Parking, ParkingOffer, Vehicle.
+// - Business rules that the client has not fixed are columns (configurable), not constants.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Identity & access ─────────────────────────────
+
+/// Fixed permission catalogue: checked in code, assigned to roles in the database.
+enum Permission {
+  DASHBOARD_VIEW
+  RESERVATION_READ
+  RESERVATION_MANAGE
+  RESERVATION_CANCEL
+  PAYMENT_READ
+  PAYMENT_REFUND
+  PARKING_READ
+  PARKING_MANAGE
+  PRICING_MANAGE
+  CUSTOMER_READ
+  CUSTOMER_MANAGE
+  CONTACT_READ
+  CONTACT_MANAGE
+  REPORT_VIEW
+  ADMIN_USER_MANAGE
+  ROLE_MANAGE
+  SETTINGS_MANAGE
+  AUDIT_LOG_READ
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+/// System roles: CUSTOMER, ADMIN, SUPER_ADMIN (isSystem = true, not deletable). Admins may add custom staff roles.
+model Role {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  key         String           @unique @db.VarChar(40)
+  name        String           @db.VarChar(80)
+  description String?          @db.VarChar(255)
+  isSystem    Boolean          @default(false)
+  /// Staff roles may access /admin; CUSTOMER may not.
+  isStaff     Boolean          @default(false)
+  permissions RolePermission[]
+  users       User[]
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
+}
+
+model RolePermission {
+  roleId     String     @db.Uuid
+  permission Permission
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permission])
+}
+
+model User {
+  id               String     @id @default(uuid(7)) @db.Uuid
+  /// Stored lower-cased and trimmed by the service layer.
+  email            String     @unique @db.VarChar(190)
+  emailVerifiedAt  DateTime?  @db.Timestamptz(3)
+  /// Argon2id hash. Null for accounts that never set a password.
+  passwordHash     String?    @db.VarChar(255)
+  firstName        String     @db.VarChar(100)
+  lastName         String     @db.VarChar(100)
+  phone            String?    @db.VarChar(32)
+  roleId           String     @db.Uuid
+  status           UserStatus @default(ACTIVE)
+  /// Incremented on password change, role change or disable: invalidates every issued session.
+  sessionVersion   Int        @default(0)
+  marketingOptInAt DateTime?  @db.Timestamptz(3)
+  lastLoginAt      DateTime?  @db.Timestamptz(3)
+  createdAt        DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime   @updatedAt @db.Timestamptz(3)
+  /// Soft delete + anonymisation (GDPR): reservations and payments keep their snapshots.
+  deletedAt        DateTime?  @db.Timestamptz(3)
+
+  role                  Role                  @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  authTokens            AuthToken[]
+  vehicles              Vehicle[]
+  reservations          Reservation[]
+  cancellationRequests  CancellationRequest[] @relation("CancellationRequester")
+  cancellationDecisions CancellationRequest[] @relation("CancellationDecider")
+  refundsRequested      Refund[]
+  contactMessages       ContactMessage[]      @relation("ContactAuthor")
+  contactAssignments    ContactMessage[]      @relation("ContactAssignee")
+  contactNotes          ContactNote[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+  settingsUpdated       AppSetting[]
+
+  @@index([roleId])
+  @@index([lastName, firstName])
+}
+
+enum AuthTokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// Single-use tokens. Only the SHA-256 hash is stored.
+model AuthToken {
+  id        String           @id @default(uuid(7)) @db.Uuid
+  userId    String           @db.Uuid
+  purpose   AuthTokenPurpose
+  tokenHash String           @unique @db.Char(64)
+  expiresAt DateTime         @db.Timestamptz(3)
+  usedAt    DateTime?        @db.Timestamptz(3)
+  createdAt DateTime         @default(now()) @db.Timestamptz(3)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+}
+
+// ───────────────────────────── Parkings & pricing ─────────────────────────────
+
+enum ParkingStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+}
+
+/// An airport site (Nantes, Marseille, Paris-Roissy, and future ones).
+model Parking {
+  id                    String        @id @default(uuid(7)) @db.Uuid
+  slug                  String        @unique @db.VarChar(60)
+  name                  String        @db.VarChar(120)
+  /// IATA code of the served airport (NTE, MRS, CDG).
+  airportCode           String        @db.Char(3)
+  airportName           String        @db.VarChar(120)
+  addressLine           String        @db.VarChar(255)
+  postalCode            String        @db.VarChar(12)
+  city                  String        @db.VarChar(120)
+  country               String        @default("FR") @db.Char(2)
+  latitude              Decimal?      @db.Decimal(9, 6)
+  longitude             Decimal?      @db.Decimal(9, 6)
+  timeZone              String        @default("Europe/Paris") @db.VarChar(64)
+  phone                 String?       @db.VarChar(32)
+  email                 String?       @db.VarChar(190)
+  description           String?
+  practicalInfo         String?
+  openingHours          Json?
+  status                ParkingStatus @default(DRAFT)
+  // Configurable booking rules (values to be confirmed by the client)
+  minLeadMinutes        Int           @default(120)
+  maxStayDays           Int           @default(60)
+  bookingHorizonDays    Int           @default(365)
+  /// How long capacity is held while the customer pays. 30 = Stripe Checkout's minimum session lifetime.
+  holdTtlMinutes        Int           @default(30)
+  /// Free cancellation up to N hours before arrival; later requests need staff approval.
+  freeCancellationHours Int           @default(24)
+  createdAt             DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime      @updatedAt @db.Timestamptz(3)
+  archivedAt            DateTime?     @db.Timestamptz(3)
+
+  offers          ParkingOffer[]
+  reservations    Reservation[]
+  contactMessages ContactMessage[]
+
+  @@index([status])
+}
+
+/// A bookable service of a site with its own capacity: ALTERPARK (shuttle) and ALTERECO (walk) today.
+model ParkingOffer {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  parkingId       String    @db.Uuid
+  code            String    @db.VarChar(40)
+  name            String    @db.VarChar(120)
+  tagline         String?   @db.VarChar(160)
+  description     String?
+  features        String[]
+  shuttleIncluded Boolean   @default(true)
+  walkMinutes     Int?
+  /// Number of vehicles the offer can host at the same instant.
+  capacity        Int
+  isHighlighted   Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  sortOrder       Int       @default(0)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @db.Timestamptz(3)
+  archivedAt      DateTime? @db.Timestamptz(3)
+
+  parking      Parking        @relation(fields: [parkingId], references: [id], onDelete: Restrict)
+  prices       ParkingPrice[]
+  reservations Reservation[]
+
+  @@unique([parkingId, code])
+  @@index([parkingId, isActive])
+}
+
+enum PricingMode {
+  /// amountCents is the total price for any stay within [minDays, maxDays].
+  FLAT
+  /// amountCents × billed days.
+  PER_DAY
+}
+
+/// Rate rows. For a stay, the engine picks the row of the offer whose validity covers the arrival
+/// date and whose [minDays, maxDays] contains the billed days; highest priority wins.
+model ParkingPrice {
+  id            String      @id @default(uuid(7)) @db.Uuid
+  offerId       String      @db.Uuid
+  label         String?     @db.VarChar(120)
+  validFrom     DateTime    @db.Date
+  validTo       DateTime?   @db.Date
+  minDays       Int         @default(1)
+  maxDays       Int?
+  mode          PricingMode
+  amountCents   Int
+  /// Added per day beyond maxDays when maxDays is set and the stay exceeds it.
+  extraDayCents Int         @default(0)
+  currency      String      @default("EUR") @db.Char(3)
+  priority      Int         @default(0)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
+
+  offer        ParkingOffer  @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  reservations Reservation[]
+
+  @@index([offerId, isActive, validFrom])
+}
+
+// ───────────────────────────── Customers' vehicles ─────────────────────────────
+
+model Vehicle {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  /// Normalised: upper case, single spaces.
+  plate     String    @db.VarChar(20)
+  make      String?   @db.VarChar(60)
+  model     String?   @db.VarChar(60)
+  color     String?   @db.VarChar(40)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservations Reservation[]
+
+  @@unique([userId, plate])
+}
+
+// ───────────────────────────── Reservations ─────────────────────────────
+
+enum ReservationStatus {
+  /// Capacity held until holdExpiresAt while payment is in progress.
+  PENDING_PAYMENT
+  /// Payment verified server-side (webhook).
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  /// Hold expired without a verified payment.
+  EXPIRED
+}
+
+model Reservation {
+  id                 String            @id @default(uuid(7)) @db.Uuid
+  /// Human reference, e.g. AP-NTE-7K3Q9M. Unique, non-sequential.
+  reference          String            @unique @db.VarChar(20)
+  userId             String            @db.Uuid
+  parkingId          String            @db.Uuid
+  offerId            String            @db.Uuid
+  priceId            String?           @db.Uuid
+  vehicleId          String?           @db.Uuid
+  status             ReservationStatus @default(PENDING_PAYMENT)
+  startsAt           DateTime          @db.Timestamptz(3)
+  endsAt             DateTime          @db.Timestamptz(3)
+  billedDays         Int
+  passengers         Int               @default(1)
+  outboundFlight     String?           @db.VarChar(16)
+  returnFlight       String?           @db.VarChar(16)
+  customerNote       String?           @db.VarChar(1000)
+  // Snapshots: the booking stays exact if the account, vehicle or tariff changes later.
+  customerFirstName  String            @db.VarChar(100)
+  customerLastName   String            @db.VarChar(100)
+  customerEmail      String            @db.VarChar(190)
+  customerPhone      String            @db.VarChar(32)
+  vehiclePlate       String            @db.VarChar(20)
+  priceSnapshot      Json
+  totalCents         Int
+  currency           String            @default("EUR") @db.Char(3)
+  refundedCents      Int               @default(0)
+  holdExpiresAt      DateTime?         @db.Timestamptz(3)
+  /// Client-generated key: a double click or network retry returns the same reservation.
+  idempotencyKey     String            @unique @db.VarChar(64)
+  confirmedAt        DateTime?         @db.Timestamptz(3)
+  checkedInAt        DateTime?         @db.Timestamptz(3)
+  completedAt        DateTime?         @db.Timestamptz(3)
+  cancelledAt        DateTime?         @db.Timestamptz(3)
+  cancellationReason String?           @db.VarChar(500)
+  createdAt          DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  parking              Parking               @relation(fields: [parkingId], references: [id], onDelete: Restrict)
+  offer                ParkingOffer          @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  price                ParkingPrice?         @relation(fields: [priceId], references: [id], onDelete: SetNull)
+  vehicle              Vehicle?              @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  payments             Payment[]
+  cancellationRequests CancellationRequest[]
+  notifications        Notification[]
+
+  /// Availability: overlapping reservations of an offer in capacity-consuming statuses.
+  @@index([offerId, status, startsAt, endsAt])
+  @@index([parkingId, startsAt])
+  @@index([userId, createdAt])
+  @@index([status, holdExpiresAt])
+  @@index([createdAt])
+}
+
+enum CancellationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model CancellationRequest {
+  id            String                    @id @default(uuid(7)) @db.Uuid
+  reservationId String                    @db.Uuid
+  requestedById String                    @db.Uuid
+  reason        String                    @db.VarChar(1000)
+  status        CancellationRequestStatus @default(PENDING)
+  decidedById   String?                   @db.Uuid
+  decidedAt     DateTime?                 @db.Timestamptz(3)
+  decisionNote  String?                   @db.VarChar(1000)
+  createdAt     DateTime                  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime                  @updatedAt @db.Timestamptz(3)
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+  requestedBy User        @relation("CancellationRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  decidedBy   User?       @relation("CancellationDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([reservationId])
+}
+
+// ───────────────────────────── Payments ─────────────────────────────
+
+enum PaymentProvider {
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+/// One row per payment attempt. Card data never reaches Alterpark: only provider identifiers.
+model Payment {
+  id                String          @id @default(uuid(7)) @db.Uuid
+  reservationId     String          @db.Uuid
+  provider          PaymentProvider
+  /// e.g. Stripe Checkout Session id.
+  providerSessionId String?         @unique @db.VarChar(255)
+  /// e.g. Stripe PaymentIntent id.
+  providerPaymentId String?         @unique @db.VarChar(255)
+  amountCents       Int
+  currency          String          @default("EUR") @db.Char(3)
+  status            PaymentStatus   @default(PENDING)
+  refundedCents     Int             @default(0)
+  failureCode       String?         @db.VarChar(100)
+  failureMessage    String?         @db.VarChar(500)
+  succeededAt       DateTime?       @db.Timestamptz(3)
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @db.Timestamptz(3)
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+  refunds     Refund[]
+
+  @@index([reservationId])
+  @@index([status, createdAt])
+  @@index([succeededAt])
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+model Refund {
+  id               String       @id @default(uuid(7)) @db.Uuid
+  paymentId        String       @db.Uuid
+  providerRefundId String?      @unique @db.VarChar(255)
+  amountCents      Int
+  currency         String       @default("EUR") @db.Char(3)
+  status           RefundStatus @default(PENDING)
+  reason           String?      @db.VarChar(500)
+  requestedById    String?      @db.Uuid
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
+
+  payment     Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  requestedBy User?   @relation(fields: [requestedById], references: [id], onDelete: SetNull)
+
+  @@index([paymentId])
+}
+
+enum WebhookEventStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+/// Idempotency ledger: a provider event is processed at most once.
+model PaymentWebhookEvent {
+  id          String             @id @default(uuid(7)) @db.Uuid
+  provider    PaymentProvider
+  eventId     String             @db.VarChar(255)
+  type        String             @db.VarChar(100)
+  status      WebhookEventStatus @default(RECEIVED)
+  error       String?            @db.VarChar(1000)
+  receivedAt  DateTime           @default(now()) @db.Timestamptz(3)
+  processedAt DateTime?          @db.Timestamptz(3)
+
+  @@unique([provider, eventId])
+}
+
+// ───────────────────────────── Contact ─────────────────────────────
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  SPAM
+  ARCHIVED
+}
+
+enum ContactSubject {
+  RESERVATION
+  CANCELLATION
+  PAYMENT
+  ACCESS_SHUTTLE
+  BUSINESS
+  OTHER
+}
+
+model ContactMessage {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  name         String         @db.VarChar(120)
+  email        String         @db.VarChar(190)
+  phone        String?        @db.VarChar(32)
+  subject      ContactSubject
+  message      String         @db.VarChar(5000)
+  parkingId    String?        @db.Uuid
+  /// Set when the sender was signed in.
+  userId       String?        @db.Uuid
+  status       ContactStatus  @default(NEW)
+  assignedToId String?        @db.Uuid
+  /// Salted hash of the IP, for abuse handling without storing the address.
+  ipHash       String?        @db.Char(64)
+  createdAt    DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @db.Timestamptz(3)
+  resolvedAt   DateTime?      @db.Timestamptz(3)
+
+  parking       Parking?       @relation(fields: [parkingId], references: [id], onDelete: SetNull)
+  user          User?          @relation("ContactAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  assignedTo    User?          @relation("ContactAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  notes         ContactNote[]
+  notifications Notification[]
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+/// Internal staff comments on a contact message.
+model ContactNote {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  messageId String   @db.Uuid
+  authorId  String   @db.Uuid
+  body      String   @db.VarChar(5000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  message ContactMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  author  User           @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([messageId, createdAt])
+}
+
+// ───────────────────────────── Notifications (outbox) ─────────────────────────────
+
+enum NotificationChannel {
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+/// Written in the same transaction as the business event, sent afterwards and retried on failure.
+model Notification {
+  id               String              @id @default(uuid(7)) @db.Uuid
+  channel          NotificationChannel @default(EMAIL)
+  template         String              @db.VarChar(80)
+  recipient        String              @db.VarChar(190)
+  payload          Json
+  status           NotificationStatus  @default(PENDING)
+  attempts         Int                 @default(0)
+  lastError        String?             @db.VarChar(1000)
+  /// Deduplication, e.g. "reservation-confirmed:<reservationId>".
+  dedupeKey        String?             @unique @db.VarChar(160)
+  userId           String?             @db.Uuid
+  reservationId    String?             @db.Uuid
+  contactMessageId String?             @db.Uuid
+  nextAttemptAt    DateTime            @default(now()) @db.Timestamptz(3)
+  sentAt           DateTime?           @db.Timestamptz(3)
+  createdAt        DateTime            @default(now()) @db.Timestamptz(3)
+
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reservation    Reservation?    @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  contactMessage ContactMessage? @relation(fields: [contactMessageId], references: [id], onDelete: SetNull)
+
+  @@index([status, nextAttemptAt])
+}
+
+// ───────────────────────────── Administration ─────────────────────────────
+
+enum ActorType {
+  USER
+  SYSTEM
+  WEBHOOK
+}
+
+/// Append-only trail of sensitive actions and reservation/payment state changes.
+model AuditLog {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  actorType  ActorType
+  actorId    String?   @db.Uuid
+  /// e.g. "reservation.cancel", "price.update", "role.permissions.update".
+  action     String    @db.VarChar(80)
+  entityType String    @db.VarChar(40)
+  entityId   String?   @db.VarChar(64)
+  /// Before/after diff or context. Never secrets, never card data.
+  metadata   Json?
+  ipHash     String?   @db.Char(64)
+  userAgent  String?   @db.VarChar(255)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt])
+}
+
+/// Global settings edited in the back office (key → JSON validated by Zod in code).
+model AppSetting {
+  key         String   @id @db.VarChar(80)
+  value       Json
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+/// Fixed-window counters for rate limiting on serverless (no in-memory state on Vercel).
+model RateLimitBucket {
+  key         String   @db.VarChar(160)
+  windowStart DateTime @db.Timestamptz(3)
+  count       Int      @default(0)
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+}

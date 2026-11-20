@@ -1,0 +1,96 @@
+/*
+ * Tailwind v4 theme generated FROM the AlterPark design system — never the other way around.
+ *
+ * Every default Tailwind scale is reset (`--*: initial`), so utilities exist only for values the
+ * design system defines: no off-palette colour, no arbitrary spacing step, no foreign radius.
+ * Values are references to the design-system variables (tokens.css), never copies.
+ *
+ * `inline` makes utilities read the design-system variable directly
+ * (e.g. `rounded-md` → `border-radius: var(--radius-md)`), and `reference` stops Tailwind from
+ * emitting its own copies of these variables: several names (`--radius-*`, `--shadow-*`,
+ * `--font-sans`) are identical to the design system's and would otherwise become
+ * self-references (`--radius-md: var(--radius-md)`).
+ */
+@theme inline reference {
+  --*: initial;
+
+  /* Colours: `bg-surface`, `text-primary`, `border-border`, `text-error`… */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-overlay-hero: var(--overlay-hero);
+  --color-overlay-modal: var(--overlay-modal);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-numeral-ghost: var(--numeral-ghost);
+  --color-border: var(--border);
+  --color-border-divider: var(--border-divider);
+  --color-focus: var(--focus);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-error: var(--error);
+  --color-error-soft: var(--error-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  /* `secondary` is reserved for the logo by the design system: intentionally not exposed. */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* Spacing: space-N = N × 4 px, so `p-4` = space-4 = 16 px. Only the system's steps exist. */
+  --spacing-0: 0px;
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --spacing-10: var(--space-10);
+  --spacing-12: var(--space-12);
+  --spacing-16: var(--space-16);
+  --spacing-20: var(--space-20);
+  --spacing-24: var(--space-24);
+  --spacing-30: var(--space-30);
+  --spacing-40: var(--space-40);
+
+  /* Containers: `w-page` (90 % of the viewport), `max-w-site` (1666 px), `max-w-nav`, `max-w-text`, `max-w-col`. */
+  --container-page: var(--container-width);
+  --container-site: var(--container-max);
+  --container-nav: var(--container-nav);
+  --container-text: var(--container-text);
+  --container-col: var(--container-col);
+
+  /* Breakpoints (mobile-first): sm 576, md 768, lg 1024, xl 1280, xxl 1920. Literal values are
+     required here (media queries cannot read custom properties) and mirror bp-* in tokens.json;
+     a unit test guards the equality. */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-xxl: 1920px;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-photo: var(--shadow-photo);
+  --shadow-tab: var(--shadow-tab);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-focus: var(--shadow-focus);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+
+  --ease-standard: var(--ease-standard);
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--ease-standard);
+}

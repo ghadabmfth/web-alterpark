@@ -1,3 +1,0 @@
-/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
-.ap-choices { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
-.ap-choices legend { padding: 0; margin-bottom: var(--space-2); font: 700 16px/24px var(--font-sans); }

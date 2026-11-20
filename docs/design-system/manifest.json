@@ -1,0 +1,524 @@
+{
+  "manifestVersion": 3,
+  "name": "AlterPark",
+  "namespace": "AlterPark",
+  "files": [
+    "analyse.md",
+    "architecture.md",
+    "assets/Icons/README.md",
+    "assets/Logos/README.md",
+    "assets/Partenaires/README.md",
+    "assets/Photos/README.md",
+    "components/Accordion/README.md",
+    "components/Alert/README.md",
+    "components/AppShowcase/README.md",
+    "components/Banner/README.md",
+    "components/BookingBar/README.md",
+    "components/Breadcrumbs/README.md",
+    "components/Button/README.md",
+    "components/Checkbox/README.md",
+    "components/FeatureList/README.md",
+    "components/Footer/README.md",
+    "components/Header/README.md",
+    "components/Hero/README.md",
+    "components/IconButton/README.md",
+    "components/MediaSection/README.md",
+    "components/Modal/README.md",
+    "components/RadioGroup/README.md",
+    "components/RatingBadge/README.md",
+    "components/ReviewCard/README.md",
+    "components/ReviewCarousel/README.md",
+    "components/SectionHeading/README.md",
+    "components/Select/README.md",
+    "components/SocialRail/README.md",
+    "components/Stars/README.md",
+    "components/Steps/README.md",
+    "components/StoreBadges/README.md",
+    "components/TextField/README.md",
+    "components/Toggle/README.md",
+    "components/VideoModal/README.md",
+    "components/bundle.css",
+    "components/bundle.js",
+    "components/index.d.ts",
+    "fonts/Crossroads-Regular.ttf",
+    "fonts/Montserrat-300.woff2",
+    "fonts/Montserrat-400.woff2",
+    "fonts/Montserrat-700.woff2",
+    "fonts/Montserrat-800.woff2",
+    "responsive.md",
+    "tokens.css"
+  ],
+  "libraries": [
+    {
+      "name": "react",
+      "version": "18.3.1",
+      "global": "React"
+    },
+    {
+      "name": "react-dom",
+      "version": "18.3.1",
+      "global": "ReactDOM"
+    }
+  ],
+  "components": [
+    {
+      "name": "Button",
+      "group": "Actions",
+      "summary": "Bouton d'action en pilule, orange par défaut, pour l'action principale d'une section (réserver, découvrir, en savoir plus)."
+    },
+    {
+      "name": "IconButton",
+      "group": "Actions",
+      "summary": "Bouton sans libellé visible : flèches du carrousel et bouton de lecture vidéo."
+    },
+    {
+      "name": "Header",
+      "group": "Navigation",
+      "summary": "En-tête du site : filet orange de 10 px, navigation en deux moitiés autour du logo centré ; burger et panneau en mobile."
+    },
+    {
+      "name": "Breadcrumbs",
+      "group": "Navigation",
+      "summary": "Fil d'Ariane des pages intérieures."
+    },
+    {
+      "name": "SocialRail",
+      "group": "Navigation",
+      "summary": "Rail d'onglets fixé au bord droit : Facebook, espace client, YouTube."
+    },
+    {
+      "name": "Footer",
+      "group": "Navigation",
+      "summary": "Pied de page : logo, droits, mentions légales, adresse, contact, filet orange de 10 px."
+    },
+    {
+      "name": "Hero",
+      "group": "Patterns",
+      "summary": "Ouverture de l'accueil : photo plein cadre voilée, H1 en Crossroads, introduction, étapes et bouton."
+    },
+    {
+      "name": "SectionHeading",
+      "group": "Contenu",
+      "summary": "Titre de section en Crossroads blanc, chiffres et ponctuation en orange, avec sous-titre et paragraphe facultatifs."
+    },
+    {
+      "name": "Steps",
+      "group": "Contenu",
+      "summary": "Suite d'étapes numérotées : pictogramme orange, grand chiffre fantôme, titre en Crossroads, légende, filets pointillés."
+    },
+    {
+      "name": "MediaSection",
+      "group": "Patterns",
+      "summary": "Section deux colonnes : titre, texte et bouton d'un côté, visuel de l'autre."
+    },
+    {
+      "name": "Banner",
+      "group": "Patterns",
+      "summary": "Bandeau photo pleine largeur fondu dans le fond, suivi d'un contenu centré (logo partenaire, titre, texte, bouton)."
+    },
+    {
+      "name": "RatingBadge",
+      "group": "Contenu",
+      "summary": "Badge de note Google en forme de bulle : pilule blanche avec une queue en bas à gauche, logo dans un cercle, note (« 4,4/5 »), étoiles remplies au dixième près…"
+    },
+    {
+      "name": "Stars",
+      "group": "Contenu",
+      "summary": "Étoiles de notation jaunes accent."
+    },
+    {
+      "name": "ReviewCard",
+      "group": "Contenu",
+      "summary": "Carte d'avis client : guillemet orange, étoiles, extrait sur 5 lignes, puis auteur (avatar, nom, date) et logo de la source."
+    },
+    {
+      "name": "ReviewCarousel",
+      "group": "Contenu",
+      "summary": "Carrousel d'avis : défilement tactile avec accrochage, flèches rondes, points de pagination et défilement automatique."
+    },
+    {
+      "name": "StoreBadges",
+      "group": "Contenu",
+      "summary": "Badges officiels Google Play et App Store."
+    },
+    {
+      "name": "Accordion",
+      "group": "Contenu",
+      "summary": "Liste de questions dépliables, séparées par le filet pointillé de la marque."
+    },
+    {
+      "name": "TextField",
+      "group": "Formulaires",
+      "summary": "Champ de saisie avec libellé, aide et message : texte, e-mail, mot de passe, téléphone, zone de texte."
+    },
+    {
+      "name": "Select",
+      "group": "Formulaires",
+      "summary": "Liste déroulante native stylée."
+    },
+    {
+      "name": "Checkbox",
+      "group": "Formulaires",
+      "summary": "Case à cocher."
+    },
+    {
+      "name": "RadioGroup",
+      "group": "Formulaires",
+      "summary": "Choix unique dans un fieldset."
+    },
+    {
+      "name": "Toggle",
+      "group": "Formulaires",
+      "summary": "Interrupteur pour un réglage activé immédiatement."
+    },
+    {
+      "name": "Alert",
+      "group": "Feedback",
+      "summary": "Message de retour : succès, information, avertissement, erreur."
+    },
+    {
+      "name": "Modal",
+      "group": "Feedback",
+      "summary": "Fenêtre de dialogue au-dessus d'un voile."
+    },
+    {
+      "name": "AppShowcase",
+      "group": "Patterns",
+      "summary": "Visuel animé de l'application mobile de réservation ALTERPARK : deux téléphones dessinés en HTML/CSS/SVG, sans image."
+    },
+    {
+      "name": "FeatureList",
+      "group": "Contenu",
+      "summary": "Liste d'atouts : pictogramme orange dans un carré teinté, titre en gras, texte de 16 px, sur une carte surface-raised."
+    },
+    {
+      "name": "BookingBar",
+      "group": "Patterns",
+      "summary": "Barre de réservation orange : choix du parking par un interrupteur à deux positions (ALTERPARK ou ALTERECO, avec prix « dès »), départ et retour (date et heure…"
+    },
+    {
+      "name": "VideoModal",
+      "group": "Feedback",
+      "summary": "Fenêtre plein écran qui lit une vidéo YouTube : voile sombre flouté, titre en Crossroads, bouton fermer rond, lecteur 16:9 aux coins arrondis."
+    },
+    {
+      "name": "ServiceCard"
+    },
+    {
+      "name": "Highlights"
+    }
+  ],
+  "assetGroups": [
+    {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "alterpark-logo.svg"
+      ],
+      "files": [
+        {
+          "path": "assets/Logos/alterpark-logo.svg",
+          "id": "767f3936d60e69df0306ed6bbfcf2d9d"
+        }
+      ]
+    },
+    {
+      "name": "Icons",
+      "tile": "s",
+      "order": [
+        "step-reserver-en-ligne.svg",
+        "step-deposer-vehicule.svg",
+        "step-navette-aeroport.svg",
+        "step-vacances.svg",
+        "fidelite-cumulez.svg",
+        "fidelite-capitalisez.svg",
+        "fidelite-utilisez.svg",
+        "arrow-small.svg",
+        "arrow-right.svg",
+        "arrow-left.svg",
+        "play-button.svg",
+        "social-facebook.svg",
+        "social-login.svg",
+        "social-youtube.svg",
+        "stars-5.svg"
+      ],
+      "files": [
+        {
+          "path": "assets/Icons/step-reserver-en-ligne.svg",
+          "id": "bf986bf12120ebe7d4bd653dc9ed3efd"
+        },
+        {
+          "path": "assets/Icons/step-deposer-vehicule.svg",
+          "id": "4ca8eaef98fbfcfe7bda02e616885c92"
+        },
+        {
+          "path": "assets/Icons/step-navette-aeroport.svg",
+          "id": "f780a6c9729a62c5804b07933742d9e8"
+        },
+        {
+          "path": "assets/Icons/step-vacances.svg",
+          "id": "5ffd3c9c541d35a717aeffc11733887a"
+        },
+        {
+          "path": "assets/Icons/fidelite-cumulez.svg",
+          "id": "eeb72ec9646c2faec103461386b1a247"
+        },
+        {
+          "path": "assets/Icons/fidelite-capitalisez.svg",
+          "id": "6745dd9e7511ec4f2ea0787a374150cb"
+        },
+        {
+          "path": "assets/Icons/fidelite-utilisez.svg",
+          "id": "01294299d06cb4b2977547aad5aa1658"
+        },
+        {
+          "path": "assets/Icons/arrow-small.svg",
+          "id": "5f8435c80da03f67732c369dab46eace"
+        },
+        {
+          "path": "assets/Icons/arrow-right.svg",
+          "id": "bba4360503197da29928a457a4b046d3"
+        },
+        {
+          "path": "assets/Icons/arrow-left.svg",
+          "id": "cce8b41e1dc9283d94223b78745a208c"
+        },
+        {
+          "path": "assets/Icons/play-button.svg",
+          "id": "96661400de97271f1cb52f5e709b708a"
+        },
+        {
+          "path": "assets/Icons/social-facebook.svg",
+          "id": "8d0f67cbe2a05a4ec8211291b825ab25"
+        },
+        {
+          "path": "assets/Icons/social-login.svg",
+          "id": "c4a8163a3940bcd973825bbbc2504a5c"
+        },
+        {
+          "path": "assets/Icons/social-youtube.svg",
+          "id": "ab10cd45a5046921e9fd08603222c836"
+        },
+        {
+          "path": "assets/Icons/stars-5.svg",
+          "id": "8af5b927d501be012d5214f444e73196"
+        }
+      ]
+    },
+    {
+      "name": "Photos",
+      "tile": "l",
+      "order": [
+        "hero-parking-aerien.jpg",
+        "entree-parking.jpg",
+        "ombrieres-photovoltaiques.jpg",
+        "rallye-du-coeur-bandeau.jpg",
+        "application-mobile.png"
+      ],
+      "files": [
+        {
+          "path": "assets/Photos/hero-parking-aerien.jpg",
+          "id": "6159107c0237792d1ed219946837d91c"
+        },
+        {
+          "path": "assets/Photos/entree-parking.jpg",
+          "id": "3d06980e061895c9fd0012a113dd18f9"
+        },
+        {
+          "path": "assets/Photos/ombrieres-photovoltaiques.jpg",
+          "id": "b4992b1b499fd9863459d5732d99160e"
+        },
+        {
+          "path": "assets/Photos/rallye-du-coeur-bandeau.jpg",
+          "id": "4247147c396e6ff6aa82a65790d100a4"
+        },
+        {
+          "path": "assets/Photos/application-mobile.png",
+          "id": "cc2f070d7e7b2c93087dd240b940d378"
+        }
+      ]
+    },
+    {
+      "name": "Partenaires",
+      "order": [
+        "rallye-du-coeur-logo.png",
+        "badge-google-play.png",
+        "badge-app-store.png",
+        "google-g.png"
+      ],
+      "files": [
+        {
+          "path": "assets/Partenaires/rallye-du-coeur-logo.png",
+          "id": "32dba7909fc6173f8712bce92dac676a"
+        },
+        {
+          "path": "assets/Partenaires/badge-google-play.png",
+          "id": "2bb86975a8365ae63c2e480c2da15489"
+        },
+        {
+          "path": "assets/Partenaires/badge-app-store.png",
+          "id": "b23188f304504bc2755bc235b83ee268"
+        },
+        {
+          "path": "assets/Partenaires/google-g.png",
+          "id": "19e4b47768784dcc4cdb2772082ee029"
+        }
+      ]
+    }
+  ],
+  "storage": {
+    "files": {
+      "assets/Icons/arrow-left.svg": {
+        "store": "blob",
+        "id": "cce8b41e1dc9283d94223b78745a208c",
+        "bytes": 786,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/arrow-right.svg": {
+        "store": "blob",
+        "id": "bba4360503197da29928a457a4b046d3",
+        "bytes": 722,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/arrow-small.svg": {
+        "store": "blob",
+        "id": "5f8435c80da03f67732c369dab46eace",
+        "bytes": 616,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/fidelite-capitalisez.svg": {
+        "store": "blob",
+        "id": "6745dd9e7511ec4f2ea0787a374150cb",
+        "bytes": 6715,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/fidelite-cumulez.svg": {
+        "store": "blob",
+        "id": "eeb72ec9646c2faec103461386b1a247",
+        "bytes": 2794,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/fidelite-utilisez.svg": {
+        "store": "blob",
+        "id": "01294299d06cb4b2977547aad5aa1658",
+        "bytes": 5228,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/play-button.svg": {
+        "store": "blob",
+        "id": "96661400de97271f1cb52f5e709b708a",
+        "bytes": 843,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/social-facebook.svg": {
+        "store": "blob",
+        "id": "8d0f67cbe2a05a4ec8211291b825ab25",
+        "bytes": 499,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/social-login.svg": {
+        "store": "blob",
+        "id": "c4a8163a3940bcd973825bbbc2504a5c",
+        "bytes": 995,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/social-youtube.svg": {
+        "store": "blob",
+        "id": "ab10cd45a5046921e9fd08603222c836",
+        "bytes": 688,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/stars-5.svg": {
+        "store": "blob",
+        "id": "8af5b927d501be012d5214f444e73196",
+        "bytes": 3944,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/step-deposer-vehicule.svg": {
+        "store": "blob",
+        "id": "4ca8eaef98fbfcfe7bda02e616885c92",
+        "bytes": 3996,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/step-navette-aeroport.svg": {
+        "store": "blob",
+        "id": "f780a6c9729a62c5804b07933742d9e8",
+        "bytes": 6432,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/step-reserver-en-ligne.svg": {
+        "store": "blob",
+        "id": "bf986bf12120ebe7d4bd653dc9ed3efd",
+        "bytes": 3736,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/step-vacances.svg": {
+        "store": "blob",
+        "id": "5ffd3c9c541d35a717aeffc11733887a",
+        "bytes": 5181,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/alterpark-logo.svg": {
+        "store": "blob",
+        "id": "767f3936d60e69df0306ed6bbfcf2d9d",
+        "bytes": 102877,
+        "type": "image/svg+xml"
+      },
+      "assets/Partenaires/badge-app-store.png": {
+        "store": "blob",
+        "id": "b23188f304504bc2755bc235b83ee268",
+        "bytes": 11597,
+        "type": "image/png"
+      },
+      "assets/Partenaires/badge-google-play.png": {
+        "store": "blob",
+        "id": "2bb86975a8365ae63c2e480c2da15489",
+        "bytes": 16721,
+        "type": "image/png"
+      },
+      "assets/Partenaires/google-g.png": {
+        "store": "blob",
+        "id": "19e4b47768784dcc4cdb2772082ee029",
+        "bytes": 11226,
+        "type": "image/png"
+      },
+      "assets/Partenaires/rallye-du-coeur-logo.png": {
+        "store": "blob",
+        "id": "32dba7909fc6173f8712bce92dac676a",
+        "bytes": 18372,
+        "type": "image/png"
+      },
+      "assets/Photos/application-mobile.png": {
+        "store": "blob",
+        "id": "cc2f070d7e7b2c93087dd240b940d378",
+        "bytes": 950679,
+        "type": "image/png"
+      },
+      "assets/Photos/entree-parking.jpg": {
+        "store": "blob",
+        "id": "3d06980e061895c9fd0012a113dd18f9",
+        "bytes": 111951,
+        "type": "image/jpeg"
+      },
+      "assets/Photos/hero-parking-aerien.jpg": {
+        "store": "blob",
+        "id": "6159107c0237792d1ed219946837d91c",
+        "bytes": 314880,
+        "type": "image/jpeg"
+      },
+      "assets/Photos/ombrieres-photovoltaiques.jpg": {
+        "store": "blob",
+        "id": "b4992b1b499fd9863459d5732d99160e",
+        "bytes": 198991,
+        "type": "image/jpeg"
+      },
+      "assets/Photos/rallye-du-coeur-bandeau.jpg": {
+        "store": "blob",
+        "id": "4247147c396e6ff6aa82a65790d100a4",
+        "bytes": 209947,
+        "type": "image/jpeg"
+      }
+    },
+    "blobBytesUsed": 1990416
+  }
+}

@@ -1,9 +1,0 @@
-/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
-/* ---------- Base ---------- */
-body { margin: 0; background: var(--surface); color: var(--text-primary); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-.ap-root, .ap-root * { box-sizing: border-box; }
-.ap-stack { display: flex; flex-direction: column; gap: var(--space-6); padding: var(--space-6); }
-.ap-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); padding: var(--space-6); }
-.ap-container { width: var(--container-width); max-width: var(--container-max); margin-inline: auto; }
-.ap-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.ap-focusable:focus-visible, .ap-root a:focus-visible, .ap-root button:focus-visible { outline: none; box-shadow: var(--shadow-focus); }

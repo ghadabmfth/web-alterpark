@@ -1,0 +1,12 @@
+<!-- @dsCard group="Formulaires" height=230 subtitle="Proposé" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Select — aperçu</title></head>
+<body>
+<div id="root" class="ap-stack" style="max-width:520px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(A.Select,{label:'Formule',placeholder:'Choisir une formule',options:['Standard (navette)','ALTERECO (sans navette)','P1 Couvert']}),h(A.Select,{label:'Nombre de passagers',options:['1','2','3','4'],error:'Au-delà de 2 personnes, déposez vos passagers à l’aéroport avant votre arrivée.'})));
+</script>
+</body>
+</html>

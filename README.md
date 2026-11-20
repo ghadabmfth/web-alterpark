@@ -1,36 +1,56 @@
 # ALTERPARK
 
-Site de réservation de parkings (Roissy, Nantes, Marseille) en architecture **Next.js + WordPress headless + Vercel**.
+Airport parking reservation and management platform for Nantes, Marseille and Paris-Roissy —
+public website, online booking with secure payment, customer area and administration back office.
+Developed by OuiDev.
 
-| Dossier | Contenu | Déploiement |
-|---|---|---|
-| `apps/web` | Frontend Next.js 16 (App Router, React 19, TypeScript) | Vercel (répertoire racine `apps/web`) |
-| `packages/design-system` | Tokens, polices et arbitrages du design system AlterPark | Consommé par `apps/web` |
-| `wordpress/themes/alterpark-headless` | Thème d'administration headless, API `alterpark/v1` | Hébergement WordPress |
-| `wordpress/plugins/alterpark-booking` | Plugin autonome de réservation et paiement Stripe, API `apbs/v1` | Hébergement WordPress (ZIP) |
-| `wordpress/site` | Installation WordPress complète : cœur figé (Composer), `wp-config.php` sans secret, `.htaccess` | `npm run wordpress:package` → `dist/alterpark-wordpress-*.zip` |
-| `docs` | Architecture, décisions, installation, API | — |
+**Status: Phase 1 complete (audit and foundation), awaiting approval.** The site currently shows a
+holding page; no booking feature exists yet. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-## Démarrage local
+## Stack
 
-Prérequis : Node 22, npm 11, Docker (pour WordPress local), PHP 8.1+ et Composer.
+Next.js 16 (App Router, React 19, TypeScript strict) · Tailwind CSS 4 restricted to the AlterPark
+design system · PostgreSQL + Prisma 7 · Auth.js · Zod · React Hook Form · Stripe · Vitest ·
+Playwright · Vercel. Exact versions in `package.json`.
+
+## Getting started
+
+Requirements: Node.js 22 (`.nvmrc`), npm 11, PostgreSQL 16 from Phase 4.
 
 ```bash
+npm install -g npm@11.6.2
 npm ci
-cp apps/web/.env.example apps/web/.env.local
-npm run wp:start        # WordPress sur http://localhost:8888 (admin / password)
-npm run dev             # Next.js sur http://localhost:3000
+cp .env.example .env.local
+npm run dev            # http://localhost:3000
 ```
 
-La page d'accueil affiche, en phase 1, l'état de la liaison signée Next.js → WordPress.
+| Script | Purpose |
+|---|---|
+| `npm run dev` / `build` / `start` | Next.js |
+| `npm run lint` · `npm run typecheck` · `npm test` | Quality checks (also run in CI) |
+| `npm run db:validate` · `npm run db:format` | Prisma schema |
+| `npm run check` | All checks except the build |
 
-Voir `docs/INSTALL.md` pour la production et `docs/ARCHITECTURE.md` pour la conception.
+Fonts: Montserrat is included. **Crossroads (headings) is not**: its licence is "personal use"
+only. After buying a commercial web licence, place the file at `public/fonts/Crossroads-Regular.ttf`
+(git-ignored). Until then headings render in Montserrat.
 
-## Avancement
+## Documentation
 
-- [x] Phase 1 — Audit et ossature (monorepo, CI, liaison signée, schéma de base de données)
-- [ ] Phase 2 — Portage du design system et composants de réservation
-- [ ] Phases 3-4 — Thème et administration graphique
-- [ ] Phases 5-6 — Plugin de réservation, Stripe, API
-- [ ] Phases 7-8 — Pages Next.js et intégration
-- [ ] Phases 9-11 — Tests, performances, mise en production
+| Document | Content |
+|---|---|
+| [`docs/AUDIT.md`](docs/AUDIT.md) | Phase 1 audit: design system, previous project, open questions |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, folder structure, workflows, rendering, deployment |
+| [`docs/DATA-MODEL.md`](docs/DATA-MODEL.md) | Entities, relationships, constraints, status machines |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Authentication, authorisation, payments, abuse, secrets |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Architecture decision records |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phases and exit criteria |
+| [`src/design-system/README.md`](src/design-system/README.md) | How to use the design-system layer |
+| [`docs/design-system/`](docs/design-system/README.md) | Supplied design system: charter, analysis, responsive rules, component sheets, reference bundle |
+
+## Repository rules
+
+- Branches: `main` (production), `develop` (integration), `feature/*`, `fix/*`; pull requests with green CI.
+- Never commit secrets or `.env` files; every variable is documented in `.env.example`.
+- The design system is the single source of truth for the interface: no colour, spacing, radius or
+  font outside its tokens (enforced by `src/design-system/design-system.test.ts`).

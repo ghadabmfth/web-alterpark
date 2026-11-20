@@ -1,0 +1,13 @@
+<!-- @dsCard group="Navigation" height=420 -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Footer — aperçu</title></head>
+<body>
+<div id="desk"></div><p style="margin:24px 16px 8px;font:700 14px/20px var(--font-sans);color:var(--text-secondary)">Mobile (375 px)</p><div id="mob" style="width:375px;margin-left:16px;outline:1px dashed var(--border)"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('desk')).render(h(A.Footer,{year:2025}));
+  ReactDOM.createRoot(document.getElementById('mob')).render(h(A.Footer,{year:2025}));
+</script>
+</body>
+</html>

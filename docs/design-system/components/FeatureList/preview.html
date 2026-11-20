@@ -1,0 +1,16 @@
+<!-- @dsCard group="Contenu" height=300 subtitle="Atouts d'un service : pictogramme, titre, texte — 2 colonnes dès 520 px" -->
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>FeatureList — aperçu</title></head>
+<body>
+<div id="root" style="max-width:760px;padding:24px"></div>
+<script>
+  var A = window.AlterPark, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.FeatureList, { items: [
+    { icon: 'bolt', title: 'Réservation express', text: 'Dates, véhicule, paiement : votre place est réservée en 4 étapes.' },
+    { icon: 'ticket', title: 'Billet dans votre poche', text: 'Présentez votre billet à l’accueil, sans rien imprimer.' },
+    { icon: 'gift', title: 'Fidélité intégrée', text: 'Suivez vos points et appliquez vos remises au paiement.' },
+    { icon: 'pin', title: 'Infos pratiques', text: 'Adresse, plan d’accès et contact de l’accueil à portée de main.' }] }));
+</script>
+</body>
+</html>

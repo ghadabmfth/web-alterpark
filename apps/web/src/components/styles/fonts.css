@@ -1,7 +1,0 @@
-/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
-/* ---------- Crossroads : chiffres ----------
-   La version « personal use » remplace les chiffres 0–9 par un filigrane. Comme dans la maquette
-   (« 20 » de « 20 mars » en Montserrat ExtraBold), les chiffres de la famille Crossroads sont servis
-   par Montserrat 800, ainsi que la ponctuation absente de la police (! ? , . : - & ( ) /).
-   À retirer avec une licence complète de la police. */
-@font-face { font-family: Crossroads; src: url("/fonts/Montserrat-800.woff2") format("woff2"); font-weight: 400; font-style: normal; unicode-range: U+0021, U+0026, U+0028-0029, U+002C-002F, U+0030-003A, U+003F; }

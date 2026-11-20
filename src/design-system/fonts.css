@@ -1,0 +1,13 @@
+/*
+ * The licensed Crossroads face has no punctuation and watermarks its digits. The design system
+ * (bundle.css) serves digits and ! ? , . : - & ( ) / from Montserrat 800 under the Crossroads
+ * family, exactly like the Figma file. Kept verbatim from the reference bundle.
+ */
+@font-face {
+  font-family: Crossroads;
+  src: url("/fonts/Montserrat-800.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0021, U+0026, U+0028-0029, U+002C-002F, U+0030-003A, U+003F;
+}

@@ -1,7 +1,0 @@
-/* Déplacé tel quel depuis packages/design-system/source/bundle.css. */
-/* ---------- Stars ---------- */
-.ap-stars { display: inline-flex; gap: 3px; color: var(--accent); }
-.ap-stars svg { width: var(--icon-xs); height: var(--icon-xs); }
-.ap-stars--md { gap: var(--space-2); }
-.ap-stars--md svg { width: 20px; height: var(--icon-sm); }
-.ap-stars .is-off { color: var(--surface-raised); }
