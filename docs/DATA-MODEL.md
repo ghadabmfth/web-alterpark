@@ -1,8 +1,8 @@
 # Data model
 
-Status: **proposal, pending approval.** Source: [`prisma/schema.prisma`](../prisma/schema.prisma)
+Status: **approved 20/11/2026.** Source: [`prisma/schema.prisma`](../prisma/schema.prisma)
 (valid, and applied successfully to a disposable PostgreSQL 16 database: 19 tables, 16 enums,
-58 indexes, 27 foreign keys). No migration is committed before approval.
+58 indexes, 27 foreign keys). The first migration is generated in Phase 4.
 
 ## Relationships
 

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **proposed in Phase 1, pending approval.** Only the parts marked ✓ exist in the code today.
+Status: **approved 20/11/2026.** Only the parts marked ✓ exist in the code today.
 
 ## 1. Overview
 
