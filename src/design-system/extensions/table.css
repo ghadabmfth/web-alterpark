@@ -1,0 +1,16 @@
+/* Proposé (extension). Table: rows separated by the system's dotted rule (3 px dash / 8 px period,
+   as Accordion), headers like field help text, hover on `surface-raised`. The wrapper scrolls
+   horizontally on small screens and is keyboard-focusable. */
+.ap-table-wrap { overflow-x: auto; border-radius: var(--radius-md); background: var(--surface-sunken); }
+.ap-table-wrap:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.ap-table { width: 100%; border-collapse: collapse; font: 400 16px/24px var(--font-sans); color: var(--text-primary); }
+.ap-table caption { padding: var(--space-4) var(--space-4) 0; text-align: left; font: 700 18px/26px var(--font-sans); }
+.ap-table th { padding: var(--space-3) var(--space-4); text-align: left; font: 700 14px/20px var(--font-sans); color: var(--text-secondary); white-space: nowrap; }
+.ap-table td { padding: var(--space-3) var(--space-4); vertical-align: middle; }
+.ap-table thead tr, .ap-table tbody tr { background-image: linear-gradient(to right, var(--border-divider) 3px, transparent 3px); background-size: 8px 1px; background-repeat: repeat-x; background-position: bottom; }
+.ap-table tbody tr:last-child { background-image: none; }
+.ap-table tbody tr:hover { background-color: var(--surface-raised); }
+.ap-table .is-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ap-table .is-nowrap { white-space: nowrap; }
+.ap-table a { color: var(--primary); font-weight: 700; text-decoration: none; }
+.ap-table a:hover { color: var(--primary-hover); text-decoration: underline; text-underline-offset: 4px; }

@@ -8,7 +8,7 @@
    * Accessibility. The system sets white text on orange buttons (2.32:1, below WCAG AA) at the
    * client's request, and itself names a readable alternative. We use #313131 — the system's own
    * `surface` value — which reaches 5.6:1 without leaving the palette.
-   * PENDING CLIENT CONFIRMATION: to follow the system literally, delete this declaration.
+   * Approved 20/11/2026 (ADR-005). To follow the system literally, delete this declaration.
    */
   --on-primary: #313131;
 

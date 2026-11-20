@@ -1,0 +1,48 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 628–675). Do not edit: replace with a new delivery. */
+/* ---------- Forms ---------- */
+.ap-field { display: flex; flex-direction: column; gap: var(--space-2); max-width: 480px; }
+.ap-field__label { font: 700 16px/24px var(--font-sans); color: var(--text-primary); }
+.ap-field__req { color: var(--primary); margin-left: 2px; }
+.ap-field__help { margin: 0; font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+.ap-field__msg { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; font: 400 16px/24px var(--font-sans); }
+.ap-field__msg svg { flex: none; width: 18px; height: 18px; margin-top: 3px; }
+.ap-field__msg--error { color: var(--error); }
+.ap-field__msg--success { color: var(--success); }
+.ap-input-wrap { position: relative; display: flex; }
+.ap-input { width: 100%; min-height: 56px; padding: 0 var(--space-4); border: var(--border-2) solid var(--border); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text-primary);
+  font: 400 16px/24px var(--font-sans); transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard); appearance: none; }
+textarea.ap-input { min-height: 140px; padding: var(--space-4); resize: vertical; line-height: 28px; }
+.ap-input::placeholder { color: var(--text-muted); }
+.ap-input:hover, .ap-input.is-hover { border-color: var(--text-secondary); }
+.ap-input:focus, .ap-input.is-focus { outline: none; border-color: var(--primary); box-shadow: var(--shadow-focus); }
+.ap-input[aria-invalid="true"] { border-color: var(--error); }
+.ap-input.is-valid { border-color: var(--success); }
+.ap-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.ap-input--has-action { padding-right: 112px; }
+.ap-input-wrap__action { position: absolute; right: var(--space-2); top: 50%; transform: translateY(-50%); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-sm); background: none; color: var(--primary); font: 700 16px/24px var(--font-sans); cursor: pointer; }
+.ap-input-wrap__action:hover { color: var(--primary-hover); }
+select.ap-input { padding-right: 48px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f6921e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 20px; }
+select.ap-input option { background: var(--surface-raised); color: var(--text-primary); }
+.ap-choices { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
+.ap-choices legend { padding: 0; margin-bottom: var(--space-2); font: 700 16px/24px var(--font-sans); }
+.ap-choice { display: inline-flex; align-items: center; gap: var(--space-3); font: 400 16px/24px var(--font-sans); cursor: pointer; }
+.ap-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ap-choice__box { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: var(--border-2) solid var(--border); border-radius: 5px; background: var(--surface-raised); color: var(--surface);
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+.ap-choice__box svg { width: 16px; height: 16px; opacity: 0; }
+.ap-choice--radio .ap-choice__box { border-radius: 50%; }
+.ap-choice--radio .ap-choice__box::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); opacity: 0; }
+.ap-choice:hover .ap-choice__box { border-color: var(--text-secondary); }
+.ap-choice input:checked + .ap-choice__box { background: var(--primary); border-color: var(--primary); }
+.ap-choice input:checked + .ap-choice__box svg, .ap-choice--radio input:checked + .ap-choice__box::after { opacity: 1; }
+.ap-choice input:focus-visible + .ap-choice__box { box-shadow: var(--shadow-focus); }
+.ap-choice input[aria-invalid="true"] + .ap-choice__box { border-color: var(--error); }
+.ap-choice input:disabled + .ap-choice__box, .ap-choice input:disabled ~ span { opacity: 0.5; cursor: not-allowed; }
+.ap-toggle { display: inline-flex; align-items: center; gap: var(--space-3); font: 400 16px/24px var(--font-sans); cursor: pointer; }
+.ap-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ap-toggle__track { position: relative; flex: none; width: 52px; height: 30px; border: var(--border-2) solid var(--border); border-radius: var(--radius-pill); background: var(--surface-raised); transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast); }
+.ap-toggle__track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-secondary); transition: transform var(--duration-base) var(--ease-standard), background-color var(--duration-fast); }
+.ap-toggle input:checked + .ap-toggle__track { background: var(--primary); border-color: var(--primary); }
+.ap-toggle input:checked + .ap-toggle__track::after { transform: translateX(22px); background: var(--surface); }
+.ap-toggle input:focus-visible + .ap-toggle__track { box-shadow: var(--shadow-focus); }
+.ap-toggle input:disabled + .ap-toggle__track { opacity: 0.5; }

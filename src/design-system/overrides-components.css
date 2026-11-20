@@ -1,0 +1,18 @@
+/*
+ * Declared deviations from the supplied COMPONENT styles (loaded in the `components` layer, after
+ * the verbatim files, so they win at equal specificity). Each is justified and listed in
+ * docs/DECISIONS.md (ADR-005, extended 20/11/2026). Delete a rule to return to the supplied value.
+ *
+ * Same principle as ADR-005 (approved): the `primary` / white pair is 2.32:1,
+ * below WCAG AA; we stay inside the palette with `surface` / `on-primary`.
+ */
+
+/* BookingBar « Le plus demandé » pill: white on orange → on-primary (5.6:1). */
+.ap-bk__opt-badge { color: var(--on-primary); }
+
+/* ServiceCard badge and the selected service's "dès" price: orange on white → surface (12.6:1). */
+.ap-svc__badge { color: var(--surface); }
+.ap-bk__opt.is-on .ap-bk__opt-price b { color: var(--surface); }
+
+/* Eyebrow pill: orange on its 14 % orange tint is 4.37:1 → the system's lighter orange (≈ 5:1). */
+.ap-eyebrow { color: var(--primary-hover); }

@@ -4,7 +4,7 @@ Airport parking reservation and management platform for Nantes, Marseille and Pa
 public website, online booking with secure payment, customer area and administration back office.
 Developed by OuiDev.
 
-**Status: Phase 1 complete (audit and foundation), awaiting approval.** The site currently shows a
+**Status: Phases 1–2 complete (foundation, design-system components). Next: Phase 3, front-end pages.** The site currently shows a
 holding page; no booking feature exists yet. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
@@ -31,6 +31,9 @@ npm run dev            # http://localhost:3000
 | `npm run db:validate` · `npm run db:format` | Prisma schema |
 | `npm run check` | All checks except the build |
 
+Design-system gallery: `npm run dev`, then open http://localhost:3000/dev/design-system
+(and `/dev/design-system/shell` for the back-office layout).
+
 Fonts: Montserrat is included. **Crossroads (headings) is not**: its licence is "personal use"
 only. After buying a commercial web licence, place the file at `public/fonts/Crossroads-Regular.ttf`
 (git-ignored). Until then headings render in Montserrat.
@@ -46,6 +49,7 @@ only. After buying a commercial web licence, place the file at `public/fonts/Cro
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Architecture decision records |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phases and exit criteria |
 | [`src/design-system/README.md`](src/design-system/README.md) | How to use the design-system layer |
+| [`docs/design-system/extensions.md`](docs/design-system/extensions.md) | Extensions to the system and porting notes |
 | [`docs/design-system/`](docs/design-system/README.md) | Supplied design system: charter, analysis, responsive rules, component sheets, reference bundle |
 
 ## Repository rules

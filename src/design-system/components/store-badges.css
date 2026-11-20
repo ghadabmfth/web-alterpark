@@ -1,0 +1,6 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 611–616). Do not edit: replace with a new delivery. */
+/* ---------- StoreBadges ---------- */
+.ap-stores { display: flex; gap: var(--space-4); }
+.ap-stores a { display: inline-flex; flex: 0 1 223px; min-width: 0; border-radius: var(--radius-sm); transition: transform var(--duration-fast) var(--ease-standard); }
+.ap-stores a:hover { transform: translateY(-2px); }
+.ap-stores img { display: block; width: 100%; height: auto; }

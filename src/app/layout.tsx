@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { tokenValue } from "@/design-system/tokens";
+import { CircleFx } from "@/components/ui/CircleFx";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
@@ -18,7 +19,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr">
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        <CircleFx />
+        {children}
+      </body>
     </html>
   );
 }

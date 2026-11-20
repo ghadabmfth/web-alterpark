@@ -52,14 +52,14 @@ Every interactive component documents hover, focus-visible, active, disabled and
 
 | # | Finding | Impact | Handling |
 |---|---|---|---|
-| D1 | White text on orange buttons = **2.32:1**, below WCAG AA. The system keeps it at the client's request and names an alternative. | Accessibility | `overrides.css` uses #313131 (5.6:1, the system's own `surface`). **Client confirmation needed** (ADR-005). |
+| D1 | White text on orange buttons = **2.32:1**, below WCAG AA. The system keeps it at the client's request and names an alternative. | Accessibility | `overrides.css` uses #313131 (5.6:1, the system's own `surface`). Approved (ADR-005). |
 | D2 | Crossroads is licensed "personal use" only; it has no punctuation and watermarks digits. | Legal, launch blocker | Not committed (git-ignored). Titles fall back to Montserrat until a commercial web licence is bought (ADR-006). Digits/punctuation already come from Montserrat 800. |
 | D3 | Rating stars are Font Awesome 6 **Pro** paths. | Licence | Only the exported path is used; confirm OuiDev/client holds a Pro licence, or redraw. |
 | D4 | Nunito is referenced (2 caption styles) but not supplied. | Minor | Falls back to Montserrat; add the font (OFL) in Phase 2 if the badge needs it. |
 | D5 | `tokens.css` defines global classes with generic names (`.label`, `.button`, `.link`, `.nav`). | Style collisions | Loaded in the `base` cascade layer, below utilities; never used as component hooks. |
 | D6 | The generated `.display` / `.h2` classes have fixed sizes; the fluid sizes live in the bundle's `.ap-*` rules. `text-body` freezes 32 px line-height while the README says 26 → 32. | Responsive fidelity | `typography.css` ports the fluid rules verbatim; `overrides.css` aligns `text-body` with the README. |
 | D7 | The system covers only the **public home page**. No table, badge, tabs, pagination, dropdown menu, date picker, skeleton, toast, empty state, sidebar navigation or KPI tile; no back-office layout. | Phase 2 scope | Add as *proposed* components from existing tokens only, documented before wide use. The back office stays in the same dark theme — no new palette. |
-| D8 | `BookingBar` reveals the business model: **two services per site** — ALTERPARK (shuttle, "most requested") and ALTERECO (no shuttle, 15 min walk) — "from" prices €45 / €35 "to be verified", and the legacy promise « Paiement uniquement à votre retour ». | Business rules | Data model has Parking → Offer → Price. Pay-on-return conflicts with the mandatory online payment: **client decision needed** (Q1). |
+| D8 | `BookingBar` reveals the business model: **two services per site** — ALTERPARK (shuttle, "most requested") and ALTERECO (no shuttle, 15 min walk) — "from" prices €45 / €35 "to be verified", and the legacy promise « Paiement uniquement à votre retour ». | Business rules | Data model has Parking → Offer → Price. Pay-on-return conflicts with the mandatory online payment: resolved: online payment at booking (Q1). |
 | D9 | Reviewer photos are deliberately not supplied (personal data); `ReviewCard` shows initials. | — | Keep. Real Google reviews require the Places API or a curated, authorised list. |
 | D10 | Bundle targets React 18 globals (`window.AlterPark`). | Porting | Components are re-implemented in TSX (React 19, Server Components by default), keeping class names and props of `index.d.ts`. The bundle is a reference, never loaded. |
 
@@ -97,10 +97,11 @@ expected tokens, fonts and fluid sizes ✓.
 
 ## 3. Open questions for the client
 
-Every rule below is implemented as a **configurable value** with the stated default, so development
-is not blocked; the answers only change data.
+**Approved on 20/11/2026: the defaults below are the confirmed v1 rules.** Each remains a
+configurable value, so a later change only touches data. Site capacities, addresses and price grids
+(Q3, Q4) are still to be entered by the client in the back office before the sites go live.
 
-| # | Question | Default used |
+| # | Question | Decision (v1) |
 |---|---|---|
 | Q1 | Online payment at booking (requested) or pay on return (legacy, shown in the design system)? Or deposit? | Full online payment at booking |
 | Q2 | Can customers book without an account? | Account required; created inline in the booking flow (ADR-011) |

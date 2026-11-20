@@ -1,0 +1,7 @@
+/* Proposé (extension). EmptyState: centred message on `surface-raised` with the FeatureList pictogram square. */
+.ap-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-12) var(--space-6); border-radius: var(--radius-md); background: var(--surface-raised); text-align: center; }
+.ap-empty__ico { display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--radius-md); background: var(--surface-sunken); color: var(--primary); }
+.ap-empty__ico svg { width: 28px; height: 28px; }
+.ap-empty__title { margin: 0; font: 700 18px/26px var(--font-sans); color: var(--text-primary); }
+.ap-empty__text { margin: 0; max-width: var(--container-col); font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+.ap-empty__action { margin-top: var(--space-3); }

@@ -1,5 +1,5 @@
-// ALTERPARK — data model (PHASE 1 PROPOSAL, pending approval).
-// Explained in docs/DATA-MODEL.md. No migration is generated before approval (Phase 4).
+// ALTERPARK — data model (approved 20/11/2026).
+// Explained in docs/DATA-MODEL.md. First migration: Phase 4.
 //
 // Conventions
 // - Primary keys: UUID v7 (time-ordered, native `uuid` column).

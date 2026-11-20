@@ -1,0 +1,11 @@
+/* Proposé (extension). StatTile: KPI of the back office. Value in Montserrat 800 (the face the system
+   uses for digits), label like field labels, hint/trend in status colours with a word.
+   The value scales with the tile (container query), between the `fs-h4` and `fs-h2` sizes. */
+.ap-stat { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; padding: var(--space-6); border-radius: var(--radius-md); background: var(--surface-raised); }
+.ap-stat__label { margin: 0; font: 700 16px/24px var(--font-sans); color: var(--text-secondary); }
+.ap-stat__value { margin: 0; font: 800 clamp(var(--fs-h4), 13cqi, var(--fs-h2))/1.1 var(--font-sans); color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.ap-stat__hint { margin: 0; font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+.ap-stat__trend { font-weight: 700; }
+.ap-stat__trend--up { color: var(--success); }
+.ap-stat__trend--down { color: var(--error); }
+.ap-stat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
