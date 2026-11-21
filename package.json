@@ -19,7 +19,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
-    "test:integration": "vitest run --config vitest.integration.config.mts"
+    "test:integration": "vitest run --config vitest.integration.config.mts",
+    "build:vercel": "node scripts/migrate-on-deploy.mjs && next build"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.2",
