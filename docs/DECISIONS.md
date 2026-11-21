@@ -105,3 +105,20 @@ AppShell and the global CircleFx). Form fields forward `ref` and
 native props (React 19), ready for React Hook Form. Extensions follow the same rules and are
 documented before wide use. The gallery `/dev/design-system` is the review surface; it is absent
 from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
+
+## ADR-015 — Phase 3 front-end decisions
+
+- **Static catalogue until Phase 4.** `src/modules/parkings/queries.ts` exposes the read model the
+  Prisma repository will implement; pages never import the catalogue directly. Only facts supplied
+  by the client are published; sites without confirmed data are `DRAFT` and not bookable.
+- **No pretend features.** Forms validate fully on the client with the shared schemas; where the
+  server side does not exist yet (contact sending, authentication, pricing, payment), the screen
+  says so and nothing is recorded. The customer area and back office show a warning banner and
+  empty states naming the phase that wires them.
+- **Indexing is opt-in.** `SITE_INDEXABLE=true` (Production at launch only) opens robots.txt and
+  removes the global `noindex`; Preview deployments are never indexable.
+- **Rendering.** All 39 routes are static; the booking funnel reads its URL parameters after mount
+  instead of `useSearchParams` + Suspense, which removed a 0.36 layout shift. Images are served as
+  AVIF/WebP, full-bleed veiled photos at quality 60.
+- **Form behaviour.** A field in error is revalidated while typing (`form.subscribe`), so fixing it
+  never shifts the layout on blur — which had swallowed clicks on « Continuer ».

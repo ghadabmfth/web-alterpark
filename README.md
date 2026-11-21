@@ -4,8 +4,7 @@ Airport parking reservation and management platform for Nantes, Marseille and Pa
 public website, online booking with secure payment, customer area and administration back office.
 Developed by OuiDev.
 
-**Status: Phases 1–2 complete (foundation, design-system components). Next: Phase 3, front-end pages.** The site currently shows a
-holding page; no booking feature exists yet. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status: Phases 1–3 complete (foundation, design system, front-end pages). Next: Phase 4, database, authentication and permissions.** Pages are in place; bookings, accounts and payments are wired in Phases 4–6 (each screen says so). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
 
