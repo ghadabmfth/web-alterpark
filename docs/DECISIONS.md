@@ -122,3 +122,20 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
   AVIF/WebP, full-bleed veiled photos at quality 60.
 - **Form behaviour.** A field in error is revalidated while typing (`form.subscribe`), so fixing it
   never shifts the layout on blur — which had swallowed clicks on « Continuer ».
+
+## ADR-016 — Phase 4 implementation choices
+
+- **Session revocation.** The JWT holds only the user id and `sessionVersion`; the DAL reloads the
+  user on every request and compares versions. Password change/reset, role change or disabling an
+  account revoke every session at once, which a plain JWT cannot do.
+- **Cache Components and auth.** Protected layouts keep a static shell; the session is read by
+  guards rendered inside `<Suspense>` (Next.js guide). Every Server Action re-checks on its own.
+  Customers get 404 on `/admin`; staff without a permission see « Accès refusé ».
+- **Rate limiting inside `authorize`.** Found while reviewing: Auth.js exposes
+  `/api/auth/callback/credentials`, which bypassed limits enforced only in the login action.
+- **Non-destructive database tooling.** Deployments and tests use `prisma migrate deploy` (never
+  `reset`); integration tests use unique data and a database whose name must end in `_test`.
+- **All sites DRAFT** (rule Q3) until capacities are known; the public site shows the information
+  and says reservations open soon. The static catalogue is the seed source and the no-database
+  fallback only.
+- **Cron daily** (Hobby plan limit); e-mails are sent right after the request via `after()`.

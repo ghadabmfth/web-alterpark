@@ -4,7 +4,7 @@ Airport parking reservation and management platform for Nantes, Marseille and Pa
 public website, online booking with secure payment, customer area and administration back office.
 Developed by OuiDev.
 
-**Status: Phases 1–3 complete (foundation, design system, front-end pages). Next: Phase 4, database, authentication and permissions.** Pages are in place; bookings, accounts and payments are wired in Phases 4–6 (each screen says so). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status: Phases 1–4 complete (foundation, design system, front-end, database and authentication). Next: Phase 5, reservation engine.** Accounts, roles, contact and the back-office access control work; bookings and payments arrive in Phases 5–6. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
 
@@ -14,20 +14,26 @@ Playwright · Vercel. Exact versions in `package.json`.
 
 ## Getting started
 
-Requirements: Node.js 22 (`.nvmrc`), npm 11, PostgreSQL 16 from Phase 4.
+Requirements: Node.js 22 (`.nvmrc`), npm 11, PostgreSQL 16.
 
 ```bash
 npm install -g npm@11.6.2
-npm ci
-cp .env.example .env.local
+npm ci                 # also generates the Prisma client
+cp .env.example .env.local   # then fill DATABASE_URL, AUTH_SECRET, IP_HASH_SALT, CRON_SECRET…
+npm run db:migrate     # apply migrations to your local database
+npm run db:seed        # roles, permissions, sites (+ super admin if SEED_SUPER_ADMIN_* are set)
 npm run dev            # http://localhost:3000
 ```
+
+Deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 | Script | Purpose |
 |---|---|
 | `npm run dev` / `build` / `start` | Next.js |
 | `npm run lint` · `npm run typecheck` · `npm test` | Quality checks (also run in CI) |
 | `npm run db:validate` · `npm run db:format` | Prisma schema |
+| `npm run db:migrate` · `npm run db:deploy` · `npm run db:seed` | Migrations (dev / deploy) and seed |
+| `npm run test:integration` | Integration tests on PostgreSQL (`TEST_DATABASE_URL`, name ending in `_test`) |
 | `npm run check` | All checks except the build |
 
 Design-system gallery: `npm run dev`, then open http://localhost:3000/dev/design-system
