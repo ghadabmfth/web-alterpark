@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 /*
- * Contact form schema, shared by the form (client) and the server action (Phase 4), which also
- * applies rate limiting and stores the message. Lengths match ContactMessage in schema.prisma.
+ * Contact form schema, shared by the form (client) and the Server Action (actions.ts), which also
+ * applies spam defences and rate limiting, and stores the message. Lengths match ContactMessage.
  */
 
 export const CONTACT_SUBJECTS = {
@@ -29,8 +29,10 @@ export const contactSchema = z.object({
   subject: z.enum(Object.keys(CONTACT_SUBJECTS) as [ContactSubject, ...ContactSubject[]], { error: "Choisissez un sujet." }),
   parking: z.string().max(60),
   message: z.string().trim().min(10, "Votre message doit contenir au moins 10 caractères.").max(5000, "5 000 caractères au maximum."),
-  /** Honeypot: hidden from people, filled by bots. Must stay empty. */
-  website: z.string().max(0),
+  /** Honeypot: hidden from people, filled by bots. Checked by the action before parsing. */
+  website: z.string().max(200).optional(),
+  /** Time the form was displayed (ms): very fast submissions are bots. */
+  startedAt: z.string().optional(),
 });
 
 export type ContactInput = z.input<typeof contactSchema>;
