@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
   // Data is dynamic by default; marketing content opts into caching with `use cache`.
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    // AVIF first (much lighter for the veiled photos), WebP fallback.
+    formats: ["image/avif", "image/webp"],
+    // 60: full-bleed photos under the system's dark veil; 75: default for everything else.
+    qualities: [60, 75],
+  },
   turbopack: {
     rules: {
       "*.css": {
