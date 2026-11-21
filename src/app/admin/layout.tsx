@@ -1,0 +1,31 @@
+import type { Metadata } from "next";
+import { AppShell } from "@/components/ui/layout/AppShell";
+import { PreviewNotice } from "@/components/site/PreviewNotice";
+import { Badge } from "@/components/ui/feedback/Badge";
+import { routes } from "@/config/site";
+
+export const metadata: Metadata = { title: { default: "Back-office", template: "%s | Back-office ALTERPARK" }, robots: { index: false, follow: false } };
+
+const a = (p: string) => `${routes.admin}/${p}`;
+
+export default function AdminLayout({ children }: LayoutProps<"/admin">) {
+  return (
+    <AppShell
+      context="Back-office"
+      navLabel="Navigation du back-office"
+      rootHref={routes.admin}
+      homeHref={routes.admin}
+      nav={[
+        { items: [{ label: "Tableau de bord", href: routes.admin }] },
+        { title: "Activité", items: [{ label: "Réservations", href: a("reservations") }, { label: "Paiements", href: a("paiements") }, { label: "Clients", href: a("clients") }, { label: "Demandes de contact", href: a("contacts") }] },
+        { title: "Parkings", items: [{ label: "Sites et offres", href: a("parkings") }, { label: "Tarifs", href: a("tarifs") }] },
+        { title: "Pilotage", items: [{ label: "Rapports", href: a("rapports") }] },
+        { title: "Administration", items: [{ label: "Utilisateurs", href: a("utilisateurs") }, { label: "Rôles et permissions", href: a("roles") }, { label: "Paramètres", href: a("parametres") }, { label: "Journal d’audit", href: a("journal") }] },
+      ]}
+      topbar={<Badge tone="warning">Accès non protégé — aperçu</Badge>}
+    >
+      <PreviewNotice area="Le back-office" />
+      {children}
+    </AppShell>
+  );
+}
