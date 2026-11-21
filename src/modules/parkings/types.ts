@@ -16,6 +16,8 @@ export interface ParkingOfferSummary {
   highlighted: boolean;
   /** Starting price in cents incl. VAT, when a validated rate exists. Never guessed. */
   fromCents?: number;
+  /** Vehicles the offer can host at once; absent in the static catalogue (= not bookable). */
+  capacity?: number;
 }
 
 export interface ParkingSummary {
