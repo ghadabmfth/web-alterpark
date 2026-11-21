@@ -31,7 +31,7 @@ export function Hero({ title, typing = true, intro, image = assets.heroPhoto, st
   return (
     <section className={cx("ap-root ap-hero", className)} aria-labelledby={id}>
       <div className="ap-hero__bg" aria-hidden>
-        <Image src={image.src} width={image.width} height={image.height} alt="" sizes="100vw" preload />
+        <Image src={image.src} width={image.width} height={image.height} alt="" sizes="100vw" quality={60} preload />
       </div>
       <div className="ap-hero__content">
         {typing ? (

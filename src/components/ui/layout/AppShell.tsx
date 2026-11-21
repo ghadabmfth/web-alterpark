@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { cx } from "../lib/cx";
 import { SmartLink } from "../lib/link";
 import { SvgIcon } from "../icons/SvgIcon";
@@ -14,7 +15,16 @@ import { CloseIcon, MenuIcon } from "../icons/icons";
  */
 export interface ShellNavGroup {
   title?: string;
+  /** `current` defaults to matching the URL (exact, or a sub-page of a non-root section). */
   items: { label: string; href: string; current?: boolean }[];
+}
+
+/** The deepest item matching the path is current; the area root only matches itself. */
+function currentHref(nav: ShellNavGroup[], pathname: string, rootHref: string): string | undefined {
+  const hrefs = nav.flatMap((g) => g.items.map((i) => i.href));
+  return hrefs
+    .filter((h) => pathname === h || (h !== rootHref && pathname.startsWith(`${h}/`)))
+    .sort((a, b) => b.length - a.length)[0];
 }
 
 export interface AppShellProps {
@@ -23,6 +33,8 @@ export interface AppShellProps {
   navLabel: string;
   nav: ShellNavGroup[];
   homeHref?: string;
+  /** Root of the area (e.g. /admin): its link is current only on that exact page. */
+  rootHref?: string;
   topbar?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -35,8 +47,10 @@ function subscribe(cb: () => void) {
   return () => mql.removeEventListener("change", cb);
 }
 
-export function AppShell({ context, navLabel, nav, homeHref = "/", topbar, children, className }: AppShellProps) {
+export function AppShell({ context, navLabel, nav, homeHref = "/", rootHref = "/", topbar, children, className }: AppShellProps) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname() ?? "/";
+  const active = currentHref(nav, pathname, rootHref);
   const desktop = useSyncExternalStore(subscribe, () => window.matchMedia(DESKTOP).matches, () => true);
   const burger = useRef<HTMLButtonElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
@@ -80,7 +94,7 @@ export function AppShell({ context, navLabel, nav, homeHref = "/", topbar, child
               <ul>
                 {g.items.map((it) => (
                   <li key={it.href}>
-                    <SmartLink href={it.href} aria-current={it.current ? "page" : undefined} onClick={() => setOpen(false)}>
+                    <SmartLink href={it.href} aria-current={(it.current ?? it.href === active) ? "page" : undefined} onClick={() => setOpen(false)}>
                       {it.label}
                     </SmartLink>
                   </li>
@@ -91,12 +105,12 @@ export function AppShell({ context, navLabel, nav, homeHref = "/", topbar, child
         </nav>
       </div>
       <div className="ap-shell__main">
-        <div className="ap-shell__top">
+        <header className="ap-shell__top">
           <button ref={burger} type="button" className="ap-shell__burger" aria-label="Ouvrir le menu" aria-expanded={drawerOpen} onClick={() => setOpen(true)}>
             <MenuIcon />
           </button>
           <div className="ml-auto flex items-center gap-3">{topbar}</div>
-        </div>
+        </header>
         <main id="contenu" className="ap-shell__content">{children}</main>
       </div>
     </div>

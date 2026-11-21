@@ -37,6 +37,7 @@ Gallery: `/dev/design-system`, available in development only.
 | `PageHeader` | Top of app pages | Breadcrumbs + H1 at `h2` size (Crossroads) + actions | Single H1 per page |
 | `DescriptionList` | Detail pages | Dotted rule between rows | `dl` / `dt` / `dd` |
 | `AppShell` | Back office and customer area layout | `surface-sunken` sidebar (like the mobile drawer) with the 10 px orange filet; active link in `primary` with a 3 px marker | Drawer below 1024 px, `inert` while closed, Escape closes |
+| `Stepper` | Progress of the booking funnel | 4 px bars (`surface-raised` → `primary`), labels from 768 px, check on completed steps | `aria-current="step"`; « Étape x sur n » always available |
 | `MenuIcon` | Burger of the AppShell | Same stroke (2.5 px, round caps) as the system's UI icons | Decorative; the button has a label |
 
 ## Porting notes (deviations from the reference bundle)
@@ -55,3 +56,5 @@ Gallery: `/dev/design-system`, available in development only.
 | Modal, VideoModal | Inline focus-trap code | Shared `useDialogFocus` hook | One tested implementation |
 | Alert | Children inside a `<p>` | Children inside a `<div>` | Allows lists and links without invalid nesting |
 | TextField, Select, Checkbox, Toggle, DateTimeField | — | `ref` and native props forwarded | Works with React Hook Form |
+| SocialRail | Always rendered | Hidden below 1280 px (`hidden xl:block`) | responsive.md: the rail would cover the content; links move to the Footer |
+| Header, AppShell | Current link passed by the caller | Derived from the URL when not set | One source of truth for navigation state |

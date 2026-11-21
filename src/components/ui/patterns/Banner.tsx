@@ -26,7 +26,7 @@ export function Banner({ title, image = assets.rallyePhoto, logo, logoAlt = "", 
   return (
     <section className={cx("ap-root ap-banner", className)}>
       <div className="ap-banner__media" aria-hidden>
-        <Image className="ap-banner__photo" src={image.src} width={image.width} height={image.height} alt="" sizes="100vw" />
+        <Image className="ap-banner__photo" src={image.src} width={image.width} height={image.height} alt="" sizes="100vw" quality={60} />
       </div>
       <div className="ap-banner__content">
         {logo ? <Image className="ap-banner__logo" src={logo.src} width={logo.width} height={logo.height} alt={logoAlt} /> : null}
