@@ -1,13 +1,19 @@
 /*
- * Company contact details shown in the header drawer and the footer.
- * Values come from the supplied design system (Nantes site). Phase 7 moves them to AppSetting so
- * staff can edit them in the back office; components receive them as props, never hard-coded.
+ * Site-wide configuration: identity, navigation, contact details.
+ * Contact values come from the supplied design system (Nantes site). Phase 7 moves editable
+ * values to AppSetting (back office); components always receive them as props.
  */
-export const siteContact = {
-  phone: "02 40 731 237",
-  email: "contact@alterpark.fr",
-  address: ["1 Rue Dieudonné Costes", "44860 Saint-Aignan-de-Grandlieu"],
-} as const;
+
+export const siteName = "ALTERPARK";
+
+/** Canonical origin, without trailing slash (NEXT_PUBLIC_SITE_URL). */
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+
+/**
+ * Search engines may index the site only when SITE_INDEXABLE=true (Production, at launch).
+ * Preview and development are never indexable.
+ */
+export const siteIndexable = process.env.SITE_INDEXABLE === "true";
 
 export type SiteContact = {
   phone: string;
@@ -15,7 +21,48 @@ export type SiteContact = {
   address: readonly string[];
 };
 
+export const siteContact: SiteContact = {
+  phone: "02 40 731 237",
+  email: "contact@alterpark.fr",
+  address: ["1 Rue Dieudonné Costes", "44860 Saint-Aignan-de-Grandlieu"],
+};
+
 /** "02 40 731 237" → "tel:0240731237" */
 export function telHref(phone: string): string {
   return `tel:${phone.replace(/\s/g, "")}`;
 }
+
+/** Absolute URL of a path on the canonical origin. */
+export function absoluteUrl(path = "/"): string {
+  return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+export const routes = {
+  home: "/",
+  parkings: "/parkings",
+  parking: (slug: string) => `/parkings/${slug}`,
+  howItWorks: "/comment-ca-marche",
+  faq: "/faq",
+  contact: "/contact",
+  booking: "/reservation",
+  legal: "/mentions-legales",
+  terms: "/cgv",
+  privacy: "/confidentialite",
+  login: "/connexion",
+  register: "/inscription",
+  forgotPassword: "/mot-de-passe-oublie",
+  account: "/compte",
+  admin: "/admin",
+} as const;
+
+export const legalLinks = [
+  { label: "Mentions légales", href: routes.legal },
+  { label: "CGV", href: routes.terms },
+  { label: "Confidentialité", href: routes.privacy },
+];
+
+/**
+ * Social profiles. Empty until the client provides the URLs: the SocialRail and the footer only
+ * render the entries that exist (no dead links).
+ */
+export const socialProfiles: { facebook?: string; youtube?: string } = {};

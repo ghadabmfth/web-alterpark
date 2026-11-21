@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { cx } from "../lib/cx";
@@ -32,6 +33,13 @@ export interface HeaderProps {
   /** Contact block of the drawer; `false` hides it. */
   contact?: SiteContact | false;
   className?: string;
+}
+
+/** A link is current when it matches the path (or is a parent section of it), unless `active` is set. */
+function isCurrent(item: NavLink, pathname: string): boolean {
+  if (item.active !== undefined) return item.active;
+  const hrefs = [item.href, ...(item.children ?? []).map((c) => c.href)].filter((h): h is string => !!h && h.startsWith("/"));
+  return hrefs.some((h) => (h === "/" ? pathname === "/" : pathname === h || pathname.startsWith(`${h}/`)));
 }
 
 function NavItem({ item }: { item: NavLink }) {
@@ -132,6 +140,8 @@ export function Header({
   const [open, setOpen] = useState(!!defaultOpen);
   const [stuck, setStuck] = useState(false);
   const drawerId = useId();
+  const pathname = usePathname() ?? "/";
+  const current = (it: NavLink): NavLink => ({ ...it, active: isCurrent(it, pathname) });
   const closeRef = useRef<HTMLButtonElement>(null);
   const mounted = useMounted();
 
@@ -176,7 +186,7 @@ export function Header({
         <nav className="ap-mnav__nav" aria-label="Menu mobile">
           <ul>
             {links.map((it, i) => (
-              <DrawerItem key={i} item={it} index={i} onNavigate={close} />
+              <DrawerItem key={i} item={current(it)} index={i} onNavigate={close} />
             ))}
           </ul>
         </nav>
@@ -198,7 +208,7 @@ export function Header({
   const list = (items: NavLink[]) => (
     <ul className="ap-header__list">
       {items.map((it, i) => (
-        <NavItem key={i} item={it} />
+        <NavItem key={i} item={current(it)} />
       ))}
     </ul>
   );
