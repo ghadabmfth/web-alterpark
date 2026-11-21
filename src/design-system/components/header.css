@@ -1,0 +1,67 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 114–180). Do not edit: replace with a new delivery. */
+/* ---------- Header ---------- */
+.ap-header { container-type: inline-size; position: relative; z-index: var(--z-header); background: transparent; }
+.ap-header__bar { height: 10px; background: var(--primary); }
+.ap-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); width: var(--container-width); max-width: var(--container-nav); margin: 0 auto; padding: var(--space-4) 0; }
+.ap-header__brand { position: relative; display: inline-flex; flex: none; }
+.ap-header__logo { display: inline-flex; flex: none; }
+/* Mini bulle Google au survol du logo */
+.ap-header__badge { position: absolute; top: calc(100% + 14px); left: 50%; z-index: var(--z-dropdown); pointer-events: none; opacity: 0; transform: translate(-50%, -8px) scale(0.85); transform-origin: 50% 0; transition: opacity 220ms var(--ease-standard), transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.ap-header__brand.has-badge:hover .ap-header__badge, .ap-header__brand.has-badge:focus-within .ap-header__badge { opacity: 1; transform: translate(-50%, 0) scale(1); }
+@media (hover: none) { .ap-header__badge { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ap-header__badge { transition: opacity 150ms; transform: translate(-50%, 0); } }
+.ap-header__logo > * { display: block; width: 110px; height: auto; }
+.ap-header__nav { display: none; }
+.ap-header__list { display: flex; align-items: center; gap: var(--space-12); margin: 0; padding: 0; list-style: none; }
+.ap-navlink { position: relative; display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border: 0; background: none; color: var(--text-primary); font: 700 16px/24px var(--font-sans); text-decoration: none; white-space: nowrap; cursor: pointer; transition: color var(--duration-fast) var(--ease-standard); }
+.ap-navlink:hover, .ap-navlink.is-hover { color: var(--primary-hover); }
+.ap-navlink[aria-current="page"] { color: var(--primary); }
+.ap-navlink[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--primary); }
+.ap-navlink svg { width: 14px; height: 14px; transition: transform var(--duration-base) var(--ease-standard); }
+.ap-navlink[aria-expanded="true"] svg { transform: rotate(180deg); }
+.ap-dropdown { position: relative; }
+.ap-dropdown__menu { position: absolute; top: calc(100% + var(--space-3)); left: 50%; transform: translateX(-50%); z-index: var(--z-dropdown); min-width: 240px; margin: 0; padding: var(--space-2); list-style: none;
+  background: var(--surface-raised); border-radius: var(--radius-md); box-shadow: var(--shadow-elevated); }
+.ap-dropdown__menu a { display: block; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); color: var(--text-primary); font: 400 16px/24px var(--font-sans); text-decoration: none; }
+.ap-dropdown__menu a:hover, .ap-dropdown__menu a:focus-visible { background: var(--surface); color: var(--primary); }
+.ap-header__burger { display: inline-flex; flex-direction: column; justify-content: center; gap: 6px; width: 48px; height: 48px; padding: 12px; border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
+.ap-header__burger span { display: block; height: 3px; border-radius: 2px; background: var(--text-primary); transition: transform var(--duration-base) var(--ease-standard), opacity var(--duration-base); }
+.ap-header__burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+.ap-header__burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.ap-header__burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+@container (min-width: 1024px) {
+  .ap-header__inner { display: grid; grid-template-columns: 1fr auto 1fr; padding: var(--space-6) 0; }
+  .ap-header__nav { display: block; }
+  /* Liens regroupés de part et d'autre du logo (demande client). */
+  .ap-header__nav--start .ap-header__list { justify-content: flex-end; }
+  .ap-header__nav--end .ap-header__list { justify-content: flex-start; }
+  .ap-header__brand { grid-column: 2; grid-row: 1; }
+  .ap-header__logo { padding-inline: var(--space-8); }
+  .ap-header__logo > * { width: 135px; }
+  .ap-header__nav--start { grid-column: 1; grid-row: 1; }
+  .ap-header__nav--end { grid-column: 3; grid-row: 1; }
+  .ap-header__burger { display: none; }
+}
+@container (min-width: 1024px) and (max-width: 1500px) {
+  .ap-header__list { gap: var(--space-6); }
+  .ap-navlink { font-size: 16px; }
+  .ap-header__logo { padding-inline: var(--space-6); }
+}
+@container (min-width: 1024px) and (max-width: 1279px) {
+  .ap-header__list { gap: var(--space-4); }
+  .ap-navlink { font-size: 15px; }
+  .ap-header__logo { padding-inline: var(--space-4); }
+  .ap-header__logo > * { width: 120px; }
+}
+
+/* En-tête collant (prop sticky) : fixé, opaque et compact après défilement. */
+.ap-header.ap-header--sticky.is-stuck { position: fixed; top: 0; left: 0; right: 0; background: var(--surface); box-shadow: var(--shadow-elevated); padding-top: env(safe-area-inset-top, 0px); animation: ap-slide-down var(--duration-base) var(--ease-standard); }
+.ap-header--sticky.is-stuck .ap-header__bar { height: 4px; }
+.ap-header--sticky.is-stuck .ap-header__inner { padding-block: var(--space-2); }
+.ap-header--sticky.is-stuck .ap-header__logo > * { width: 84px; }
+@keyframes ap-slide-down { from { transform: translateY(-100%); } to { transform: none; } }
+@container (min-width: 1024px) {
+  .ap-header--sticky.is-stuck .ap-header__inner { padding-block: var(--space-3); }
+  .ap-header--sticky.is-stuck .ap-header__logo > * { width: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { .ap-header.is-stuck { animation: none; } }

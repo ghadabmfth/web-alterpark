@@ -1,0 +1,8 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 215–222). Do not edit: replace with a new delivery. */
+/* ---------- Breadcrumbs ---------- */
+.ap-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font: 400 16px/24px var(--font-sans); }
+.ap-crumbs li { display: inline-flex; align-items: center; gap: var(--space-2); }
+.ap-crumbs li + li::before { content: ""; width: 7px; height: 7px; border-top: 2px solid var(--primary); border-right: 2px solid var(--primary); transform: rotate(45deg); margin-right: var(--space-2); }
+.ap-crumbs a { color: var(--primary); text-decoration: none; }
+.ap-crumbs a:hover { color: var(--primary-hover); text-decoration: underline; text-underline-offset: 4px; }
+.ap-crumbs [aria-current="page"] { color: var(--text-secondary); }

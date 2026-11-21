@@ -1,0 +1,10 @@
+/* Proposé (extension). Card: `surface-raised` panel with `radius-md`, as FeatureList and fields.
+   Header (title + actions), body, footer on `surface-sunken` like the Modal footer. */
+.ap-card { display: flex; flex-direction: column; min-width: 0; border-radius: var(--radius-md); background: var(--surface-raised); }
+.ap-card__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-6) 0; }
+.ap-card__title { margin: 0; font: 700 18px/26px var(--font-sans); color: var(--text-primary); }
+.ap-card__subtitle { margin: 0; font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+.ap-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.ap-card__body { flex: 1; padding: var(--space-4) var(--space-6) var(--space-6); font: 400 16px/24px var(--font-sans); }
+.ap-card__foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-radius: 0 0 var(--radius-md) var(--radius-md); background: var(--surface-sunken); }
+.ap-card--flush .ap-card__body { padding: 0; }

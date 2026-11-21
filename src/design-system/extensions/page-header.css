@@ -1,0 +1,8 @@
+/* Proposé (extension). PageHeader of app pages: breadcrumbs, H1 at section-title size (Crossroads,
+   as SectionHeading), description, actions aligned right from 768 px. */
+.ap-pagehead { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-8); }
+.ap-pagehead__row { display: flex; flex-direction: column; gap: var(--space-4); }
+.ap-pagehead__text { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.ap-pagehead__desc { margin: 0; max-width: var(--container-col); font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+.ap-pagehead__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+@media (min-width: 768px) { .ap-pagehead__row { flex-direction: row; align-items: flex-end; justify-content: space-between; } }

@@ -1,0 +1,12 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 260–271). Do not edit: replace with a new delivery. */
+/* ---------- Section heading ---------- */
+.ap-heading { display: flex; flex-direction: column; gap: var(--space-8); }
+.ap-heading--center { align-items: center; text-align: center; }
+.ap-heading--center .ap-body { max-width: var(--container-text); }
+.ap-heading__subtitle { margin-top: calc(var(--space-6) * -1); }
+
+/* Surtitre (prop eyebrow de SectionHeading / MediaSection) */
+.ap-eyebrow { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: rgba(246, 146, 30, 0.14); color: var(--primary); font: 700 14px/20px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: calc(var(--space-4) * -1); }
+.ap-eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+.ap-heading--center .ap-eyebrow { align-self: center; }
+.ap-media__after { margin-top: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); }

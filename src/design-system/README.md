@@ -10,13 +10,23 @@ sheet per component) is in [`docs/design-system/`](../../docs/design-system/READ
 | `tokens.css` | CSS variables + type classes + `@font-face`, as supplied. Only change: font URLs point to `/fonts/`. | Never by hand |
 | `fonts.css` | Digits and punctuation of Crossroads served from Montserrat 800 (from the reference bundle). | Rarely |
 | `typography.css` | Fluid heading/body rules (`.ap-display`, `.ap-h2`, `.ap-body`…), verbatim from the reference bundle. | Rarely |
-| `overrides.css` | **Declared** deviations from the system, each justified (see `docs/DECISIONS.md`, ADR-005). | Only with an ADR |
+| `overrides.css` | **Declared** deviations from the system tokens, each justified (see `docs/DECISIONS.md`, ADR-005). | Only with an ADR |
+| `components/*.css` | Component styles of the reference bundle, split one file per component, **verbatim**, in bundle order. | Never by hand |
+| `extensions/*.css` | Styles of the *proposed* extensions (`docs/design-system/extensions.md`). Tokens only: no colour literal. | Yes, with the doc |
+| `overrides-components.css` | Declared deviations from supplied component styles (contrast fixes, ADR-005). | Only with an ADR |
+| `icons/svg-data.ts` | Logo, pictograms and icon sets extracted mechanically from the bundle. | Never by hand |
+| `illustrations/app-showcase.ts` | AppShowcase markup, verbatim from the bundle (output verified identical). | Never by hand |
 | `theme.css` | Tailwind v4 theme built *from* the tokens. All Tailwind defaults are reset. | When a token group is added |
 | `tokens.ts` | Typed token values for non-CSS contexts (metadata, payment page, e-mails). | No |
-| `design-system.test.ts` | Fails if `tokens.css` drifts from `tokens.json`, if breakpoints diverge, or if a colour literal appears outside this folder. | Extend with new rules |
+| `design-system.test.ts` | Fails if `tokens.css` drifts from `tokens.json`, if a component stylesheet differs from the bundle, if breakpoints diverge, or if a colour literal appears in app code or extensions. | Extend with new rules |
 
-Load order (`src/app/globals.css`): Tailwind → theme → tokens → fonts → typography → overrides.
-The design-system files sit in the `base` cascade layer, so utilities can refine them.
+Load order (`src/app/globals.css`): Tailwind → theme → tokens, fonts, typography, overrides
+(`base` layer) → component styles, extensions, component overrides (`components` layer) →
+utilities. A utility can therefore always refine a component.
+
+React components live in `src/components/ui/` (one file per component, grouped as in the
+system: actions, navigation, content, forms, feedback, patterns, plus data and layout for the
+extensions). They render the system's `ap-*` classes; they never carry their own colours.
 
 ## Using it
 
@@ -35,7 +45,8 @@ The design-system files sit in the `base` cascade layer, so utilities can refine
 
 ## Extending the system
 
-The supplied system covers the public home page. The back office, tables, badges, tabs, pagination,
-menus, toasts and loading states are **not** designed in it. Phase 2 adds them as *proposed*
-components built only from existing tokens, each documented in `docs/design-system/extensions.md`
-before it is used widely — the same "Observed / Proposed" convention the system itself uses.
+The supplied system covers the public home page. Tables, badges, tabs, pagination, menus, toasts,
+loading and empty states and the app layout are **extensions** built only from existing tokens and
+documented in [`docs/design-system/extensions.md`](../../docs/design-system/extensions.md), with
+the porting notes. Every component is shown in all its states at `/dev/design-system` (development,
+or a Preview with `DESIGN_SYSTEM_GALLERY=true`).
