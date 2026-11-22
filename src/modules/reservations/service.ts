@@ -11,6 +11,7 @@ import { formatDateTime, utcToZoned, validateStay, type StayErrors, type ValidSt
 import { newReference } from "./domain/reference";
 import { canTransition } from "./domain/status";
 import { cancellationOption } from "./domain/cancellation";
+import { readSettings } from "@/modules/settings/settings";
 
 /*
  * Reservation services (ARCHITECTURE.md §5, ADR-010). Everything the customer sends is re-checked
@@ -77,6 +78,8 @@ async function lockOffer(tx: Tx, offerId: string) {
 }
 
 async function computeQuote(tx: Tx, req: StayRequest, now: Date, lock: boolean): Promise<{ ok: true; quote: Quote } | QuoteFailure> {
+  // Master switch of the back office (incident, closure): nothing can be quoted or held.
+  if (!(await readSettings())["booking.enabled"]) return { ok: false, reason: "NOT_BOOKABLE" };
   const parking = await loadContext(tx, req.parkingSlug, req.offerCode);
   const offer = parking?.offers[0];
   if (!parking || !offer) return { ok: false, reason: "NOT_BOOKABLE" };

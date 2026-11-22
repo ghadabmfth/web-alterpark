@@ -10,6 +10,7 @@ export type TemplatePayloads = {
   "auth.verify-email": { firstName: string; url: string };
   "auth.reset-password": { firstName: string; url: string };
   "auth.password-changed": { firstName: string };
+  "staff.invite": { firstName: string; invitedBy: string; role: string; url: string };
   "contact.received": { name: string; email: string; subject: string; message: string; parking?: string };
   "reservation.confirmed": { firstName: string; reference: string; parking: string; offer: string; startsAt: string; endsAt: string; total: string };
   "reservation.cancelled": { firstName: string; reference: string; parking: string; startsAt: string; refund?: string };
@@ -45,6 +46,10 @@ export function renderEmail<T extends TemplateName>(template: T, to: string, pay
     case "auth.password-changed": {
       const p = payload as TemplatePayloads["auth.password-changed"];
       return { to, subject: "Votre mot de passe a été modifié", ...layout(`Bonjour ${p.firstName},`, ["Le mot de passe de votre compte ALTERPARK vient d’être modifié. Toutes vos sessions ont été déconnectées.", `Si vous n’êtes pas à l’origine de ce changement, contactez-nous immédiatement : ${siteContact.phone}.`], { label: "Se connecter", url: absoluteUrl("/connexion") }) };
+    }
+    case "staff.invite": {
+      const p = payload as TemplatePayloads["staff.invite"];
+      return { to, subject: "Votre accès au back-office ALTERPARK", ...layout(`Bonjour ${p.firstName},`, [`${p.invitedBy} vous a créé un accès au back-office ALTERPARK (rôle : ${p.role}).`, "Choisissez votre mot de passe pour activer votre compte. Ce lien est valable 72 heures et ne peut servir qu’une fois."], { label: "Choisir mon mot de passe", url: p.url }) };
     }
     case "contact.received": {
       const p = payload as TemplatePayloads["contact.received"];

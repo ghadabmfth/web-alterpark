@@ -43,7 +43,7 @@ export default async function AdminReservations({ searchParams }: PageProps<"/ad
         title="Réservations"
         description={`${count} réservation${count > 1 ? "s" : ""}`}
         breadcrumbs={[{ label: "Back-office", href: routes.admin }, { label: "Réservations" }]}
-        actions={actor.can("REPORT_VIEW") ? <Button href={exportHref} size="sm" variant="secondary">Exporter (CSV)</Button> : undefined}
+        actions={actor.can("REPORT_VIEW") ? <Button href={exportHref} size="sm" variant="secondary" download>Exporter (CSV)</Button> : undefined}
       />
       {requests.length ? (
         <Card title={`Demandes d’annulation à traiter (${requests.length})`} titleAs="h2" className="mb-6">

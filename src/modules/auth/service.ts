@@ -159,6 +159,8 @@ export async function resetPassword(raw: string, password: string, meta: Request
   const userId = await consumeToken(raw, "PASSWORD_RESET");
   if (!userId) return false;
   await setPassword(userId, password, "user.password.reset", meta, userId);
+  // The link arrived by e-mail: the address is proven (also completes staff invitations).
+  await db().user.updateMany({ where: { id: userId, emailVerifiedAt: null }, data: { emailVerifiedAt: new Date() } });
   return true;
 }
 
