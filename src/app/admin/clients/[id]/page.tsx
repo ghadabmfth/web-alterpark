@@ -14,6 +14,7 @@ import { routes } from "@/config/site";
 import { adminActor } from "@/modules/admin/page-guard";
 import { getCustomer } from "@/modules/admin/customers";
 import { customerStatusAction } from "@/modules/admin/actions/catalog";
+import { anonymiseCustomerAction } from "@/modules/privacy/actions";
 import { STATUS_LABELS, STATUS_TONES } from "@/modules/reservations/domain/status";
 import { formatDateTime } from "@/modules/reservations/domain/stay";
 
@@ -58,6 +59,18 @@ export default async function AdminCustomer({ params }: PageProps<"/admin/client
             >
               <p className="m-0 text-text-secondary">{active ? "Un compte désactivé ne peut plus se connecter ; ses réservations restent valables." : "Le client pourra de nouveau se connecter."}</p>
             </AdminForm>
+            {u.deletedAt ? null : (
+              <div className="mt-8">
+                <AdminForm
+                  action={anonymiseCustomerAction}
+                  hidden={{ id: u.id }}
+                  submitLabel="Anonymiser (demande RGPD)"
+                  variant="secondary"
+                  label="Anonymiser le client"
+                  confirm={{ title: "Anonymiser le client", body: "Identité, coordonnées, véhicules et messages sont effacés définitivement ; les réservations passées restent pour la comptabilité. À faire uniquement sur demande écrite du client.", confirmLabel: "Anonymiser" }}
+                />
+              </div>
+            )}
           </Card>
         ) : null}
       </div>

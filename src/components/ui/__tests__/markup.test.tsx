@@ -125,3 +125,12 @@ describe("Feedback and data", () => {
     expect(html(<StatTile label="CA" value="1" trend={{ direction: "up", text: "+12 %" }} />)).toContain('<span class="ap-stat__trend ap-stat__trend--up">+12 %</span>');
   });
 });
+
+describe("AppShowcase", () => {
+  it("escapes the example first name", async () => {
+    const { AppShowcase } = await import("../patterns/AppShowcase");
+    const out = html(<AppShowcase firstName={'<img src=x onerror="alert(1)">'} />);
+    expect(out).not.toContain("<img src=x");
+    expect(out).toContain("&lt;img");
+  });
+});

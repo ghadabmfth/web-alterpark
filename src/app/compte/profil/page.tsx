@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/layout/PageHeader";
 import { Card } from "@/components/ui/layout/Card";
 import { ChangePasswordForm, ProfileForm } from "@/components/site/AuthForms";
+import { DeleteAccount } from "@/components/site/DeleteAccount";
 import { routes } from "@/config/site";
 import { requireUser } from "@/server/auth/session";
 
@@ -20,6 +21,11 @@ export default async function ProfilePage() {
           <ChangePasswordForm />
         </Card>
       </div>
+      {user.isStaff ? null : (
+        <Card title="Supprimer mon compte" titleAs="h2" className="mt-6">
+          <DeleteAccount />
+        </Card>
+      )}
     </>
   );
 }

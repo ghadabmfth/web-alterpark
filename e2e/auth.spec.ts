@@ -69,3 +69,31 @@ test("the admin session from setup is valid", async ({ browser }) => {
   expect(E2E.adminEmail).toContain("@");
   await ctx.close();
 });
+
+test("a customer deletes their account (GDPR) and can no longer sign in", async ({ page }) => {
+  const email = `suppr.${Date.now()}@e2e.test`;
+  await page.goto("/inscription");
+  const form = page.getByRole("form", { name: "Création de compte" });
+  await form.getByLabel("Prénom").fill("Sam");
+  await form.getByLabel(/^Nom/).fill("Supprime");
+  await form.getByLabel("Adresse e-mail").fill(email);
+  await form.getByLabel(/^Mot de passe/).first().fill("une phrase de passe solide");
+  await form.getByLabel("Confirmez le mot de passe").fill("une phrase de passe solide");
+  await form.getByLabel(/J’accepte/).check();
+  await form.getByRole("button", { name: "Créer mon compte" }).click();
+  await page.waitForURL((u) => u.pathname === "/compte");
+
+  await page.goto("/compte/profil");
+  const del = page.getByRole("form", { name: "Supprimer mon compte" });
+  await del.getByLabel(/^Mot de passe/).fill("une phrase de passe solide");
+  await del.getByLabel(/Je comprends/).check();
+  await del.getByRole("button", { name: "Supprimer mon compte" }).click();
+  await page.waitForURL((u) => u.pathname === "/");
+
+  await page.goto("/connexion");
+  const login = page.getByRole("form", { name: "Connexion" });
+  await login.getByLabel("Adresse e-mail").fill(email);
+  await login.getByLabel("Mot de passe").fill("une phrase de passe solide");
+  await login.getByRole("button", { name: /Se connecter/ }).click();
+  await expect(login).toContainText("Adresse e-mail ou mot de passe incorrect.");
+});

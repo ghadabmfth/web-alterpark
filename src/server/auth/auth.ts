@@ -40,7 +40,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // keep error logs for real failures only.
   logger: {
     error(error) {
-      if (error.name === "CredentialsSignin" || error.name === "RateLimited") return;
+      // `type` survives minification (class names do not); RateLimited inherits it.
+      if ((error as { type?: string }).type === "CredentialsSignin") return;
       console.error("[auth]", error);
     },
   },
