@@ -10,9 +10,11 @@ export type TemplatePayloads = {
   "auth.verify-email": { firstName: string; url: string };
   "auth.reset-password": { firstName: string; url: string };
   "auth.password-changed": { firstName: string };
+  "staff.invite": { firstName: string; invitedBy: string; role: string; url: string };
   "contact.received": { name: string; email: string; subject: string; message: string; parking?: string };
   "reservation.confirmed": { firstName: string; reference: string; parking: string; offer: string; startsAt: string; endsAt: string; total: string };
-  "reservation.cancelled": { firstName: string; reference: string; parking: string; startsAt: string };
+  "reservation.cancelled": { firstName: string; reference: string; parking: string; startsAt: string; refund?: string };
+  "reservation.cancellation-rejected": { firstName: string; reference: string; note: string };
   "reservation.cancellation-requested": { reference: string; customer: string; parking: string; startsAt: string; reason: string };
 };
 
@@ -45,6 +47,10 @@ export function renderEmail<T extends TemplateName>(template: T, to: string, pay
       const p = payload as TemplatePayloads["auth.password-changed"];
       return { to, subject: "Votre mot de passe a été modifié", ...layout(`Bonjour ${p.firstName},`, ["Le mot de passe de votre compte ALTERPARK vient d’être modifié. Toutes vos sessions ont été déconnectées.", `Si vous n’êtes pas à l’origine de ce changement, contactez-nous immédiatement : ${siteContact.phone}.`], { label: "Se connecter", url: absoluteUrl("/connexion") }) };
     }
+    case "staff.invite": {
+      const p = payload as TemplatePayloads["staff.invite"];
+      return { to, subject: "Votre accès au back-office ALTERPARK", ...layout(`Bonjour ${p.firstName},`, [`${p.invitedBy} vous a créé un accès au back-office ALTERPARK (rôle : ${p.role}).`, "Choisissez votre mot de passe pour activer votre compte. Ce lien est valable 72 heures et ne peut servir qu’une fois."], { label: "Choisir mon mot de passe", url: p.url }) };
+    }
     case "contact.received": {
       const p = payload as TemplatePayloads["contact.received"];
       return { to, subject: `Nouvelle demande de contact : ${p.subject}`, ...layout("Nouvelle demande de contact", [`De : ${p.name} <${p.email}>`, ...(p.parking ? [`Parking : ${p.parking}`] : []), `Sujet : ${p.subject}`, p.message], { label: "Ouvrir le back-office", url: absoluteUrl("/admin/contacts") }) };
@@ -55,7 +61,11 @@ export function renderEmail<T extends TemplateName>(template: T, to: string, pay
     }
     case "reservation.cancelled": {
       const p = payload as TemplatePayloads["reservation.cancelled"];
-      return { to, subject: `Réservation annulée — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre réservation ${p.reference} (${p.parking}, ${p.startsAt}) est annulée.`], { label: "Mes réservations", url: absoluteUrl("/compte/reservations") }) };
+      return { to, subject: `Réservation annulée — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre réservation ${p.reference} (${p.parking}, ${p.startsAt}) est annulée.`, ...(p.refund ? [`Un remboursement de ${p.refund} est en cours : il apparaîtra sur votre relevé sous 5 à 10 jours.`] : [])], { label: "Mes réservations", url: absoluteUrl("/compte/reservations") }) };
+    }
+    case "reservation.cancellation-rejected": {
+      const p = payload as TemplatePayloads["reservation.cancellation-rejected"];
+      return { to, subject: `Demande d’annulation — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre demande d’annulation de la réservation ${p.reference} n’a pas pu être acceptée.`, p.note, `Pour toute question : ${siteContact.phone}.`], { label: "Voir ma réservation", url: absoluteUrl(`/compte/reservations/${p.reference}`) }) };
     }
     case "reservation.cancellation-requested": {
       const p = payload as TemplatePayloads["reservation.cancellation-requested"];

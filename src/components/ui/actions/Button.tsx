@@ -55,8 +55,9 @@ export function Button(props: ButtonProps) {
     if (disabled) {
       return <a {...anchor} className={cls} aria-disabled="true">{kids}</a>;
     }
-    // Internal routes use client-side navigation; external links stay plain anchors.
-    if (href.startsWith("/") && !href.startsWith("//")) {
+    // Internal routes use client-side navigation; external links and downloads (prefetching would
+    // run the file's route handler) stay plain anchors.
+    if (href.startsWith("/") && !href.startsWith("//") && anchor.download === undefined) {
       return <Link {...anchor} href={href} className={cls}>{kids}</Link>;
     }
     return <a {...anchor} href={href} className={cls}>{kids}</a>;

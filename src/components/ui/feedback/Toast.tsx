@@ -28,6 +28,12 @@ export function useToast(): (t: ToastInput) => void {
   return ctx;
 }
 
+/** Toasts when a provider is present, otherwise a no-op (components usable everywhere). */
+export function useOptionalToast(): (t: ToastInput) => void {
+  return useContext(ToastContext) ?? noop;
+}
+const noop = () => {};
+
 function AutoDismiss({ item, onDone }: { item: ToastItem; onDone: (id: number) => void }) {
   useEffect(() => {
     const tone = item.tone ?? "info";

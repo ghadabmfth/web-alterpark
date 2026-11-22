@@ -47,3 +47,25 @@ export function hasPermission(granted: readonly Permission[], required: Permissi
   const needed = Array.isArray(required) ? required : [required];
   return needed.every((p) => granted.includes(p));
 }
+
+/** French labels of the permissions (roles editor). */
+export const PERMISSION_LABELS: Record<Permission, string> = {
+  DASHBOARD_VIEW: "Voir le tableau de bord",
+  RESERVATION_READ: "Consulter les réservations",
+  RESERVATION_MANAGE: "Gérer arrivées et départs",
+  RESERVATION_CANCEL: "Annuler des réservations, traiter les demandes",
+  PAYMENT_READ: "Consulter les paiements",
+  PAYMENT_REFUND: "Rembourser",
+  PARKING_READ: "Consulter sites, formules et tarifs",
+  PARKING_MANAGE: "Modifier sites et formules (capacités, ouverture)",
+  PRICING_MANAGE: "Gérer les tarifs",
+  CUSTOMER_READ: "Consulter les clients",
+  CUSTOMER_MANAGE: "Désactiver / réactiver des clients",
+  CONTACT_READ: "Consulter les demandes de contact",
+  CONTACT_MANAGE: "Traiter les demandes de contact",
+  REPORT_VIEW: "Rapports et exports CSV",
+  ADMIN_USER_MANAGE: "Gérer les comptes de l’équipe",
+  ROLE_MANAGE: "Gérer les rôles et permissions",
+  SETTINGS_MANAGE: "Modifier les paramètres",
+  AUDIT_LOG_READ: "Consulter le journal d’audit",
+};

@@ -184,6 +184,48 @@ async function onRefund(e: Extract<PaymentEvent, { kind: "refund.updated" }>): P
 
 /* ---------------------------------------------------------------- refunds */
 
+type Tx = Parameters<Parameters<ReturnType<typeof db>["$transaction"]>[0]>[0];
+
+/**
+ * Records refunds totalling `amountCents` on the reservation's succeeded payments, inside the
+ * caller's transaction. Payment rows are locked and refunds already pending count as spent, so two
+ * staff members cannot refund more than was paid. Returns null when the amount exceeds what is left.
+ */
+export async function recordRefunds(
+  tx: Tx,
+  input: { reservationId: string; amountCents: number; reason: string; requestedById: string | null },
+): Promise<string[] | null> {
+  if (!Number.isInteger(input.amountCents) || input.amountCents <= 0) return null;
+  await tx.$queryRaw`SELECT "id" FROM "Payment" WHERE "reservationId" = ${input.reservationId}::uuid FOR UPDATE`;
+  const payments = await tx.payment.findMany({
+    where: { reservationId: input.reservationId, status: "SUCCEEDED" },
+    include: { refunds: { where: { status: "PENDING" }, select: { amountCents: true } } },
+    orderBy: { succeededAt: "asc" },
+  });
+  const left = (p: (typeof payments)[number]) => p.amountCents - p.refundedCents - p.refunds.reduce((n, r) => n + r.amountCents, 0);
+  if (payments.reduce((n, p) => n + left(p), 0) < input.amountCents) return null;
+  const ids: string[] = [];
+  let remaining = input.amountCents;
+  for (const p of payments) {
+    const amount = Math.min(remaining, left(p));
+    if (amount <= 0) continue;
+    const r = await tx.refund.create({ data: { paymentId: p.id, amountCents: amount, currency: p.currency, reason: input.reason.slice(0, 500), requestedById: input.requestedById } });
+    ids.push(r.id);
+    remaining -= amount;
+    if (!remaining) break;
+  }
+  return ids;
+}
+
+/** Amount still refundable on a reservation (paid − refunded − pending refunds). */
+export async function refundableCents(reservationId: string): Promise<number> {
+  const payments = await db().payment.findMany({
+    where: { reservationId, status: "SUCCEEDED" },
+    include: { refunds: { where: { status: "PENDING" }, select: { amountCents: true } } },
+  });
+  return payments.reduce((n, p) => n + p.amountCents - p.refundedCents - p.refunds.reduce((m, r) => m + r.amountCents, 0), 0);
+}
+
 /** Moves a refund to its new status; amounts are added to payment and reservation exactly once. */
 async function applyRefundStatus(refundId: string, providerRefundId: string, status: "PENDING" | "SUCCEEDED" | "FAILED" | "CANCELED") {
   await db().$transaction(async (tx) => {

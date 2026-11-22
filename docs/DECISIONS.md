@@ -185,3 +185,20 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
   Next.js SRI (experimental) is stable.
 - **Auth.js and prerendering.** `getCurrentUser` awaits `connection()` before `auth()`: Auth.js draws
   random values before reading the cookie, which Cache Components reported on every account page.
+
+## ADR-019 — Phase 7 back-office choices
+
+- **Permission checked three times**: the page (`adminActor`, « Accès refusé »), the Server Action
+  (`runAdminAction`) and the service (`ensure`). Services are what tests exercise directly.
+- **Guarded updates.** Every state change is an `UPDATE … WHERE status = <expected>`: two staff
+  members acting at once cannot both apply; the second gets « la réservation a changé ».
+- **Refund ceiling under lock.** Refunds lock the payment rows and count refunds still pending.
+- **Rates are append-only** (add, deactivate): what a customer paid can always be explained.
+- **Capacity changes take the booking lock** and cannot drop below the vehicles already booked.
+- **Staff never handle passwords**: invitations send a single-use link (72 h).
+- **CSV exports are plain links** (`download`): a `next/link` prefetch would have run the export —
+  and written an audit entry — on hover. Text cells starting with `= + - @` are neutralised.
+- **Inline row actions are unnamed forms**: a named form is a landmark, and a table of named
+  « Désactiver » forms produced duplicate landmarks (axe).
+- **No `upgrade-insecure-requests`** in the CSP: HSTS already forces HTTPS, and the directive broke
+  redirects of a production build served over HTTP (it rewrote them to https://localhost).
