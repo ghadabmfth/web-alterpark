@@ -8,18 +8,20 @@ import { DescriptionList } from "@/components/ui/data/DescriptionList";
 import { DataTable } from "@/components/ui/data/DataTable";
 import { formatCents } from "@/components/ui/lib/format";
 import { AccessDenied } from "@/components/admin/AccessDenied";
-import { AdminForm, FormText } from "@/components/admin/AdminForm";
+import { AdminForm, FormSelect, FormText } from "@/components/admin/AdminForm";
 import { AUDIT_LABELS, PAYMENT_LABELS, REFUND_LABELS, shortDateTime } from "@/components/admin/format";
 import { routes } from "@/config/site";
 import { adminActor } from "@/modules/admin/page-guard";
 import { getReservation } from "@/modules/admin/reservations";
-import { checkInAction, completeAction, refundAction, rejectRequestAction, staffCancelAction } from "@/modules/admin/actions/reservations";
-import { refundableCents } from "@/modules/payments/service";
+import { checkInAction, completeAction, recordOnSiteAction, refundAction, rejectRequestAction, staffCancelAction } from "@/modules/admin/actions/reservations";
+import { dueCents, refundableCents } from "@/modules/payments/service";
 import { STATUS_LABELS, STATUS_TONES, canTransition } from "@/modules/reservations/domain/status";
 import { formatDateTime } from "@/modules/reservations/domain/stay";
 import { REFERENCE_RE } from "@/modules/reservations/domain/reference";
 
 export const metadata: Metadata = { title: "Réservation" };
+
+const ON_SITE_LABELS: Record<string, string> = { CARD: "Carte bancaire", CASH: "Espèces", HOLIDAY_VOUCHERS: "Chèques vacances", CHECK: "Chèque" };
 
 const toEuroInput = (cents: number) => (cents / 100).toFixed(2).replace(".", ",");
 
@@ -31,7 +33,8 @@ export default async function AdminReservation({ params }: PageProps<"/admin/res
   const r = await getReservation(actor, reference);
   if (!r) notFound();
   const tz = r.parking.timeZone;
-  const refundable = await refundableCents(r.id);
+  const [refundable, due] = await Promise.all([refundableCents(r.id), dueCents(r.id)]);
+  const onSite = r.paymentMethod === "ON_SITE";
   const pending = r.cancellationRequests.find((c) => c.status === "PENDING");
   const cancellable = canTransition(r.status, "CANCELLED");
   const hidden = { id: r.id };
@@ -77,7 +80,9 @@ export default async function AdminReservation({ params }: PageProps<"/admin/res
         <Card title="Paiement" titleAs="h2">
           <DescriptionList
             items={[
+              { term: "Mode de paiement", value: onSite ? "Sur place, au retour" : "En ligne" },
               { term: "Montant", value: formatCents(r.totalCents) },
+              ...(onSite ? [{ term: "Reste à encaisser", value: formatCents(due) }] : []),
               { term: "Remboursé", value: formatCents(r.refundedCents) },
               { term: "Encore remboursable", value: formatCents(refundable) },
             ]}
@@ -86,7 +91,7 @@ export default async function AdminReservation({ params }: PageProps<"/admin/res
             className="mt-6"
             caption="Paiements et remboursements"
             rows={r.payments.flatMap((p) => [
-              { key: p.id, date: p.createdAt, what: "Paiement", amount: p.amountCents, badge: PAYMENT_LABELS[p.status], ref: p.providerPaymentId ?? p.providerSessionId ?? "" },
+              { key: p.id, date: p.createdAt, what: p.provider === "ON_SITE" ? `Encaissement sur place (${ON_SITE_LABELS[p.onSiteMethod ?? "CARD"]})` : "Paiement en ligne", amount: p.amountCents, badge: PAYMENT_LABELS[p.status], ref: p.providerPaymentId ?? p.providerSessionId ?? "" },
               ...p.refunds.map((x) => ({ key: x.id, date: x.createdAt, what: `Remboursement${x.reason ? ` — ${x.reason}` : ""}`, amount: -x.amountCents, badge: REFUND_LABELS[x.status], ref: x.providerRefundId ?? "" })),
             ])}
             rowKey={(x) => x.key}
@@ -101,6 +106,14 @@ export default async function AdminReservation({ params }: PageProps<"/admin/res
         </Card>
         <Card title="Actions" titleAs="h2">
           <div className="flex flex-col gap-8">
+            {actor.can("RESERVATION_MANAGE") && onSite && due > 0 && ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(r.status) ? (
+              <AdminForm action={recordOnSiteAction} hidden={hidden} label="Encaissement sur place" submitLabel="Enregistrer l’encaissement">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <FormText label="Montant (€)" name="amount" required inputMode="decimal" defaultValue={toEuroInput(due)} help={`Reste à encaisser : ${formatCents(due)}`} />
+                  <FormSelect label="Moyen de paiement" name="method" required placeholder="Choisir" options={Object.entries(ON_SITE_LABELS).map(([value, label]) => ({ value, label }))} />
+                </div>
+              </AdminForm>
+            ) : null}
             {actor.can("RESERVATION_MANAGE") && r.status === "CONFIRMED" ? (
               <AdminForm action={checkInAction} hidden={hidden} submitLabel="Véhicule déposé" pendingLabel="Enregistrement…" />
             ) : null}

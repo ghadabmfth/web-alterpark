@@ -21,7 +21,9 @@ export const metadata: Metadata = { title: "Ma réservation" };
 
 export default async function MyReservation({ params, searchParams }: PageProps<"/compte/reservations/[reference]">) {
   const { reference } = await params;
-  const back = (await searchParams).paiement; // "retour" | "annule" from the payment page
+  const sp = await searchParams;
+  const back = sp.paiement; // "retour" | "annule" from the payment page
+  const justBooked = sp.reservation === "confirmee"; // pay-on-site booking just made
   const user = await requireUser(`${routes.account}/reservations/${reference}`);
   if (!REFERENCE_RE.test(reference) || !hasDatabase()) notFound();
   // Scoped by owner in the query: another customer's reference is simply not found.
@@ -48,6 +50,11 @@ export default async function MyReservation({ params, searchParams }: PageProps<
         actions={<Badge tone={STATUS_TONES[r.status]}>{STATUS_LABELS[r.status]}</Badge>}
       />
       <div className="mb-6 flex flex-col gap-4">
+        {justBooked && r.status === "CONFIRMED" ? (
+          <Alert tone="success" title="Réservation confirmée">
+            <p>{`Un e-mail de confirmation a été envoyé à ${r.customerEmail}. Présentez la référence ${r.reference} à votre arrivée ; vous réglerez ${formatCents(r.totalCents)} à l’accueil à votre retour (carte bancaire, espèces, chèques vacances).`}</p>
+          </Alert>
+        ) : null}
         {back === "retour" && r.status === "CONFIRMED" ? (
           <Alert tone="success" title="Paiement reçu, réservation confirmée">
             <p>{`Un e-mail de confirmation a été envoyé à ${r.customerEmail}. Présentez la référence ${r.reference} à votre arrivée.`}</p>
@@ -80,7 +87,19 @@ export default async function MyReservation({ params, searchParams }: PageProps<
               ...(r.outboundFlight ? [{ term: "Vol aller", value: r.outboundFlight }] : []),
               ...(r.returnFlight ? [{ term: "Vol retour", value: r.returnFlight }] : []),
               { term: "Montant TTC", value: formatCents(r.totalCents) },
-              { term: "Paiement", value: paid ? "Payé en ligne" : r.payments.some((p) => p.status === "PROCESSING") ? "En cours de vérification" : "Non payé" },
+              {
+                term: "Paiement",
+                value:
+                  r.paymentMethod === "ON_SITE"
+                    ? paid
+                      ? "Réglé sur place"
+                      : "À régler sur place à votre retour"
+                    : paid
+                      ? "Payé en ligne"
+                      : r.payments.some((p) => p.status === "PROCESSING")
+                        ? "En cours de vérification"
+                        : "Non payé",
+              },
               ...(r.refundedCents > 0 ? [{ term: "Remboursé", value: formatCents(r.refundedCents) }] : []),
               ...(r.payments.some((p) => p.refunds.some((x) => x.status === "PENDING")) ? [{ term: "Remboursement", value: "En cours (5 à 10 jours ouvrés)" }] : []),
             ]}

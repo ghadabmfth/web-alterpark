@@ -19,7 +19,7 @@ import { routes } from "@/config/site";
 import { bookingFormSchema, MAX_PASSENGERS, type BookingFormData, type BookingFormInput } from "@/modules/reservations/schemas";
 import { formatDateTime, formatDuration, validateStay, type StayField, type ValidStay } from "@/modules/reservations/domain/stay";
 import { quoteAction, type QuoteState } from "@/modules/reservations/actions";
-import { funnelSessionAction, startCheckoutAction, type FunnelSession } from "@/modules/payments/actions";
+import { bookPayOnSiteAction, funnelSessionAction, startCheckoutAction, type FunnelSession } from "@/modules/payments/actions";
 
 /*
  * Booking funnel. Step 1 is checked twice: instantly in the browser (shared rules), then by the
@@ -76,6 +76,8 @@ export function BookingFunnel({ parkings, paymentsEnabled }: { parkings: FunnelP
   const [payError, setPayError] = useState<string | null>(null);
   /** One key per quoted stay: a double click or a retry returns the same reservation. */
   const payKey = useRef<string>("");
+  /** Customer's choice: pay online now (Stripe) or at the counter on return. */
+  const [payMode, setPayMode] = useState<"ONLINE" | "ON_SITE">(paymentsEnabled ? "ONLINE" : "ON_SITE");
   const heading = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
 
@@ -250,12 +252,15 @@ export function BookingFunnel({ parkings, paymentsEnabled }: { parkings: FunnelP
     }
     setPaying(true);
     try {
-      const r = await startCheckoutAction(getValues(), payKey.current || (payKey.current = newKey()));
+      const key = payKey.current || (payKey.current = newKey());
+      const r = payMode === "ONLINE" ? await startCheckoutAction(getValues(), key) : await bookPayOnSiteAction(getValues(), key);
       if (r.status === "redirect") {
         try {
           sessionStorage.removeItem(SAVED_KEY);
         } catch {}
-        window.location.assign(r.url); // hosted payment page; the button stays busy meanwhile
+        // Hosted payment page (online) or the confirmed booking (on site); the button stays busy.
+        if (r.url.startsWith("/")) router.push(r.url);
+        else window.location.assign(r.url);
         return;
       }
       setPaying(false);
@@ -298,17 +303,13 @@ export function BookingFunnel({ parkings, paymentsEnabled }: { parkings: FunnelP
                   Continuer
                 </Button>
               ) : (
-                paymentsEnabled && session?.signedIn ? (
-                  <Button size="sm" onClick={pay} loading={paying} loadingLabel="Redirection vers le paiement…">
-                    {quote ? `Payer ${quote.total}` : "Payer et confirmer"}
-                  </Button>
-                ) : paymentsEnabled ? (
-                  <Button size="sm" onClick={() => goToSignIn("/connexion")} disabled={!session}>
-                    Se connecter pour payer
+                session?.signedIn ? (
+                  <Button size="sm" onClick={pay} loading={paying} loadingLabel={payMode === "ONLINE" ? "Redirection vers le paiement…" : "Confirmation…"}>
+                    {payMode === "ONLINE" ? (quote ? `Payer ${quote.total}` : "Payer et confirmer") : "Confirmer ma réservation"}
                   </Button>
                 ) : (
-                  <Button size="sm" disabled aria-describedby="payment-unavailable">
-                    Payer et confirmer
+                  <Button size="sm" onClick={() => goToSignIn("/connexion")} disabled={!session}>
+                    Se connecter pour réserver
                   </Button>
                 )
               )}
@@ -414,19 +415,26 @@ export function BookingFunnel({ parkings, paymentsEnabled }: { parkings: FunnelP
                 ]}
               />
             ) : null}
+            <RadioGroup
+              legend="Paiement"
+              name="payMode"
+              options={[
+                ...(paymentsEnabled ? [{ value: "ONLINE", label: "Payer maintenant en ligne (carte bancaire, paiement sécurisé)" }] : []),
+                { value: "ON_SITE", label: "Payer sur place à mon retour (carte bancaire, espèces, chèques vacances)" },
+              ]}
+              value={payMode}
+              onChange={(e) => {
+                setPayMode(e.target.value as "ONLINE" | "ON_SITE");
+                payKey.current = newKey(); // a new request for the other mode
+              }}
+            />
             {payError ? (
-              <Alert tone="error" title="Paiement non démarré">
+              <Alert tone="error" title="Réservation non enregistrée">
                 <p>{payError}</p>
               </Alert>
             ) : null}
-            {!paymentsEnabled ? (
-              <div id="payment-unavailable">
-                <Alert tone="info" title="Paiement en ligne bientôt disponible">
-                  <p>Les places disponibles et le prix ci-dessus sont vérifiés en temps réel. Le paiement sécurisé sera activé prochainement : aucune réservation n’est enregistrée et aucune place n’est bloquée pour le moment.</p>
-                </Alert>
-              </div>
-            ) : session && !session.signedIn ? (
-              <Alert tone="info" title="Connectez-vous pour payer">
+            {session && !session.signedIn ? (
+              <Alert tone="info" title="Connectez-vous pour réserver">
                 <p>
                   Votre saisie est conservée.{" "}
                   <button type="button" className="text-primary underline" onClick={() => goToSignIn("/inscription")}>Créer un compte</button>{" "}
@@ -435,7 +443,9 @@ export function BookingFunnel({ parkings, paymentsEnabled }: { parkings: FunnelP
               </Alert>
             ) : (
               <p className="m-0 text-text-secondary">
-                Vous allez être redirigé vers la page de paiement sécurisée de notre prestataire Stripe. Votre place est bloquée pendant 30 minutes ; la réservation est confirmée dès la validation du paiement.
+                {payMode === "ONLINE"
+                  ? "Vous allez être redirigé vers la page de paiement sécurisée de notre prestataire Stripe. Votre place est bloquée pendant 30 minutes ; la réservation est confirmée dès la validation du paiement."
+                  : `Votre réservation est confirmée immédiatement. Vous réglez ${quote ? quote.total : "le montant"} à l’accueil à votre retour : carte bancaire, espèces ou chèques vacances.`}
               </p>
             )}
           </div>

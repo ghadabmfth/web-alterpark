@@ -72,11 +72,9 @@ export async function cancelReservationAction(_prev: ActionState, formData: Form
   }
   const r = await cancelByCustomer({ userId: user.id, reference: parsed.data.reference, reason: parsed.data.reason });
   if (!r.ok) return { status: "error", message: CANCEL_ERRORS[r.reason], ...(r.reason === "REASON_REQUIRED" ? { fieldErrors: { reason: CANCEL_ERRORS.REASON_REQUIRED } } : {}) };
-  if ((r.refundIds.length || r.sessionsToExpire.length) && paymentsConfigured()) {
-    // The cancellation and its refund are recorded; the provider calls follow (retried by the cron).
-    await executeRefunds(r.refundIds);
-    after(() => expireSessions(r.sessionsToExpire));
-  }
+  // The cancellation and its refund are recorded; the provider calls follow (retried by the cron).
+  if (r.refundIds.length) await executeRefunds(r.refundIds);
+  if (r.sessionsToExpire.length && paymentsConfigured()) after(() => expireSessions(r.sessionsToExpire));
   after(() => processOutbox().catch((e) => console.error("outbox", e)));
   refresh();
   return {

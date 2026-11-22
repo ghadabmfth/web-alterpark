@@ -7,6 +7,9 @@ import { bookingFormSchema } from "@/modules/reservations/schemas";
 import type { StayErrors } from "@/modules/reservations/domain/stay";
 import { paymentsConfigured } from "./stripe";
 import { resumeCheckout, startCheckout, type CheckoutResult } from "./service";
+import { bookPayOnSite } from "@/modules/reservations/service";
+import { after } from "next/server";
+import { processOutbox } from "@/modules/notifications/outbox";
 
 /*
  * Payment Server Actions. The booking form is validated again here (never trusted), the customer
@@ -69,4 +72,25 @@ export async function resumeCheckoutAction(reference: string): Promise<CheckoutS
   const user = await requireUser(`/compte/reservations/${reference}`);
   if (!/^AP-[A-Z]{3}-[A-Z0-9]{6}$/.test(reference)) return { status: "error", message: MESSAGES.NOT_PAYABLE! };
   return toState(await resumeCheckout(user.id, reference));
+}
+
+/** « Payer sur place à mon retour »: the booking is confirmed at once, the amount is due on site. */
+export async function bookPayOnSiteAction(input: unknown, idempotencyKey: string): Promise<CheckoutState> {
+  const user = await getCurrentUser();
+  if (!user) return { status: "auth" };
+  const parsed = bookingFormSchema.safeParse(input);
+  if (!parsed.success) return { status: "invalid", fieldErrors: fieldErrorsOf(parsed.error) };
+  if (!(await consumeRateLimit(RATE_LIMITS.reservationChange, user.id)).allowed) {
+    return { status: "error", message: "Trop de tentatives. Réessayez plus tard." };
+  }
+  const d = parsed.data;
+  const r = await bookPayOnSite({
+    userId: user.id,
+    idempotencyKey,
+    request: { parkingSlug: d.parking, offerCode: d.offer, departure: { date: d.departureDate, time: d.departureTime }, ret: { date: d.returnDate, time: d.returnTime } },
+    details: { plate: d.plate, passengers: d.passengers, outboundFlight: d.outboundFlight, returnFlight: d.returnFlight, firstName: d.firstName, lastName: d.lastName, email: d.email, phone: d.phone },
+  });
+  if (!r.ok) return toState(r);
+  after(() => processOutbox().catch((e) => console.error("outbox", e)));
+  return { status: "redirect", url: `/compte/reservations/${r.reference}?reservation=confirmee` };
 }
