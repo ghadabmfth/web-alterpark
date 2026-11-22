@@ -16,3 +16,8 @@
 
 /* Eyebrow pill: orange on its 14 % orange tint is 4.37:1 → the system's lighter orange (≈ 5:1). */
 .ap-eyebrow { color: var(--primary-hover); }
+
+/* Carousel dots: 8 px targets fail WCAG 2.2 « target size » (24 px). Same visible dot, larger
+   clickable area (transparent padding around it). */
+.ap-carousel__dot { box-sizing: content-box; padding: 8px; background-clip: content-box; }
+.ap-carousel__dots { gap: 0; }

@@ -16,7 +16,7 @@ export interface HeroProps {
   title: string;
   /** Typewriter effect (default true). */
   typing?: boolean;
-  intro?: string;
+  intro?: ReactNode;
   image?: BrandImage;
   steps?: StepItem[];
   cta?: LinkAction;

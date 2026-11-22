@@ -1,0 +1,110 @@
+/*
+ * Page layouts of the client's design « Accueil » and « Services Plus » (Nov. 2026), taken from the
+ * page CSS of the supplied mock-ups, with colours expressed from tokens only.
+ */
+
+/* Header laid over the hero photo on pages that open with a hero (home, Services Plus). */
+.ap-site-top { --hdr-h: 104px; position: relative; }
+@media (min-width: 1024px) { .ap-site-top { --hdr-h: 126px; } }
+@media (min-width: 1280px) { .ap-site-top { --hdr-h: 134px; } }
+.ap-site-top:has(~ main > .ap-hero:first-child) > .ap-header:not(.is-stuck) { position: absolute; top: 0; left: 0; right: 0; }
+main > .ap-hero:first-child { padding-top: calc(var(--hdr-h, 104px) + var(--space-30)); padding-bottom: var(--space-12); }
+@media (min-width: 768px) { main > .ap-hero:first-child { padding-bottom: var(--space-16); } }
+@media (min-width: 1024px) { main > .ap-hero:first-child { padding-top: calc(126px + var(--space-30)); } }
+@media (min-width: 1280px) { main > .ap-hero:first-child { padding-top: calc(134px + var(--space-30)); } }
+.ap-hero .ap-display { text-wrap: balance; max-width: 1513px; }
+.ap-hero__content { gap: var(--space-6); }
+@media (min-width: 768px) { .ap-hero__content { gap: var(--space-8); } }
+.ap-hero__content > .ap-body { font-size: 18px; }
+@media (max-width: 767px) {
+  .ap-hero__steps { max-width: 440px; margin-top: var(--space-2); }
+  .ap-hero__content > .ap-body { max-width: 34em; }
+}
+.hero-seul { font-family: var(--font-display); font-weight: 400; font-size: 1.35em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); }
+.hero-num { color: var(--primary); font-weight: 700; }
+
+/* Stacked sections of the page */
+.ap-page { display: flex; flex-direction: column; gap: var(--space-16); padding-bottom: var(--space-16); }
+@media (min-width: 768px) { .ap-page { gap: var(--space-20); } }
+@media (min-width: 1024px) { .ap-page { gap: var(--space-24); } }
+@media (min-width: 1280px) { .ap-page { gap: var(--space-30); padding-bottom: var(--space-30); } }
+.page-wrap { box-sizing: border-box; width: var(--container-width); max-width: var(--container-max); margin-inline: auto; }
+.ap-page section[id] { scroll-margin-top: 96px; }
+
+/* « Changements » collage: Google badge above the left photo */
+.collage { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-4); align-items: start; max-width: 818px; margin-left: auto; }
+@media (max-width: 1023px) { .collage { margin-inline: auto; } }
+.collage__col { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.collage__col--a { padding-top: 29%; }
+.collage img { display: block; width: 100%; height: auto; object-fit: cover; border-radius: var(--radius-xl); box-shadow: var(--shadow-photo); }
+.collage__a { aspect-ratio: 397 / 539; }
+.collage__b { aspect-ratio: 395 / 535; }
+.collage__badge { align-self: flex-end; position: relative; z-index: var(--z-raised); }
+@media (max-width: 575px) {
+  .collage { grid-template-columns: 1fr; gap: var(--space-4); }
+  .collage__col--a { padding-top: 0; }
+  .collage__a { display: none !important; }
+  .collage__badge { align-self: center; }
+  .collage__col--b { position: relative; }
+  .collage__b { aspect-ratio: 4 / 3; }
+  .collage__col--b .ap-iconbtn--play { position: absolute; right: var(--space-4); bottom: var(--space-4); width: 64px; height: 64px; }
+}
+
+/* Loyalty */
+.loyalty { display: flex; flex-direction: column; gap: var(--space-8); }
+@media (min-width: 768px) { .loyalty { gap: var(--space-12); } }
+.loyalty__how { display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start; }
+.loyalty__how .ap-body { max-width: 1022px; }
+.loyalty__how strong { font-weight: 700; }
+@media (min-width: 1024px) {
+  .loyalty__steps { margin-left: auto; width: min(100%, 1320px); }
+  .loyalty__how { align-items: flex-end; text-align: right; }
+}
+
+/* Application */
+.app-visual { display: block; width: 100%; max-width: 684px; height: auto; margin-inline: auto; }
+@media (max-width: 1023px) { .app-visual { max-width: 520px; } }
+#application .ap-media__grid { align-items: center; }
+.app-download { display: flex; flex-direction: column; gap: var(--space-3); }
+.app-download__note { margin: 0; font: 400 16px/24px var(--font-sans); color: var(--text-secondary); }
+.app-download .ap-stores a { flex-basis: 180px; }
+@media (max-width: 575px) { .app-download { align-items: center; text-align: center; } .ap-media .ap-stores { justify-content: center; } }
+
+/* Reviews */
+.reviews { display: flex; flex-direction: column; gap: var(--space-8); }
+@media (min-width: 768px) { .reviews { gap: var(--space-12); } }
+.reviews__head { display: grid; gap: var(--space-6); justify-items: center; }
+@media (min-width: 1280px) {
+  .reviews__head { grid-template-columns: 1fr minmax(0, 1144px) 1fr; gap: var(--space-8); }
+  .reviews__head > .ap-heading { grid-column: 2; }
+  .reviews__head > .ap-rating { grid-column: 3; justify-self: end; }
+}
+.reviews__cta, .center-cta { display: flex; justify-content: center; }
+.end-cta { display: flex; justify-content: flex-start; }
+@media (min-width: 1024px) { .end-cta { justify-content: flex-end; } }
+@media (max-width: 575px) {
+  .ap-page .ap-btn--md { width: 100%; max-width: 400px; }
+  .end-cta, .reviews__cta, .ap-media__cta { justify-content: center; }
+}
+
+/* Services Plus */
+.sp-hero-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-4) var(--space-6); }
+.sp-watch { display: inline-flex; align-items: center; gap: var(--space-3); padding: 0; border: 0; background: none; color: var(--text-primary); font: 700 16px/24px var(--font-sans); cursor: pointer; }
+.sp-watch__ico { display: grid; width: 52px; height: 52px; color: var(--primary); transition: transform var(--duration-base) cubic-bezier(0.34, 1.56, 0.64, 1); }
+.sp-watch__ico .ap-svg, .sp-watch__ico svg { width: 100%; height: 100%; }
+.sp-watch:hover { color: var(--primary); }
+.sp-watch:hover .sp-watch__ico { transform: scale(1.1); }
+.sp-watch:focus-visible { outline: none; border-radius: var(--radius-pill); box-shadow: var(--shadow-focus); }
+.sp-quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); width: 100%; max-width: 980px; margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+@media (min-width: 900px) { .sp-quick { grid-template-columns: repeat(4, 1fr); } }
+.sp-quick a { display: flex; flex-direction: column; gap: 2px; height: 100%; padding: var(--space-3) var(--space-4); border-radius: 16px; background: color-mix(in srgb, var(--surface-sunken) 60%, transparent); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 14%, transparent); color: var(--text-primary); text-decoration: none; transition: box-shadow var(--duration-fast), transform var(--duration-fast); }
+.sp-quick a:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--primary); }
+.sp-quick b { font: 700 15px/20px var(--font-sans); }
+.sp-quick span { font: 800 16px/22px var(--font-sans); color: var(--primary); }
+.sp-services { display: flex; flex-direction: column; gap: var(--space-12); }
+.sp-grid { display: grid; gap: var(--space-6); }
+@media (min-width: 900px) { .sp-grid { grid-template-columns: 1fr 1fr; } }
+.sp-why { display: flex; flex-direction: column; gap: var(--space-12); }
+.sp-why .ap-banner__content .ap-body { color: var(--primary); font-weight: 700; }
+.sp-why__body { display: flex; flex-direction: column; gap: var(--space-12); }
+.ap-page [id="recharge"], .ap-page [id="interieur"], .ap-page [id="lavage"], .ap-page [id="sur-demande"] { scroll-margin-top: var(--space-8); }

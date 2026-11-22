@@ -1,19 +1,26 @@
 import { cacheLife } from "next/cache";
 import { routes, socialProfiles } from "@/config/site";
-import { listParkings } from "@/modules/parkings/queries";
 import type { NavLink, SocialItem } from "@/components/ui/navigation/types";
 
 /* Data of the public header and footer. */
 
+/** Header links, as in the client's design (Accueil, Nov. 2026): three on each side of the logo. */
 export async function publicNav(): Promise<NavLink[]> {
-  const parkings = await listParkings();
   return [
-    { label: "Réserver", href: routes.booking },
-    { label: "Nos parkings", children: [{ label: "Tous nos parkings", href: routes.parkings }, ...parkings.map((p) => ({ label: p.city === "Roissy-en-France" ? "Paris-Roissy" : p.city, href: routes.parking(p.slug) }))] },
-    { label: "Comment ça marche", href: routes.howItWorks },
-    { label: "FAQ", href: routes.faq },
-    { label: "Contact", href: routes.contact },
-    { label: "Mon compte", href: routes.account },
+    { label: "Accueil", href: routes.home },
+    { label: "Comment ça marche ?", href: routes.howItWorks },
+    { label: "Nos tarifs", href: routes.parkings },
+    {
+      label: "Services Plus",
+      children: [
+        { label: "Tous nos Services Plus", href: routes.services },
+        { label: "Nos nouveautés", href: "/#nouveautes" },
+        { label: "Programme de fidélité", href: "/#fidelite" },
+        { label: "Application mobile", href: "/#application" },
+      ],
+    },
+    { label: "Plan accès", href: `${routes.parking("nantes")}#acces` },
+    { label: "Contactez-nous", href: routes.contact },
   ];
 }
 

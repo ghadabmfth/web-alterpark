@@ -42,6 +42,7 @@ export const routes = {
   parkings: "/parkings",
   parking: (slug: string) => `/parkings/${slug}`,
   howItWorks: "/comment-ca-marche",
+  services: "/services",
   faq: "/faq",
   contact: "/contact",
   booking: "/reservation",
@@ -59,6 +60,8 @@ export const legalLinks = [
   { label: "Mentions légales", href: routes.legal },
   { label: "CGV", href: routes.terms },
   { label: "Confidentialité", href: routes.privacy },
+  { label: "FAQ", href: routes.faq },
+  { label: "Espace client", href: routes.account },
 ];
 
 /**
@@ -66,3 +69,15 @@ export const legalLinks = [
  * render the entries that exist (no dead links).
  */
 export const socialProfiles: { facebook?: string; youtube?: string } = {};
+
+/** Google rating shown by the client's design (« relevés le 13 nov. 2026 »). Update when it changes. */
+export const googleRating = { rating: 4.4, count: 1375 } as const;
+
+/** Presentation video supplied with the design. */
+export const presentationVideo = "https://youtu.be/zrJMs72gTJg";
+
+/**
+ * Mobile application store pages. Empty until the client provides the published URLs: the
+ * badges are only shown with real links (no dead « Download » button).
+ */
+export const appStoreLinks: { appStore?: string; googlePlay?: string } = {};

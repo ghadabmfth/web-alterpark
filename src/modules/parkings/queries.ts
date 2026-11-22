@@ -2,6 +2,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { db, hasDatabase } from "@/server/db/client";
 import { STATIC_PARKINGS } from "./catalog";
 import type { ParkingSummary } from "./types";
+import { priceStay, type RateRow } from "@/modules/pricing/domain/price";
 
 /*
  * Public read queries of the parkings feature. Cached (`use cache`) and tagged so the back office
@@ -17,8 +18,19 @@ async function loadRows() {
   return db().parking.findMany({
     where: { archivedAt: null },
     orderBy: { createdAt: "asc" },
-    include: { offers: { where: { isActive: true, archivedAt: null }, orderBy: { sortOrder: "asc" } } },
+    include: { offers: { where: { isActive: true, archivedAt: null }, orderBy: { sortOrder: "asc" }, include: { prices: { where: { isActive: true } } } } },
   });
+}
+
+/**
+ * « dès » price of an offer: what one day costs for an arrival today, with the same engine as the
+ * booking (active rates only). No applicable rate → undefined: a price is never guessed.
+ */
+function fromCents(prices: ParkingRow["offers"][number]["prices"]): number | undefined {
+  if (!prices.length) return undefined;
+  const today = new Date().toISOString().slice(0, 10);
+  const rows: RateRow[] = prices.map((r) => ({ id: r.id, validFrom: r.validFrom.toISOString().slice(0, 10), validTo: r.validTo ? r.validTo.toISOString().slice(0, 10) : null, minDays: r.minDays, maxDays: r.maxDays, mode: r.mode, amountCents: r.amountCents, extraDayCents: r.extraDayCents, priority: r.priority, currency: r.currency }));
+  return priceStay(rows, today, 1)?.totalCents;
 }
 
 function toSummary(p: ParkingRow): ParkingSummary {
@@ -53,6 +65,7 @@ function toSummary(p: ParkingRow): ParkingSummary {
       walkMinutes: o.walkMinutes ?? undefined,
       highlighted: o.isHighlighted,
       capacity: o.capacity,
+      fromCents: fromCents(o.prices),
     })),
   };
 }

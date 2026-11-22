@@ -69,7 +69,7 @@ export default async function ParkingPage({ params }: PageProps<"/parkings/[slug
       )}
 
       {p.practicalInfo.length || p.address || p.phone ? (
-        <Section labelledBy="infos-title">
+        <Section labelledBy="infos-title" id="acces">
           <div className="grid gap-12 lg:grid-cols-2">
             <div className="flex flex-col gap-8">
               <div id="infos-title">

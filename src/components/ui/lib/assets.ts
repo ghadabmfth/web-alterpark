@@ -4,6 +4,8 @@ export const assets = {
   entreePhoto: { src: "/brand/photos/entree-parking.jpg", width: 765, height: 1020 },
   ombrieresPhoto: { src: "/brand/photos/ombrieres-photovoltaiques.jpg", width: 1360, height: 907 },
   rallyePhoto: { src: "/brand/photos/rallye-du-coeur-bandeau.jpg", width: 1920, height: 500 },
+  servicesWashPhoto: { src: "/brand/photos/services-lavage.webp", width: 2000, height: 1334 },
+  servicesHeroPhoto: { src: "/brand/photos/services-recharge-aerien.webp", width: 2400, height: 1046 },
   appPhoto: { src: "/brand/photos/application-mobile.png", width: 1200, height: 1295 },
   rallyeLogo: { src: "/brand/partners/rallye-du-coeur-logo.png", width: 580, height: 110 },
   googlePlay: { src: "/brand/partners/badge-google-play.png", width: 300, height: 100 },
