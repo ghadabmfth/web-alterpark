@@ -139,3 +139,23 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
   and says reservations open soon. The static catalogue is the seed source and the no-database
   fallback only.
 - **Cron daily** (Hobby plan limit); e-mails are sent right after the request via `after()`.
+
+## ADR-017 — Phase 5 reservation engine
+
+- **Holds are created at payment time, not at quote time.** The funnel asks the server for a quote
+  (price + availability, nothing held); the hold is taken in the same request that opens the Stripe
+  Checkout session (Phase 6). Holding a space while the customer types their details would block
+  capacity for people who never pay.
+- **Rate selection is deterministic:** priority, then a rate whose range covers the stay, then the
+  most specific minimum, then the most recent, then the id. Rates are chosen by the arrival date in
+  the site's time zone. No applicable rate → the funnel says no price is published.
+- **Peak occupancy, not overlap count**, is compared with capacity: consecutive stays share a space.
+- **References are random** (32-character alphabet without 0/O/1/I, 6 characters) and retried on
+  the rare collision; they reveal no volume.
+- **Late payments** confirm only if a space is still free; otherwise the webhook refunds (Phase 6).
+- **No cancellation without refund:** until refunds exist (Phase 6), a paid booking cannot be
+  cancelled online; the customer is told to contact the team.
+- **Pages below a dynamic parameter** (e.g. `/compte/reservations/[reference]`) cannot know the URL
+  at prerender time; the AppShell resolves the current link inside `<Suspense>` with an identical
+  fallback, so the shell stays prerendered.
+- **Demo data is a local script**, never part of the seed or deployment, and refuses remote databases.

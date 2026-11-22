@@ -45,7 +45,7 @@ Stripe variables arrive in Phase 6 (`.env.example` documents them).
 
 ## 4. Scheduled job
 
-`/api/cron/notifications` retries e-mails that failed and purges old rate-limit counters. E-mails
+`/api/cron/notifications` retries e-mails that failed, marks unpaid holds past their time as EXPIRED (availability already ignores them) and purges old rate-limit counters. E-mails
 are normally sent right after each request; the job is a safety net. The Hobby plan allows **one run
 per day** (configured at 03:17 UTC); on Pro, set `*/10 * * * *` in `vercel.json`.
 

@@ -1,6 +1,6 @@
 # Security
 
-Status: Phase 4 in place (authentication, authorisation, rate limiting, audit, contact); payment parts in Phase 6. ✓ = in place today.
+Status: Phases 4–5 in place (authentication, authorisation, rate limiting, audit, contact, reservations); payment parts in Phase 6. ✓ = in place today.
 
 ## Authentication
 
@@ -11,7 +11,7 @@ Status: Phase 4 in place (authentication, authorisation, rate limiting, audit, c
 - ✓ E-mail verification (48 h) and password reset (1 h) with single-use tokens consumed atomically;
   only their SHA-256 hash is stored; a new reset link invalidates older ones; confirmation is an
   explicit POST so link scanners cannot use it up. Reset responses never reveal whether an e-mail exists.
-- ✓ Login (inside Auth.js `authorize`, so the raw `/api/auth/callback/credentials` endpoint is covered too: 20 / 15 min per IP, 8 / 15 min per account), sign-up (5 / h per IP), reset (5 / h) and contact (5 / h) are rate-limited; generic error messages.
+- ✓ Login (inside Auth.js `authorize`, so the raw `/api/auth/callback/credentials` endpoint is covered too: 20 / 15 min per IP, 8 / 15 min per account), sign-up (5 / h per IP), reset (5 / h) contact (5 / h), quotes (60 / 10 min per IP) and reservation changes (10 / h per account) are rate-limited; generic error messages.
 
 ## Authorisation
 
@@ -36,7 +36,7 @@ Status: Phase 4 in place (authentication, authorisation, rate limiting, audit, c
 ## Payments
 
 - No card data ever reaches Alterpark (Stripe-hosted payment page).
-- Amounts are computed server-side from the database; client values are ignored.
+- ✓ Amounts are computed server-side from the database; client values are ignored (the funnel only displays the server quote).
 - Reservation confirmed **only** by a verified webhook (signature + event-id idempotency); the
   redirect page is read-only.
 - Refunds require `PAYMENT_REFUND`, are idempotent and audit-logged.
@@ -59,7 +59,8 @@ Status: Phase 4 in place (authentication, authorisation, rate limiting, audit, c
 ## Audit trail
 
 ✓ In place for registration, logins (success and failure), e-mail verification, password reset and
-change, profile changes. Phase 7 adds back-office actions.
+change, profile changes, and every reservation state change (hold, confirmation, refused late
+confirmation, expiry, abandon, cancellation, cancellation request). Phase 7 adds back-office actions.
 
 Sensitive actions (refunds, cancellations, price and capacity changes, role/permission changes,
 admin account changes, settings) and every reservation/payment state change write an `AuditLog`
