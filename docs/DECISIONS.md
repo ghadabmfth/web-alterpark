@@ -202,3 +202,20 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
   « Désactiver » forms produced duplicate landmarks (axe).
 - **No `upgrade-insecure-requests`** in the CSP: HSTS already forces HTTPS, and the directive broke
   redirects of a production build served over HTTP (it rewrote them to https://localhost).
+
+## ADR-020 — Phase 8 quality choices
+
+- **Stripe emulator for end-to-end tests.** A 120-line local server implements the Stripe calls we
+  make (Checkout Sessions with idempotency, expire, refunds) and a hosted « payment page » that
+  sends signed webhooks. The real `StripeProvider` talks to it through `STRIPE_API_BASE`, honoured
+  with **test keys only**. A real Stripe test-mode run remains a launch step (needs keys).
+- **E2E against a production build** and a dedicated database (`*_test`, refused otherwise);
+  sessions saved once per role to stay under the login rate limits; one worker (shared state).
+- **Vendor-neutral monitoring**: one JSON log line per error (server and browser), optional webhook;
+  never query strings (tokens), headers or bodies. Sentry or a Log Drain can be plugged later.
+- **Erasure = anonymisation**: the account row stays to own accounting records; identity, contact
+  details, vehicles, tokens and messages are erased. Refused while a booking is in progress.
+- **Zod in the browser runs « jitless »**: its `Function("")` probe was blocked by the CSP and
+  reported as a violation on every page with a form.
+- **Back-office menu by permission**: the menu is rendered with the session (inside Suspense); the
+  prerendered shell shows no entry rather than entries the role cannot open.

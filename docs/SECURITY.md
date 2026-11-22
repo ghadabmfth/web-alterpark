@@ -1,6 +1,6 @@
 # Security
 
-Status: Phases 4–6 in place (authentication, authorisation, rate limiting, audit, contact, reservations, payment). ✓ = in place today.
+Status: Phases 4–8 in place; pre-launch review in [`SECURITY-REVIEW.md`](SECURITY-REVIEW.md). ✓ = in place today.
 
 ## Authentication
 
@@ -47,8 +47,9 @@ Status: Phases 4–6 in place (authentication, authorisation, rate limiting, aud
 
 - ✓ Rate limiting in PostgreSQL (fixed windows, atomic upsert) — works on serverless without extra services.
 - ✓ Contact form: honeypot, minimum fill time, rate limit (bots get the same success answer); optional Turnstile later.
-- IP addresses are stored only as salted hashes. GDPR: account deletion anonymises personal data
-  while keeping accounting records; retention periods to confirm with the client.
+- ✓ IP addresses are stored only as salted hashes. ✓ GDPR: account deletion (self-service or back
+  office) anonymises personal data while keeping accounting records; retention periods to confirm.
+- ✓ Error reports (server and browser) never contain query strings, headers, cookies or bodies.
 
 ## Secrets and configuration
 

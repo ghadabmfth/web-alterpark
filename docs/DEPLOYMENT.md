@@ -33,6 +33,7 @@ Create → Neon). It injects `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED`
 | `SITE_INDEXABLE` | `true` **at launch only** | — | Opens robots.txt / meta robots |
 | `DESIGN_SYSTEM_GALLERY` | — | `true` | Component gallery on previews |
 | `SEED_SUPER_ADMIN_EMAIL` / `_PASSWORD` | once | — | See §3, then delete |
+| `ERROR_WEBHOOK_URL` | recommended | optional | Errors are also POSTed there (Slack, Better Stack…) |
 
 | `STRIPE_SECRET_KEY` | live key (restricted `rk_live_`) | test key `sk_test_` / `rk_test_` | Payment stays disabled until set |
 | `STRIPE_WEBHOOK_SECRET` | from the live endpoint | from the test endpoint | `whsec_…`, one per endpoint |
@@ -65,7 +66,13 @@ Create → Neon). It injects `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED`
 are normally sent right after each request; the job is a safety net. The Hobby plan allows **one run
 per day** (configured at 03:17 UTC); on Pro, set `*/10 * * * *` in `vercel.json`.
 
-## 6. Backups and recovery
+## 6. Monitoring
+
+Every server or browser error is one JSON line with `"event":"alterpark.error"` in the Vercel logs
+(Project → Logs, search `alterpark.error`). Set `ERROR_WEBHOOK_URL` to receive them in a chat or an
+incident tool, or add a Vercel Log Drain. Sign-in failures are audit entries, not errors.
+
+## 7. Backups and recovery
 
 - Neon: point-in-time restore (retention depends on the plan — 7 days minimum recommended for
   Production) and branch-from-timestamp to inspect past data without touching production.
@@ -73,7 +80,7 @@ per day** (configured at 03:17 UTC); on Pro, set `*/10 * * * *` in `vercel.json`
   encrypted storage bucket (to automate in Phase 9).
 - Test a restore on a scratch branch before launch, then quarterly.
 
-## 7. Release checklist (Phase 9)
+## 8. Release checklist (Phase 9)
 
 Preview validated end to end → `develop` merged into `main` → Production deployment → smoke
 tests (home, booking, login, back office) → `SITE_INDEXABLE=true` → sitemap submitted.

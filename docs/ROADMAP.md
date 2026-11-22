@@ -13,7 +13,7 @@ production-ready before every critical workflow is tested end to end.
 | **5 — Reservation engine** ✅ | Date rules, pricing engine, availability with row lock, holds and expiry cron, lifecycle transitions, references, cancellation rules and requests, e-mail outbox | Unit tests (pricing, dates, availability, transitions, permissions); concurrency test: N parallel bookings on the last space → exactly one |
 | **6 — Payment** ✅ | `PaymentProvider` + Stripe Checkout, webhook (signature, idempotency), success / failure / pending / expiry / late payment, refunds, CSP | Stripe test-mode scenarios incl. duplicate and out-of-order webhooks; no confirmation without webhook |
 | **7 — Back office** ✅ | Dashboard (real KPIs, date/site filters), reservations, parkings & offers, pricing, customers, payments & refunds, contacts (status, assignment, notes), reports & CSV export, admin users, roles & permissions, settings, audit log | Every action permission-checked and audit-logged; e2e admin flows |
-| **8 — Quality** | Playwright e2e (registration, login, booking, payment sandbox, confirmation, history, admin management, contact), accessibility pass, security review, performance, error monitoring | All suites green in CI |
+| **8 — Quality** ✅ | Playwright e2e (registration, login, booking, payment sandbox, confirmation, history, admin management, contact), accessibility pass, security review, performance, error monitoring | All suites green in CI |
 | **9 — Deployment** | Vercel project, environments and variables, Neon (or chosen) PostgreSQL, migrations in CI/CD, Stripe live webhook, e-mail domain, backups & restore drill, `DEPLOYMENT.md`, then indexing enabled | Preview validated end to end before Production |
 
 ## Phase 1 — implementation plan and status
@@ -146,3 +146,19 @@ says reservations open soon.
 | Tests: 89 unit, 58 integration (permissions refused for every command, invariants above, audit entries), end-to-end on a production build: 13 back-office pages × 2 widths axe-clean without overflow, check-in → completion with toast and history, CSV download, booking switch reflected on the public site, custom role → invitation → password → restricted access (pages refused, export 404) | ✅ |
 | Navigation menu filtered by permission | Later (pages already show « Accès refusé »; the menu is part of the prerendered shell) |
 | GDPR: anonymisation of a customer on request | Phase 8 (retention periods to confirm with the client) |
+
+## Phase 8 — status
+
+| Task | Status |
+|---|---|
+| Playwright suite in CI (`npm run test:e2e`, own job): production build, dedicated `*_test` database, **local Stripe emulator** so the real Stripe integration (SDK, signed webhooks) is exercised without keys | ✅ 28 scenarios |
+| Public site: 14 pages × 390 / 1440 px — axe (WCAG 2.2 AA), no overflow, **zero CSP violation**; security headers; 404; contact form reaching the back office | ✅ |
+| Accounts: sign-up, sign-out, protected areas, same message for wrong password / unknown account, reset without enumeration, GDPR erasure | ✅ |
+| Booking & payment: funnel → hosted payment → signed webhook → confirmation and history; ownership; staff check-in/out; free cancellation with refund; cancel and resume; refused payment releases the space | ✅ |
+| Back office: 13 sections × 2 widths axe-clean; CSV; booking switch; audit; restricted role from invitation to refused sections and filtered menu | ✅ |
+| Security review (`docs/SECURITY-REVIEW.md`) — **open redirect found and fixed** (`/\t/evil.example`) | ✅ |
+| Error monitoring: server (`instrumentation.ts`) and browser errors as structured JSON logs, optional `ERROR_WEBHOOK_URL`; wrong passwords no longer logged as errors | ✅ |
+| GDPR: « Supprimer mon compte » and back-office anonymisation (accounting records kept) | ✅ retention periods to confirm |
+| Back-office menu filtered by permission | ✅ |
+| Lighthouse (mobile, production build): performance 91–94, accessibility 100, best practices 96 (Crossroads font 404 until licensed), SEO 100 when indexable | ✅ |
+| Totals: 95 unit, 60 integration, 28 end-to-end | ✅ |
