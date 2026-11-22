@@ -9,7 +9,7 @@ const DAY = 86_400_000;
 const rand = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 const key = () => `k_${rand()}${rand()}`.slice(0, 40);
 
-async function fixture({ capacity = 1, status = "ACTIVE" as const } = {}) {
+async function fixture({ capacity = 1, status = "ACTIVE" }: { capacity?: number; status?: "ACTIVE" | "DRAFT" } = {}) {
   const slug = `test-${rand()}`;
   const parking = await db().parking.create({
     data: {
