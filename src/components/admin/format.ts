@@ -46,3 +46,17 @@ export const AUDIT_LABELS: Record<string, string> = {
   "refund.succeeded": "Remboursement effectué",
   "refund.failed": "Remboursement en échec",
 };
+
+export const PARKING_STATUS: Record<string, [string, BadgeTone]> = {
+  ACTIVE: ["Ouvert à la réservation", "success"],
+  DRAFT: ["Brouillon", "info"],
+  SUSPENDED: ["Suspendu", "warning"],
+};
+
+export const CONTACT_STATUS: Record<string, [string, BadgeTone]> = {
+  NEW: ["Nouvelle", "warning"],
+  IN_PROGRESS: ["En cours", "info"],
+  RESOLVED: ["Traitée", "success"],
+  SPAM: ["Indésirable", "neutral"],
+  ARCHIVED: ["Archivée", "neutral"],
+};

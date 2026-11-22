@@ -1,40 +1,34 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/layout/PageHeader";
 import { DataTable } from "@/components/ui/data/DataTable";
 import { Badge } from "@/components/ui/feedback/Badge";
-import { Alert } from "@/components/ui/feedback/Alert";
+import { AccessDenied } from "@/components/admin/AccessDenied";
+import { PARKING_STATUS } from "@/components/admin/format";
 import { routes } from "@/config/site";
-import { RequirePermission } from "@/components/site/AreaGates";
-import { isBookable, listParkings } from "@/modules/parkings/queries";
-import type { ParkingSummary } from "@/modules/parkings/types";
+import { adminActor } from "@/modules/admin/page-guard";
+import { listParkingsAdmin } from "@/modules/admin/parkings";
 
 export const metadata: Metadata = { title: "Sites et offres" };
 
-/* Read-only view of the parking catalogue (static until Phase 4; editing in Phase 7). */
-export default async function AdminParkingsPage() {
-  const parkings = await listParkings();
+export default async function AdminParkings() {
+  const actor = await adminActor("PARKING_READ");
+  if (!actor) return <AccessDenied />;
+  const parkings = await listParkingsAdmin(actor);
   return (
-    <RequirePermission permission="PARKING_READ">
-      <PageHeader
-        title="Sites et offres"
-        description="Parkings, aéroports desservis et formules proposées."
-        breadcrumbs={[{ label: "Back-office", href: routes.admin }, { label: "Sites et offres" }]}
-      />
-      <Alert tone="info" title="Lecture seule" className="mb-6">
-        <p>Données de la base. Tous les sites sont en brouillon tant que les capacités, adresses et tarifs ne sont pas saisis : la saisie se fera ici en phase 7.</p>
-      </Alert>
-      <DataTable<ParkingSummary>
+    <>
+      <PageHeader title="Sites et offres" description="Parkings, règles de réservation, formules, capacités et tarifs." breadcrumbs={[{ label: "Back-office", href: routes.admin }, { label: "Sites et offres" }]} />
+      <DataTable
         caption="Parkings"
         rows={parkings}
-        rowKey={(p) => p.slug}
+        rowKey={(p) => p.id}
         columns={[
-          { key: "name", header: "Parking", cell: (p) => <a href={routes.parking(p.slug)}>{p.name}</a> },
+          { key: "name", header: "Parking", cell: (p) => <Link className="text-primary underline" href={`${routes.admin}/parkings/${p.slug}`}>{p.name}</Link> },
           { key: "airport", header: "Aéroport", cell: (p) => `${p.airportName} (${p.airportCode})` },
-          { key: "offers", header: "Formules", cell: (p) => (p.offers.length ? p.offers.map((o) => o.shortName).join(", ") : "À définir") },
-          { key: "lead", header: "Délai minimum", cell: (p) => `${p.minLeadMinutes / 60} h`, align: "end" },
-          { key: "status", header: "Statut", cell: (p) => (isBookable(p) ? <Badge tone="success">Ouvert à la réservation</Badge> : <Badge tone="info">Brouillon</Badge>) },
+          { key: "offers", header: "Formules", cell: (p) => (p.offers.length ? p.offers.map((o) => `${o.name} : ${o.capacity} pl.${o.isActive ? "" : " (inactive)"}${o._count.prices ? "" : " — sans tarif"}`).join(" · ") : "Aucune") },
+          { key: "status", header: "Statut", nowrap: true, cell: (p) => <Badge tone={PARKING_STATUS[p.status]![1]}>{PARKING_STATUS[p.status]![0]}</Badge> },
         ]}
       />
-    </RequirePermission>
+    </>
   );
 }
