@@ -302,6 +302,11 @@ export async function listCustomerReservations(userId: string) {
   return db().reservation.findMany({ where: { userId }, orderBy: [{ startsAt: "desc" }], include: customerInclude, take: 200 });
 }
 
+/** Upcoming or ongoing confirmed stays, soonest first. */
+export async function listUpcomingCustomerReservations(userId: string, limit = 3, now = new Date()) {
+  return db().reservation.findMany({ where: { userId, endsAt: { gt: now }, status: { in: ["CONFIRMED", "CHECKED_IN"] } }, orderBy: { startsAt: "asc" }, include: customerInclude, take: limit });
+}
+
 export async function getCustomerReservation(userId: string, reference: string) {
   return db().reservation.findFirst({ where: { userId, reference }, include: customerInclude });
 }

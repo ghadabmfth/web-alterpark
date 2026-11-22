@@ -12,18 +12,14 @@ export const metadata = pageMetadata({
   path: routes.booking,
 });
 
-/* Configurable rules not yet in the static catalogue (Parking.maxStayDays / bookingHorizonDays defaults). */
-const DEFAULT_MAX_STAY_DAYS = 60;
-const DEFAULT_HORIZON_DAYS = 365;
-
 export default async function BookingPage() {
   const parkings: FunnelParking[] = (await listParkings()).filter(isBookable).map((p) => ({
     slug: p.slug,
     name: p.name,
     timeZone: p.timeZone,
     minLeadMinutes: p.minLeadMinutes,
-    maxStayDays: DEFAULT_MAX_STAY_DAYS,
-    horizonDays: DEFAULT_HORIZON_DAYS,
+    maxStayDays: p.maxStayDays,
+    horizonDays: p.bookingHorizonDays,
     offers: p.offers.map((o) => ({ code: o.code, label: `${o.shortName} — ${o.tagline}` })),
   }));
   return (

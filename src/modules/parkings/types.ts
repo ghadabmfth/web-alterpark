@@ -42,4 +42,7 @@ export interface ParkingSummary {
   openingHours?: string;
   offers: ParkingOfferSummary[];
   minLeadMinutes: number;
+  maxStayDays: number;
+  bookingHorizonDays: number;
+  freeCancellationHours: number;
 }

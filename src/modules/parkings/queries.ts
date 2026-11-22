@@ -40,6 +40,9 @@ function toSummary(p: ParkingRow): ParkingSummary {
     practicalInfo: p.practicalInfo ? p.practicalInfo.split("\n").filter(Boolean) : [],
     openingHours: hours?.label,
     minLeadMinutes: p.minLeadMinutes,
+    maxStayDays: p.maxStayDays,
+    bookingHorizonDays: p.bookingHorizonDays,
+    freeCancellationHours: p.freeCancellationHours,
     offers: p.offers.map((o) => ({
       code: o.code,
       name: o.name,

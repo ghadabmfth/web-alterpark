@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { cx } from "../lib/cx";
 import { SmartLink } from "../lib/link";
@@ -12,6 +12,9 @@ import { CloseIcon, MenuIcon } from "../icons/icons";
  * navigation (groups of links, current page marked) and a top bar for page-level controls
  * (user menu). Below 1024 px the sidebar is a drawer: burger to open, scrim / Escape / link to
  * close, `inert` while closed so hidden links are unreachable.
+ * The current link comes from the URL. Under Cache Components the URL of a page with a dynamic
+ * parameter is unknown at prerender time, so the links are rendered inside <Suspense> with an
+ * identical fallback that only lacks the `aria-current` mark.
  */
 export interface ShellNavGroup {
   title?: string;
@@ -47,10 +50,30 @@ function subscribe(cb: () => void) {
   return () => mql.removeEventListener("change", cb);
 }
 
+function ShellLinks({ nav, active, onNavigate }: { nav: ShellNavGroup[]; active?: string; onNavigate: () => void }) {
+  return nav.map((g, i) => (
+    <div key={i} className="ap-shell__group">
+      {g.title ? <p className="ap-shell__group-title">{g.title}</p> : null}
+      <ul>
+        {g.items.map((it) => (
+          <li key={it.href}>
+            <SmartLink href={it.href} aria-current={(it.current ?? it.href === active) ? "page" : undefined} onClick={onNavigate}>
+              {it.label}
+            </SmartLink>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ));
+}
+
+function CurrentShellLinks({ nav, rootHref, onNavigate }: { nav: ShellNavGroup[]; rootHref: string; onNavigate: () => void }) {
+  const pathname = usePathname() ?? "/";
+  return <ShellLinks nav={nav} active={currentHref(nav, pathname, rootHref)} onNavigate={onNavigate} />;
+}
+
 export function AppShell({ context, navLabel, nav, homeHref = "/", rootHref = "/", topbar, children, className }: AppShellProps) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname() ?? "/";
-  const active = currentHref(nav, pathname, rootHref);
   const desktop = useSyncExternalStore(subscribe, () => window.matchMedia(DESKTOP).matches, () => true);
   const burger = useRef<HTMLButtonElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
@@ -88,20 +111,9 @@ export function AppShell({ context, navLabel, nav, homeHref = "/", rootHref = "/
         </div>
         <nav className="ap-shell__nav" aria-label={navLabel}>
           {context ? <p className="ap-shell__context">{context}</p> : null}
-          {nav.map((g, i) => (
-            <div key={i} className="ap-shell__group">
-              {g.title ? <p className="ap-shell__group-title">{g.title}</p> : null}
-              <ul>
-                {g.items.map((it) => (
-                  <li key={it.href}>
-                    <SmartLink href={it.href} aria-current={(it.current ?? it.href === active) ? "page" : undefined} onClick={() => setOpen(false)}>
-                      {it.label}
-                    </SmartLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <Suspense fallback={<ShellLinks nav={nav} onNavigate={() => setOpen(false)} />}>
+            <CurrentShellLinks nav={nav} rootHref={rootHref} onNavigate={() => setOpen(false)} />
+          </Suspense>
         </nav>
       </div>
       <div className="ap-shell__main">
