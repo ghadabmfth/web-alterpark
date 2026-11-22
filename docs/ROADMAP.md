@@ -183,3 +183,19 @@ says reservations open soon.
 | Back office: payment method, amount still due, « Encaissement sur place » (card, cash, holiday vouchers, cheque) | ✅ |
 | Refunds of on-site payments recorded at once; confirmation e-mail states the amount due on site; CSV column | ✅ |
 | Tests: 4 integration scenarios (confirmation, idempotency, ceiling, refunds, cancellation), e2e pay-on-site end to end | ✅ |
+
+## Pages from the client mockups (Nov. 2026)
+
+Done: combined sign-in and sign-up page (`/connexion`, `/inscription`), with new required fields: civility, e-mail confirmation, postal code and phone (company name is optional); customer dashboard in the site layout (`/compte`); `/plan-acces` (schematic SVG map and two itineraries, each with a Google Maps link); new 5-step `/comment-ca-marche`; `/qui-sommes-nous` (timeline and Rallye du Cœur).
+
+Adapted from the mockups:
+- Step 1, « Aucun paiement à l’avance »: replaced by « Paiement au choix : en ligne ou sur place » (ADR-023).
+- « Se souvenir de moi » is not offered: the session already lasts 7 days and is renewed while the customer is active.
+- « Mes points de fidélité » is shown as « bientôt disponible » (the programme does not exist yet).
+- The avatar is replaced by the customer's initials (we do not store photos).
+
+Questions for the client:
+- « Juillet 2025 » in the timeline repeats the text of « Avril 2022 » word for word. It is left out until the client sends the real text.
+- The shuttle drop-off point is « P11 Eco » on Comment ça marche but « P1 Couvert » in the home page news: which one is right?
+- Missing photos: the airport control tower (Plan accès hero), a hand holding keys (banner), the timeline thumbnails (GCA logo, lockdown, shuttle) and the Comment ça marche hero. Existing photos are used for now.
+- The Rallye du Cœur URL: the « En savoir + » button is hidden until we have it.

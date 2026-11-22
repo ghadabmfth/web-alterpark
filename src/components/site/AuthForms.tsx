@@ -4,6 +4,7 @@ import { useSyncExternalStore, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextField } from "@/components/ui/forms/TextField";
 import { Checkbox } from "@/components/ui/forms/Checkbox";
+import { Select } from "@/components/ui/forms/Select";
 import { Button } from "@/components/ui/actions/Button";
 import { Alert } from "@/components/ui/feedback/Alert";
 import { StatusIcon } from "@/components/ui/icons/icons";
@@ -62,7 +63,8 @@ function useNextParam(): string {
 }
 const withNext = (href: string, next: string) => (next ? `${href}?suivant=${encodeURIComponent(next)}` : href);
 
-export function LoginForm() {
+/** « Déjà client ? » — sign-in. `standalone` adds the link to the sign-up page. */
+export function LoginForm({ standalone = true }: { standalone?: boolean }) {
   const next = useNextParam();
   // Return to the protected page that sent the user here (validated again on the server).
   const { form, state, pending, formAction, onSubmit } = useActionForm<LoginInput>(loginAction, zodResolver(loginSchema), { email: "", password: "" }, () => ({
@@ -74,24 +76,38 @@ export function LoginForm() {
       <Feedback state={state} />
       <TextField label="Adresse e-mail" type="email" autoComplete="email" required error={e.email?.message} {...form.register("email")} />
       <TextField label="Mot de passe" type="password" autoComplete="current-password" required error={e.password?.message} {...form.register("password")} />
-      <a className="text-primary underline" href={routes.forgotPassword}>Mot de passe oublié ?</a>
-      <Button type="submit" fullWidth loading={pending} loadingLabel="Connexion…">Se connecter</Button>
-      <p className="m-0 text-center text-text-secondary">
-        Pas encore de compte ? <a className="font-bold text-primary underline" href={withNext(routes.register, next)}>Créer un compte</a>
-      </p>
+      <a className="self-end font-bold text-primary" href={routes.forgotPassword}>Mot de passe oublié ?</a>
+      <div>
+        <Button type="submit" loading={pending} loadingLabel="Connexion…">Se connecter</Button>
+      </div>
+      {standalone ? (
+        <p className="m-0 text-text-secondary">
+          Pas encore de compte ? <a className="font-bold text-primary underline" href={withNext(routes.register, next)}>Créer un compte</a>
+        </p>
+      ) : null}
     </Frame>
   );
 }
 
-export function RegisterForm() {
+const CIVILITIES = [
+  { value: "MME", label: "Mme" },
+  { value: "M", label: "M." },
+];
+
+/** « Première réservation ? » — account creation (client design « Connexion »). */
+export function RegisterForm({ standalone = true }: { standalone?: boolean }) {
   const next = useNextParam();
   const { form, state, pending, formAction, onSubmit } = useActionForm<RegisterInput>(
     registerAction,
     zodResolver(registerSchema),
     {
+      civility: undefined as unknown as "MME",
       firstName: "",
       lastName: "",
+      companyName: "",
       email: "",
+      emailConfirm: "",
+      postalCode: "",
       phone: "",
       password: "",
       passwordConfirm: "",
@@ -103,20 +119,26 @@ export function RegisterForm() {
   return (
     <Frame label="Création de compte" action={formAction} onSubmit={onSubmit}>
       <Feedback state={state} />
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-[minmax(7rem,auto)_1fr_1fr]">
+        <Select label="Civilité" required placeholder="Choisir" options={CIVILITIES} error={e.civility?.message} {...form.register("civility")} />
         <TextField label="Prénom" autoComplete="given-name" required error={e.firstName?.message} {...form.register("firstName")} />
         <TextField label="Nom" autoComplete="family-name" required error={e.lastName?.message} {...form.register("lastName")} />
       </div>
-      <TextField label="Adresse e-mail" type="email" autoComplete="email" required error={e.email?.message} {...form.register("email")} />
-      <TextField label="Téléphone" type="tel" autoComplete="tel" help="Facultatif, utile le jour de votre départ." error={e.phone?.message} {...form.register("phone")} />
-      <TextField label="Mot de passe" type="password" autoComplete="new-password" required help={`${PASSWORD_MIN} caractères au minimum. Une phrase facile à retenir fonctionne très bien.`} error={e.password?.message} {...form.register("password")} />
-      <TextField label="Confirmez le mot de passe" type="password" autoComplete="new-password" required error={e.passwordConfirm?.message} {...form.register("passwordConfirm")} />
+      <TextField label="Société" autoComplete="organization" help="Facultatif" error={e.companyName?.message} {...form.register("companyName")} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <TextField label="Adresse e-mail" type="email" autoComplete="email" required error={e.email?.message} {...form.register("email")} />
+        <TextField label="Confirmez l’adresse e-mail" type="email" autoComplete="email" required error={e.emailConfirm?.message} {...form.register("emailConfirm")} />
+        <TextField label="Code postal" autoComplete="postal-code" required error={e.postalCode?.message} {...form.register("postalCode")} />
+        <TextField label="Téléphone" type="tel" autoComplete="tel" required error={e.phone?.message} {...form.register("phone")} />
+        <TextField label="Mot de passe" type="password" autoComplete="new-password" required help={`${PASSWORD_MIN} caractères au minimum.`} error={e.password?.message} {...form.register("password")} />
+        <TextField label="Confirmez le mot de passe" type="password" autoComplete="new-password" required error={e.passwordConfirm?.message} {...form.register("passwordConfirm")} />
+      </div>
       <div className="flex flex-col gap-2">
         <Checkbox
           label={
             <>
-              J’accepte les <a className="text-primary underline" href={routes.terms} target="_blank" rel="noopener">conditions générales de vente</a> et la{" "}
-              <a className="text-primary underline" href={routes.privacy} target="_blank" rel="noopener">politique de confidentialité</a>
+              J’ai compris et j’accepte votre <a className="text-primary underline" href={routes.privacy} target="_blank" rel="noopener">politique de gestion des données</a> et les{" "}
+              <a className="text-primary underline" href={routes.terms} target="_blank" rel="noopener">conditions générales de vente</a>
             </>
           }
           invalid={!!e.acceptTerms}
@@ -125,10 +147,14 @@ export function RegisterForm() {
         />
         <FieldMessage id="register-terms-error" message={e.acceptTerms?.message} />
       </div>
-      <Button type="submit" fullWidth loading={pending} loadingLabel="Création du compte…">Créer mon compte</Button>
-      <p className="m-0 text-center text-text-secondary">
-        Déjà client ? <a className="font-bold text-primary underline" href={withNext(routes.login, next)}>Se connecter</a>
-      </p>
+      <div>
+        <Button type="submit" loading={pending} loadingLabel="Création du compte…">S’inscrire</Button>
+      </div>
+      {standalone ? (
+        <p className="m-0 text-text-secondary">
+          Déjà client ? <a className="font-bold text-primary underline" href={withNext(routes.login, next)}>Se connecter</a>
+        </p>
+      ) : null}
     </Frame>
   );
 }
@@ -174,11 +200,16 @@ export function ProfileForm({ defaults }: { defaults: ProfileInput }) {
   return (
     <Frame label="Mes coordonnées" action={formAction} onSubmit={onSubmit}>
       <Feedback state={state} />
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-[minmax(7rem,auto)_1fr_1fr]">
+        <Select label="Civilité" placeholder="—" options={CIVILITIES} error={e.civility?.message} {...form.register("civility")} />
         <TextField label="Prénom" autoComplete="given-name" required error={e.firstName?.message} {...form.register("firstName")} />
         <TextField label="Nom" autoComplete="family-name" required error={e.lastName?.message} {...form.register("lastName")} />
       </div>
-      <TextField label="Téléphone" type="tel" autoComplete="tel" error={e.phone?.message} {...form.register("phone")} />
+      <TextField label="Société" autoComplete="organization" help="Facultatif" error={e.companyName?.message} {...form.register("companyName")} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <TextField label="Code postal" autoComplete="postal-code" error={e.postalCode?.message} {...form.register("postalCode")} />
+        <TextField label="Téléphone" type="tel" autoComplete="tel" error={e.phone?.message} {...form.register("phone")} />
+      </div>
       <div>
         <Button type="submit" loading={pending} loadingLabel="Enregistrement…">Enregistrer</Button>
       </div>

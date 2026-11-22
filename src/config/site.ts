@@ -42,6 +42,8 @@ export const routes = {
   parkings: "/parkings",
   parking: (slug: string) => `/parkings/${slug}`,
   howItWorks: "/comment-ca-marche",
+  access: "/plan-acces",
+  about: "/qui-sommes-nous",
   services: "/services",
   faq: "/faq",
   contact: "/contact",
@@ -61,6 +63,7 @@ export const legalLinks = [
   { label: "CGV", href: routes.terms },
   { label: "Confidentialité", href: routes.privacy },
   { label: "FAQ", href: routes.faq },
+  { label: "Qui sommes-nous", href: routes.about },
   { label: "Espace client", href: routes.account },
 ];
 

@@ -3,7 +3,7 @@ import { expectAccessible, expectNoHorizontalScroll, main } from "./support/help
 
 /* Public site: every page renders, is accessible and fits mobile; contact form is stored. */
 
-const PAGES = ["/", "/services", "/parkings", "/parkings/nantes", "/parkings/marseille", "/comment-ca-marche", "/faq", "/contact", "/reservation", "/connexion", "/inscription", "/mot-de-passe-oublie", "/mentions-legales", "/cgv", "/confidentialite"];
+const PAGES = ["/", "/services", "/parkings", "/parkings/nantes", "/parkings/marseille", "/comment-ca-marche", "/plan-acces", "/qui-sommes-nous", "/faq", "/contact", "/reservation", "/connexion", "/inscription", "/mot-de-passe-oublie", "/mentions-legales", "/cgv", "/confidentialite"];
 
 for (const width of [390, 1440]) {
   test(`public pages at ${width} px`, async ({ page }) => {

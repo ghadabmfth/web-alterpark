@@ -25,6 +25,9 @@ export interface SessionUser {
   firstName: string;
   lastName: string;
   phone: string | null;
+  civility: "MME" | "M" | null;
+  companyName: string | null;
+  postalCode: string | null;
   emailVerified: boolean;
   roleKey: string;
   isStaff: boolean;
@@ -44,7 +47,7 @@ export async function hashPassword(password: string): Promise<string> {
 // ───────────────────────────── Registration ─────────────────────────────
 
 export async function registerCustomer(
-  input: { firstName: string; lastName: string; email: string; phone: string; password: string },
+  input: { firstName: string; lastName: string; email: string; phone: string; password: string; civility?: "MME" | "M"; companyName?: string; postalCode?: string },
   meta: RequestMeta = {},
 ): Promise<{ ok: true; userId: string } | { ok: false; reason: "EMAIL_TAKEN" }> {
   const email = normalizeEmail(input.email);
@@ -57,7 +60,17 @@ export async function registerCustomer(
     const user = await db().$transaction(async (tx) => {
       const role = await tx.role.findUniqueOrThrow({ where: { key: "CUSTOMER" }, select: { id: true } });
       const created = await tx.user.create({
-        data: { email, firstName: input.firstName.trim(), lastName: input.lastName.trim(), phone: input.phone.trim() || null, passwordHash, roleId: role.id },
+        data: {
+          email,
+          civility: input.civility ?? null,
+          firstName: input.firstName.trim(),
+          lastName: input.lastName.trim(),
+          companyName: input.companyName?.trim() || null,
+          postalCode: input.postalCode?.trim().toUpperCase() || null,
+          phone: input.phone.trim() || null,
+          passwordHash,
+          roleId: role.id,
+        },
       });
       await tx.authToken.create({
         data: { userId: created.id, purpose: "EMAIL_VERIFICATION", tokenHash: token.hash, expiresAt: new Date(Date.now() + TOKEN_TTL_MS.EMAIL_VERIFICATION) },
@@ -103,6 +116,9 @@ export async function loadSessionUser(id: string, sessionVersion: number): Promi
     firstName: u.firstName,
     lastName: u.lastName,
     phone: u.phone,
+    civility: u.civility,
+    companyName: u.companyName,
+    postalCode: u.postalCode,
     emailVerified: !!u.emailVerifiedAt,
     roleKey: u.role.key,
     isStaff: u.role.isStaff,
@@ -171,7 +187,17 @@ export async function changePassword(userId: string, current: string, next: stri
   return true;
 }
 
-export async function updateProfile(userId: string, input: { firstName: string; lastName: string; phone: string }, meta: RequestMeta = {}): Promise<void> {
-  await db().user.update({ where: { id: userId }, data: { firstName: input.firstName.trim(), lastName: input.lastName.trim(), phone: input.phone.trim() || null } });
-  await writeAudit({ actorType: "USER", actorId: userId, action: "user.profile.updated", entityType: "User", entityId: userId, metadata: { fields: ["firstName", "lastName", "phone"] }, ...meta });
+export async function updateProfile(userId: string, input: { firstName: string; lastName: string; phone: string; civility?: "MME" | "M" | null; companyName?: string; postalCode?: string }, meta: RequestMeta = {}): Promise<void> {
+  await db().user.update({
+    where: { id: userId },
+    data: {
+      firstName: input.firstName.trim(),
+      lastName: input.lastName.trim(),
+      phone: input.phone.trim() || null,
+      ...(input.civility !== undefined ? { civility: input.civility } : {}),
+      ...(input.companyName !== undefined ? { companyName: input.companyName.trim() || null } : {}),
+      ...(input.postalCode !== undefined ? { postalCode: input.postalCode.trim().toUpperCase() || null } : {}),
+    },
+  });
+  await writeAudit({ actorType: "USER", actorId: userId, action: "user.profile.updated", entityType: "User", entityId: userId, metadata: { fields: ["civility", "firstName", "lastName", "companyName", "postalCode", "phone"] }, ...meta });
 }

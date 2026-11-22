@@ -19,7 +19,7 @@ export async function publicNav(): Promise<NavLink[]> {
         { label: "Application mobile", href: "/#application" },
       ],
     },
-    { label: "Plan accès", href: `${routes.parking("nantes")}#acces` },
+    { label: "Plan accès", href: routes.access },
     { label: "Contactez-nous", href: routes.contact },
   ];
 }
