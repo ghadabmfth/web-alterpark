@@ -1,3 +1,9 @@
+import { z } from "zod";
+
+// Zod probes eval support with `Function("")`, which the CSP blocks (and reports). Its
+// interpreted mode is used in the browser instead: same results, no CSP violation report.
+z.config({ jitless: true });
+
 /*
  * Browser errors → /api/monitoring/client-error (structured server log). At most 5 reports per
  * page load; only the message, error name, page path (no query string) and a short stack.

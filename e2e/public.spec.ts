@@ -8,6 +8,9 @@ const PAGES = ["/", "/parkings", "/parkings/nantes", "/parkings/marseille", "/co
 for (const width of [390, 1440]) {
   test(`public pages at ${width} px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
+    const csp: string[] = [];
+    page.on("console", (m) => m.text().startsWith("CSP:") && csp.push(m.text()));
+    await page.addInitScript(() => document.addEventListener("securitypolicyviolation", (e) => console.log(`CSP: ${e.violatedDirective} ${e.blockedURI} ${e.sourceFile}`)));
     for (const path of PAGES) {
       const res = await page.goto(path);
       expect(res?.status(), path).toBe(200);
@@ -15,6 +18,7 @@ for (const width of [390, 1440]) {
       await expectAccessible(page, path);
       await expectNoHorizontalScroll(page);
     }
+    expect(csp, "Content-Security-Policy violations").toEqual([]);
   });
 }
 
