@@ -113,7 +113,7 @@ export default async function AdminParking({ params }: PageProps<"/admin/parking
                   nowrap: true,
                   cell: (x) =>
                     canPrice ? (
-                      <AdminForm action={togglePriceAction} hidden={{ priceId: x.id, active: String(!x.isActive) }} submitLabel={x.isActive ? "Désactiver" : "Réactiver"} variant="secondary" inline label={`${x.isActive ? "Désactiver" : "Réactiver"} le tarif ${x.label ?? ""}`} />
+                      <AdminForm action={togglePriceAction} hidden={{ priceId: x.id, active: String(!x.isActive) }} submitLabel={x.isActive ? "Désactiver" : "Réactiver"} variant="secondary" inline label={`${x.isActive ? "Désactiver" : "Réactiver"} le tarif ${x.label ?? "sans libellé"} (${formatCents(x.amountCents)}${x.mode === "PER_DAY" ? " par jour" : " forfait"}, dès le ${day(x.validFrom)})`} />
                     ) : (
                       <Badge tone={x.isActive ? "success" : "neutral"}>{x.isActive ? "Actif" : "Inactif"}</Badge>
                     ),

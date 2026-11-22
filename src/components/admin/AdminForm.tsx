@@ -9,6 +9,7 @@ import { Select, type SelectProps } from "@/components/ui/forms/Select";
 import { Checkbox } from "@/components/ui/forms/Checkbox";
 import { IDLE, type ActionState } from "@/lib/action-state";
 import { cx } from "@/components/ui/lib/cx";
+import { useOptionalToast } from "@/components/ui/feedback/Toast";
 
 /*
  * Back-office form bound to a Server Action (useActionState). Fields are design-system components
@@ -33,7 +34,14 @@ export interface AdminFormProps {
 }
 
 export function AdminForm({ action, children, submitLabel, pendingLabel = "Enregistrement…", hidden, confirm, variant = "primary", inline, label, className }: AdminFormProps) {
-  const [state, formAction, pending] = useActionState(action, IDLE);
+  const toast = useOptionalToast();
+  // The success message is also toasted from here, before React commits the refreshed page: the
+  // form itself often disappears with the change it made (« Véhicule déposé » once checked in).
+  const [state, formAction, pending] = useActionState(async (prev: ActionState, fd: FormData) => {
+    const next = await action(prev, fd);
+    if (next.status === "success" && next.message) toast({ tone: "success", message: next.message });
+    return next;
+  }, IDLE);
   const [asking, setAsking] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -46,7 +54,9 @@ export function AdminForm({ action, children, submitLabel, pendingLabel = "Enreg
     <StateCtx.Provider value={state}>
       <form
         ref={formRef}
-        aria-label={label ?? submitLabel}
+        // Named forms are landmarks: only full forms get a name; inline row actions (a button in a
+        // table cell) stay unnamed, their button label says what they do.
+        aria-label={inline ? undefined : (label ?? submitLabel)}
         noValidate
         className={cx(inline ? "flex flex-wrap items-end gap-4" : "flex flex-col gap-6", className)}
         onSubmit={(e) => {

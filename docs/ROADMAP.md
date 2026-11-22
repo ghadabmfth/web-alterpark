@@ -12,7 +12,7 @@ production-ready before every critical workflow is tested end to end.
 | **4 — Back end & database** ✅ | First migration, seed (roles, permissions, three sites as `DRAFT`), Prisma client, Auth.js (sign-up, login, verification, reset), permission helpers, rate limiting, audit log, structured logger | Integration tests against PostgreSQL; protected routes refuse unauthorised access server-side |
 | **5 — Reservation engine** ✅ | Date rules, pricing engine, availability with row lock, holds and expiry cron, lifecycle transitions, references, cancellation rules and requests, e-mail outbox | Unit tests (pricing, dates, availability, transitions, permissions); concurrency test: N parallel bookings on the last space → exactly one |
 | **6 — Payment** ✅ | `PaymentProvider` + Stripe Checkout, webhook (signature, idempotency), success / failure / pending / expiry / late payment, refunds, CSP | Stripe test-mode scenarios incl. duplicate and out-of-order webhooks; no confirmation without webhook |
-| **7 — Back office** | Dashboard (real KPIs, date/site filters), reservations, parkings & offers, pricing, customers, payments & refunds, contacts (status, assignment, notes), reports & CSV export, admin users, roles & permissions, settings, audit log | Every action permission-checked and audit-logged; e2e admin flows |
+| **7 — Back office** ✅ | Dashboard (real KPIs, date/site filters), reservations, parkings & offers, pricing, customers, payments & refunds, contacts (status, assignment, notes), reports & CSV export, admin users, roles & permissions, settings, audit log | Every action permission-checked and audit-logged; e2e admin flows |
 | **8 — Quality** | Playwright e2e (registration, login, booking, payment sandbox, confirmation, history, admin management, contact), accessibility pass, security review, performance, error monitoring | All suites green in CI |
 | **9 — Deployment** | Vercel project, environments and variables, Neon (or chosen) PostgreSQL, migrations in CI/CD, Stripe live webhook, e-mail domain, backups & restore drill, `DEPLOYMENT.md`, then indexing enabled | Preview validated end to end before Production |
 
@@ -123,3 +123,26 @@ says reservations open soon.
 | Tests: 85 unit (incl. signature verification and event mapping), 42 integration (16 payment scenarios with an in-memory provider), end-to-end on a production build: CSP clean on 8 pages, sign-in from the funnel with restore, provider outage message, webhook signature / duplicate, return page → confirmation by signed webhook, axe | ✅ |
 | **Stripe test-mode run with real test keys** (card 4242…, 3-D Secure, declined card, expiry, refund) | ⏳ needs the client's Stripe test keys and the webhook endpoint configured (`docs/DEPLOYMENT.md` §4) |
 | Staff refunds (partial, after the deadline) and reconciliation of refunds made in the Stripe dashboard | Phase 7 |
+
+## Phase 7 — status
+
+| Task | Status |
+|---|---|
+| Shared back-office layer: permission re-checked in every service (`ensure`), Server Actions through one guard (`runAdminAction`: staff + permission + Zod), forms bound to actions with field errors, confirmation dialogs for destructive actions, success toasts, filters and pages in the URL | ✅ `src/modules/admin`, `src/components/admin` |
+| Dashboard: arrivals / departures today, vehicles on site, items to handle, cash-in (payments − refunds), confirmed / created / cancelled, average basket and stay, live occupancy per offer; period and site filters | ✅ |
+| Reservations: search (reference, name, e-mail, plate), filters, pagination; detail with stay, customer, payments and refunds, history (audit) | ✅ |
+| Actions: vehicle dropped off / returned, staff cancellation with refund amount, cancellation requests approved (full or partial refund) or rejected with a note e-mailed to the customer, partial refunds | ✅ never more than paid, even concurrently (tested) |
+| Payments and refunds list | ✅ |
+| Sites: information, booking rules, status; opening refused while address, capacity or rate is missing; public pages updated at once (`updateTag`) | ✅ |
+| Offers: create and edit; capacity cannot go below vehicles already booked at the same time (same lock as bookings) | ✅ |
+| Rates: add and deactivate (never edited, history kept), the last rate of an open site cannot be removed, price simulator using the booking engine | ✅ |
+| Customers: search, detail (bookings, vehicles, messages), disable / enable (signs out everywhere) | ✅ |
+| Contacts: status, assignment to a team member, internal notes | ✅ |
+| Reports: monthly figures per year and site (Paris months), CSV export of reservations with the list filters (Excel-compatible, formula-injection safe, audited) | ✅ |
+| Team: invitation by e-mail (single-use link, 72 h, no password handled by staff), role change, disable; nobody changes their own role, the last active super administrator is protected | ✅ |
+| Roles and permissions: custom roles with any subset of the catalogue, effective at the next request; system roles protected | ✅ |
+| Settings: online booking master switch, notice above the funnel | ✅ |
+| Audit log viewer with filters | ✅ |
+| Tests: 89 unit, 58 integration (permissions refused for every command, invariants above, audit entries), end-to-end on a production build: 13 back-office pages × 2 widths axe-clean without overflow, check-in → completion with toast and history, CSV download, booking switch reflected on the public site, custom role → invitation → password → restricted access (pages refused, export 404) | ✅ |
+| Navigation menu filtered by permission | Later (pages already show « Accès refusé »; the menu is part of the prerendered shell) |
+| GDPR: anonymisation of a customer on request | Phase 8 (retention periods to confirm with the client) |

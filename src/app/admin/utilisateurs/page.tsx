@@ -35,7 +35,7 @@ export default async function AdminStaff() {
               u.id === actor.id ? (
                 u.role.name
               ) : (
-                <AdminForm action={changeStaffRoleAction} hidden={{ id: u.id }} submitLabel="Changer" variant="secondary" inline label={`Rôle de ${u.firstName} ${u.lastName}`}>
+                <AdminForm action={changeStaffRoleAction} hidden={{ id: u.id }} submitLabel="Changer" variant="secondary" inline label={`Rôle de ${u.firstName} ${u.lastName} (${u.email})`}>
                   <FormSelect label="Rôle" name="roleId" defaultValue={u.roleId} options={roleOptions.some((o) => o.value === u.roleId) ? roleOptions : [{ value: u.roleId, label: u.role.name }, ...roleOptions]} />
                 </AdminForm>
               ),
@@ -54,7 +54,7 @@ export default async function AdminStaff() {
                   submitLabel={u.status === "ACTIVE" ? "Désactiver" : "Réactiver"}
                   variant="secondary"
                   inline
-                  label={`Accès de ${u.firstName} ${u.lastName}`}
+                  label={`Accès de ${u.firstName} ${u.lastName} (${u.email})`}
                   confirm={u.status === "ACTIVE" ? { title: "Désactiver l’accès", body: `${u.firstName} ${u.lastName} est déconnecté immédiatement et ne peut plus se connecter.`, confirmLabel: "Désactiver" } : undefined}
                 />
               ),

@@ -21,7 +21,7 @@ Status: Phases 4–6 in place (authentication, authorisation, rate limiting, aud
   never the security boundary.
 - ✓ Customers' queries are always scoped by their own `userId` (ownership in the `WHERE` clause, not
   checked after loading). Unknown or foreign resources return 404.
-- Only `SUPER_ADMIN` manages roles and admin accounts; an admin cannot raise their own permissions.
+- ✓ Only `SUPER_ADMIN` manages roles and admin accounts by default; nobody changes their own role or disables themselves; the last active super administrator cannot be demoted or disabled; role and status changes revoke sessions. Staff are invited by single-use link, never given a password.
 
 ## Input, output, requests
 
@@ -60,8 +60,9 @@ Status: Phases 4–6 in place (authentication, authorisation, rate limiting, aud
 ## Audit trail
 
 ✓ In place for registration, logins (success and failure), e-mail verification, password reset and
-change, profile changes, and every reservation state change (hold, confirmation, refused late
-confirmation, expiry, abandon, cancellation, cancellation request). Phase 7 adds back-office actions.
+change, profile changes, every reservation and payment state change, and every back-office action
+(check-in/out, cancellations, refunds, sites, offers, rates, customers, contacts, staff, roles,
+settings, CSV exports). Readable in the back office (journal d’audit, `AUDIT_LOG_READ`).
 
 Sensitive actions (refunds, cancellations, price and capacity changes, role/permission changes,
 admin account changes, settings) and every reservation/payment state change write an `AuditLog`

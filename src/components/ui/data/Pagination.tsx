@@ -26,7 +26,7 @@ export function Pagination({ page, totalPages, hrefFor, label = "Pagination", cl
           {prev ? (
             <SmartLink href={prev} aria-label="Page précédente"><ArrowLeftIcon /></SmartLink>
           ) : (
-            <a aria-label="Page précédente" aria-disabled="true"><ArrowLeftIcon /></a>
+            <a role="link" aria-label="Page précédente" aria-disabled="true"><ArrowLeftIcon /></a>
           )}
         </li>
         {pageItems(page, totalPages).map((p, i) => (
@@ -47,7 +47,7 @@ export function Pagination({ page, totalPages, hrefFor, label = "Pagination", cl
           {next ? (
             <SmartLink href={next} aria-label="Page suivante"><ArrowRightIcon /></SmartLink>
           ) : (
-            <a aria-label="Page suivante" aria-disabled="true"><ArrowRightIcon /></a>
+            <a role="link" aria-label="Page suivante" aria-disabled="true"><ArrowRightIcon /></a>
           )}
         </li>
       </ol>

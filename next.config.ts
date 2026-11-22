@@ -25,7 +25,8 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  // No upgrade-insecure-requests: HSTS already forces HTTPS in production, and the directive breaks
+  // redirects of a production build served over plain HTTP locally (e2e tests).
 ].join("; ");
 
 const securityHeaders = [
