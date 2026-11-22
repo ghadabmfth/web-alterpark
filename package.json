@@ -20,9 +20,10 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "test:integration": "vitest run --config vitest.integration.config.mts",
-    "build:vercel": "node scripts/migrate-on-deploy.mjs && next build",
+    "build:vercel": "tsx scripts/check-deploy-env.ts && node scripts/migrate-on-deploy.mjs && next build",
     "db:demo": "tsx --env-file-if-exists=.env.local scripts/demo-data.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.2",

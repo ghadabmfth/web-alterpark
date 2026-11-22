@@ -4,7 +4,7 @@ Airport parking reservation and management platform for Nantes, Marseille and Pa
 public website, online booking with secure payment, customer area and administration back office.
 Developed by OuiDev.
 
-**Status: Phases 1–8 complete (foundation, design system, front-end, database and authentication, reservation engine, payment, back office, quality). Next: Phase 9, deployment.** Online booking works end to end once Stripe keys are set and a site is opened from the back office (capacities and rates entered). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status: Phases 1–8 complete; Phase 9 (deployment) ready on the code side — the launch now depends on the accounts and data listed in [`docs/LAUNCH.md`](docs/LAUNCH.md).** Online booking works end to end once Stripe keys are set and a site is opened from the back office (capacities and rates entered). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
 
@@ -36,6 +36,7 @@ Deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 | `npm run db:demo` | **Local only**: opens Nantes with fictitious capacities and rates labelled « DÉMO » (`-- --undo` to revert) |
 | `npm run test:integration` | Integration tests on PostgreSQL (`TEST_DATABASE_URL`, name ending in `_test`) |
 | `npm run test:e2e` | Playwright end-to-end suite: prepares `alterpark_e2e_test`, builds, starts the app and a local Stripe emulator (`E2E_DATABASE_URL` to override) |
+| `npm run smoke -- <url>` | Read-only smoke test of a deployment (`--expect-database`, `--indexable`) |
 | `npm run check` | All checks except the build |
 
 Design-system gallery: `npm run dev`, then open http://localhost:3000/dev/design-system
@@ -55,6 +56,7 @@ only. After buying a commercial web licence, place the file at `public/fonts/Cro
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Authentication, authorisation, payments, abuse, secrets |
 | [`docs/SECURITY-REVIEW.md`](docs/SECURITY-REVIEW.md) | Pre-launch security review (Phase 8) and recommendations |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Architecture decision records |
+| [`docs/LAUNCH.md`](docs/LAUNCH.md) | Launch runbook: who does what, Preview then Production |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phases and exit criteria |
 | [`src/design-system/README.md`](src/design-system/README.md) | How to use the design-system layer |
 | [`docs/design-system/extensions.md`](docs/design-system/extensions.md) | Extensions to the system and porting notes |
