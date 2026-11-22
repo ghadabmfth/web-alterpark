@@ -11,7 +11,7 @@ production-ready before every critical workflow is tested end to end.
 | **3 — Front-end foundation** ✅ | Public layout (Header, Footer, SocialRail), home, parkings, parking details, how it works, FAQ, contact, legal pages, auth pages, booking funnel UI, customer-area and admin shells; metadata, sitemap, robots, structured data (`ParkingFacility`, `FAQPage`, `BreadcrumbList`) | Pages responsive and accessible (axe clean), Lighthouse ≥ 90 on mobile for public pages |
 | **4 — Back end & database** ✅ | First migration, seed (roles, permissions, three sites as `DRAFT`), Prisma client, Auth.js (sign-up, login, verification, reset), permission helpers, rate limiting, audit log, structured logger | Integration tests against PostgreSQL; protected routes refuse unauthorised access server-side |
 | **5 — Reservation engine** ✅ | Date rules, pricing engine, availability with row lock, holds and expiry cron, lifecycle transitions, references, cancellation rules and requests, e-mail outbox | Unit tests (pricing, dates, availability, transitions, permissions); concurrency test: N parallel bookings on the last space → exactly one |
-| **6 — Payment** | `PaymentProvider` + Stripe Checkout, webhook (signature, idempotency), success / failure / pending / expiry / late payment, refunds, CSP | Stripe test-mode scenarios incl. duplicate and out-of-order webhooks; no confirmation without webhook |
+| **6 — Payment** ✅ | `PaymentProvider` + Stripe Checkout, webhook (signature, idempotency), success / failure / pending / expiry / late payment, refunds, CSP | Stripe test-mode scenarios incl. duplicate and out-of-order webhooks; no confirmation without webhook |
 | **7 — Back office** | Dashboard (real KPIs, date/site filters), reservations, parkings & offers, pricing, customers, payments & refunds, contacts (status, assignment, notes), reports & CSV export, admin users, roles & permissions, settings, audit log | Every action permission-checked and audit-logged; e2e admin flows |
 | **8 — Quality** | Playwright e2e (registration, login, booking, payment sandbox, confirmation, history, admin management, contact), accessibility pass, security review, performance, error monitoring | All suites green in CI |
 | **9 — Deployment** | Vercel project, environments and variables, Neon (or chosen) PostgreSQL, migrations in CI/CD, Stripe live webhook, e-mail domain, backups & restore drill, `DEPLOYMENT.md`, then indexing enabled | Preview validated end to end before Production |
@@ -107,3 +107,19 @@ booking funnel says reservations open soon. Phase 5 needs at least one ACTIVE si
 durations, amounts), confirmed addresses for Marseille and Roissy, and the cancellation and lead-time
 rules if they differ from the approved defaults. Until then every site stays DRAFT and the funnel
 says reservations open soon.
+
+## Phase 6 — status
+
+| Task | Status |
+|---|---|
+| `PaymentProvider` interface; Stripe implementation (stripe@23.1.0): hosted Checkout Session, refunds, signed webhooks | ✅ `src/modules/payments` |
+| Pay: form re-validated on the server, customer signed in, hold under row lock, session for the server amount, same session on double click / retry (idempotency keys on our side and Stripe's) | ✅ |
+| Sign-in from the funnel without losing the form (sessionStorage), sign-up returns to the funnel | ✅ |
+| Webhook `/api/webhooks/stripe`: signature, event recorded once, duplicate and out-of-order safe, retried on error (500) | ✅ |
+| Success, delayed method (processing), failure (space released), expiry (space released), late payment (confirmed if a space remains, otherwise refunded), wrong amount (refunded) | ✅ |
+| Return page: polls until the webhook confirms (the redirect never confirms); resume payment while the hold lasts | ✅ |
+| Free cancellation of a paid booking → full refund recorded in the same transaction, executed with an idempotency key, retried by the cron; refund status from Stripe events | ✅ |
+| Content-Security-Policy (no nonce: prerendered shells), no Stripe script needed | ✅ ADR-018 |
+| Tests: 85 unit (incl. signature verification and event mapping), 42 integration (16 payment scenarios with an in-memory provider), end-to-end on a production build: CSP clean on 8 pages, sign-in from the funnel with restore, provider outage message, webhook signature / duplicate, return page → confirmation by signed webhook, axe | ✅ |
+| **Stripe test-mode run with real test keys** (card 4242…, 3-D Secure, declined card, expiry, refund) | ⏳ needs the client's Stripe test keys and the webhook endpoint configured (`docs/DEPLOYMENT.md` §4) |
+| Staff refunds (partial, after the deadline) and reconciliation of refunds made in the Stripe dashboard | Phase 7 |

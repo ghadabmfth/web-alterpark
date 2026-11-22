@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import type { Permission } from "@/generated/prisma/enums";
 import { hasDatabase } from "@/server/db/client";
 import { loadSessionUser, type SessionUser } from "@/modules/auth/service";
@@ -16,6 +17,9 @@ import { auth } from "./auth";
 
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   if (!hasDatabase()) return null;
+  // Request time only: Auth.js draws random values (CSRF) before it reads the cookie, which Cache
+  // Components would otherwise report as an unstable value during prerendering.
+  await connection();
   const session = await auth();
   const id = session?.user?.id;
   if (!id || session.sv === undefined) return null;

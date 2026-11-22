@@ -1,6 +1,6 @@
 # Security
 
-Status: Phases 4–5 in place (authentication, authorisation, rate limiting, audit, contact, reservations); payment parts in Phase 6. ✓ = in place today.
+Status: Phases 4–6 in place (authentication, authorisation, rate limiting, audit, contact, reservations, payment). ✓ = in place today.
 
 ## Authentication
 
@@ -30,16 +30,17 @@ Status: Phases 4–5 in place (authentication, authorisation, rate limiting, aud
 - React escaping; no `dangerouslySetInnerHTML` with user content.
 - CSRF: Server Actions are POST-only with Origin checking by Next.js; mutating route handlers check
   `Origin`; Auth.js uses its own CSRF token; webhooks are authenticated by signature, cron by bearer secret.
-- Security headers ✓ (`nosniff`, `DENY` framing, referrer policy, HSTS, permissions policy);
-  a nonce-based Content-Security-Policy including the Stripe domains is added in Phase 6.
+- Security headers ✓ (`nosniff`, `DENY` framing, referrer policy, HSTS, permissions policy) and a
+  Content-Security-Policy ✓ (ADR-018: own-origin scripts, no nonce because of prerendered shells).
 
 ## Payments
 
-- No card data ever reaches Alterpark (Stripe-hosted payment page).
+- ✓ No card data ever reaches Alterpark (Stripe-hosted payment page, no Stripe script on our pages).
 - ✓ Amounts are computed server-side from the database; client values are ignored (the funnel only displays the server quote).
-- Reservation confirmed **only** by a verified webhook (signature + event-id idempotency); the
-  redirect page is read-only.
-- Refunds require `PAYMENT_REFUND`, are idempotent and audit-logged.
+- ✓ Reservation confirmed **only** by a verified webhook (signature + event-id idempotency); the
+  redirect page is read-only. The amount charged is compared with the server amount.
+- ✓ Refunds are recorded before the provider call, idempotent (`refund:<id>` key) and audit-logged;
+  customer refunds follow the cancellation rules; staff refunds require `PAYMENT_REFUND` (Phase 7).
 - A restricted Stripe key limited to the needed resources is recommended.
 
 ## Abuse and privacy
