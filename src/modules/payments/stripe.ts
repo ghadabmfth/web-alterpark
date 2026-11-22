@@ -51,6 +51,16 @@ export function normaliseStripeEvent(event: Stripe.Event): PaymentEvent {
   }
 }
 
+/**
+ * End-to-end tests point the SDK at a local Stripe emulator (e2e/support/stripe-emulator.ts) with
+ * STRIPE_API_BASE. Honoured with TEST keys only: a live key always talks to Stripe.
+ */
+export function emulatorEndpoint(secretKey: string, base = process.env.STRIPE_API_BASE): { host?: string; port?: number; protocol?: "http" | "https" } {
+  if (!base || !/^(sk|rk)_test_/.test(secretKey)) return {};
+  const u = new URL(base);
+  return { host: u.hostname, port: Number(u.port || (u.protocol === "https:" ? 443 : 80)), protocol: u.protocol === "https:" ? "https" : "http" };
+}
+
 export class StripeProvider implements PaymentProvider {
   readonly name = "STRIPE" as const;
   private readonly stripe: Stripe;
@@ -59,7 +69,7 @@ export class StripeProvider implements PaymentProvider {
     secretKey: string,
     private readonly webhookSecret: string,
   ) {
-    this.stripe = new Stripe(secretKey, { maxNetworkRetries: 2, timeout: 20_000, appInfo: { name: "alterpark" } });
+    this.stripe = new Stripe(secretKey, { maxNetworkRetries: 2, timeout: 20_000, appInfo: { name: "alterpark" }, ...emulatorEndpoint(secretKey) });
   }
 
   async createCheckout(i: Parameters<PaymentProvider["createCheckout"]>[0]) {

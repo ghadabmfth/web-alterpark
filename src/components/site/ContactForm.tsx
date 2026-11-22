@@ -33,7 +33,7 @@ export function ContactForm({ parkings }: { parkings: { value: string; label: st
   }
 
   return (
-    <form noValidate action={formAction} onSubmit={onSubmit} className="flex flex-col gap-6" aria-describedby="contact-required">
+    <form noValidate action={formAction} onSubmit={onSubmit} className="flex flex-col gap-6" aria-label="Formulaire de contact" aria-describedby="contact-required">
       <p id="contact-required" className="m-0 text-text-secondary">Les champs marqués * sont obligatoires.</p>
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
       <div className="grid gap-6 md:grid-cols-2">

@@ -21,7 +21,8 @@
     "db:reset": "prisma migrate reset",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "build:vercel": "node scripts/migrate-on-deploy.mjs && next build",
-    "db:demo": "tsx --env-file-if-exists=.env.local scripts/demo-data.ts"
+    "db:demo": "tsx --env-file-if-exists=.env.local scripts/demo-data.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.2",
@@ -39,6 +40,8 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "22.20.5",
     "@types/pg": "8.23.1",

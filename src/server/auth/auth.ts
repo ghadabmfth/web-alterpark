@@ -36,6 +36,14 @@ declare module "@auth/core/jwt" {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  // A wrong password is an expected outcome (audit-logged, rate-limited), not an application error:
+  // keep error logs for real failures only.
+  logger: {
+    error(error) {
+      if (error.name === "CredentialsSignin" || error.name === "RateLimited") return;
+      console.error("[auth]", error);
+    },
+  },
   session: { strategy: "jwt", maxAge: 7 * 24 * 3600, updateAge: 24 * 3600 },
   pages: { signIn: "/connexion" },
   providers: [
