@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/config/site";
 import { formatDateTime } from "@/modules/reservations/domain/stay";
 import { confirmReservation, createHold, type HoldDetails, type QuoteFailure, type StayRequest } from "@/modules/reservations/service";
 import type { PaymentEvent, PaymentProvider } from "./provider";
-import { paymentProvider } from "./stripe";
+import { paymentProvider, paymentsConfigured } from "./stripe";
 
 /*
  * Payment workflows (ARCHITECTURE.md §5.4, ADR-009).
@@ -254,10 +254,20 @@ async function refundFull(paymentId: string, reason: string, provider: PaymentPr
 }
 
 /** Sends recorded refunds to the provider. Failures stay PENDING and are retried by the cron. */
-export async function executeRefunds(refundIds: string[], provider: PaymentProvider = paymentProvider()): Promise<void> {
+export async function executeRefunds(refundIds: string[], provider?: PaymentProvider): Promise<void> {
   for (const id of refundIds) {
     const r = await db().refund.findUniqueOrThrow({ where: { id }, include: { payment: true } });
     if (r.status !== "PENDING" || r.providerRefundId) continue;
+    // Paid at the counter: the staff member gives the money back on site, recorded at once.
+    if (r.payment.provider === "ON_SITE") {
+      await applyRefundStatus(r.id, `onsite-${r.id}`, "SUCCEEDED");
+      continue;
+    }
+    if (!paymentsConfigured() && !provider) {
+      console.error("refund: online payments are not configured, will retry", r.id);
+      continue;
+    }
+    provider ??= paymentProvider();
     if (!r.payment.providerPaymentId) {
       console.error("refund: payment without provider id", r.paymentId);
       continue;
@@ -274,10 +284,18 @@ export async function executeRefunds(refundIds: string[], provider: PaymentProvi
 /** Cron: refunds recorded but not yet accepted by the provider. */
 export async function retryPendingRefunds(provider?: PaymentProvider): Promise<number> {
   const due = await db().refund.findMany({ where: { status: "PENDING", providerRefundId: null, createdAt: { lt: new Date(Date.now() - 60_000) } }, select: { id: true }, take: 50 });
-  if (due.length) await executeRefunds(due.map((r) => r.id), provider ?? paymentProvider());
+  if (due.length) await executeRefunds(due.map((r) => r.id), provider);
   return due.length;
 }
 
 export async function expireSessions(sessionIds: string[], provider: PaymentProvider = paymentProvider()): Promise<void> {
   for (const id of sessionIds) await provider.expireCheckout(id).catch((e) => console.error("payment: expire session failed", id, e));
+}
+
+/* ---------------------------------------------------------------- on-site payments */
+
+/** Amount still due on a reservation (total − succeeded payments + refunded ones are not due again). */
+export async function dueCents(reservationId: string): Promise<number> {
+  const r = await db().reservation.findUniqueOrThrow({ where: { id: reservationId }, include: { payments: { where: { status: "SUCCEEDED" }, select: { amountCents: true } } } });
+  return Math.max(0, r.totalCents - r.payments.reduce((n, p) => n + p.amountCents, 0));
 }

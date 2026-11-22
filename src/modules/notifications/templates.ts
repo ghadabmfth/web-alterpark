@@ -12,7 +12,7 @@ export type TemplatePayloads = {
   "auth.password-changed": { firstName: string };
   "staff.invite": { firstName: string; invitedBy: string; role: string; url: string };
   "contact.received": { name: string; email: string; subject: string; message: string; parking?: string };
-  "reservation.confirmed": { firstName: string; reference: string; parking: string; offer: string; startsAt: string; endsAt: string; total: string };
+  "reservation.confirmed": { firstName: string; reference: string; parking: string; offer: string; startsAt: string; endsAt: string; total: string; payment?: string };
   "reservation.cancelled": { firstName: string; reference: string; parking: string; startsAt: string; refund?: string };
   "reservation.cancellation-rejected": { firstName: string; reference: string; note: string };
   "reservation.cancellation-requested": { reference: string; customer: string; parking: string; startsAt: string; reason: string };
@@ -57,7 +57,7 @@ export function renderEmail<T extends TemplateName>(template: T, to: string, pay
     }
     case "reservation.confirmed": {
       const p = payload as TemplatePayloads["reservation.confirmed"];
-      return { to, subject: `Réservation confirmée — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre réservation ${p.reference} est confirmée.`, `Parking : ${p.parking} — ${p.offer}`, `Dépôt du véhicule : ${p.startsAt}`, `Récupération : ${p.endsAt}`, `Montant payé : ${p.total}`], { label: "Voir ma réservation", url: absoluteUrl(`/compte/reservations/${p.reference}`) }) };
+      return { to, subject: `Réservation confirmée — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre réservation ${p.reference} est confirmée.`, `Parking : ${p.parking} — ${p.offer}`, `Dépôt du véhicule : ${p.startsAt}`, `Récupération : ${p.endsAt}`, p.payment ?? `Montant payé : ${p.total}`], { label: "Voir ma réservation", url: absoluteUrl(`/compte/reservations/${p.reference}`) }) };
     }
     case "reservation.cancelled": {
       const p = payload as TemplatePayloads["reservation.cancelled"];

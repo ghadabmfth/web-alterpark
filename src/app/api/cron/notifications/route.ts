@@ -3,7 +3,6 @@ import { processOutbox } from "@/modules/notifications/outbox";
 import { purgeRateLimits } from "@/server/security/rate-limit";
 import { expireHolds } from "@/modules/reservations/service";
 import { retryPendingRefunds } from "@/modules/payments/service";
-import { paymentsConfigured } from "@/modules/payments/stripe";
 
 /*
  * Vercel Cron job (vercel.json, daily at 03:17 UTC — the Hobby plan allows daily jobs only; every
@@ -29,7 +28,7 @@ export async function GET(request: Request) {
     processOutbox(50),
     purgeRateLimits(),
     expireHolds(),
-    paymentsConfigured() ? retryPendingRefunds() : Promise.resolve(0),
+    retryPendingRefunds(),
   ]);
   return Response.json({ ...outbox, purgedRateLimits: purged, expiredHolds: expired, retriedRefunds: refunds });
 }

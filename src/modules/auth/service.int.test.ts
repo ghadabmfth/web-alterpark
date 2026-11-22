@@ -122,6 +122,9 @@ describe("outbox", () => {
     const transport = await import("@/server/email/transport");
     const email = unique();
     await registerCustomer({ firstName: "A", lastName: "B", email, phone: "", password: PASSWORD });
+    // Other tests leave e-mails pending in the shared test database: postpone them so this test
+    // does not depend on how many there are (processOutbox handles a limited batch).
+    await db().notification.updateMany({ where: { status: "PENDING", recipient: { not: email } }, data: { nextAttemptAt: new Date(Date.now() + 3_600_000) } });
 
     const failing = vi.spyOn(transport, "emailTransport").mockReturnValue({ send: async () => Promise.reject(new Error("provider down")) });
     await processOutbox(500);

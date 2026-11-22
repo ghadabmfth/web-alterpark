@@ -167,7 +167,7 @@ async function replay(userId: string, idempotencyKey: string): Promise<HoldResul
  * Stripe Checkout session right after). Idempotent per `idempotencyKey`: a double click or a
  * network retry returns the same reservation.
  */
-export async function createHold(input: { userId: string; request: StayRequest; details: HoldDetails; idempotencyKey: string; now?: Date }): Promise<HoldResult> {
+export async function createHold(input: { userId: string; request: StayRequest; details: HoldDetails; idempotencyKey: string; now?: Date; paymentMethod?: "ONLINE" | "ON_SITE" }): Promise<HoldResult> {
   const now = input.now ?? new Date();
   if (!IDEMPOTENCY_KEY_RE.test(input.idempotencyKey)) return { ok: false, reason: "INVALID_KEY" };
   const previous = await replay(input.userId, input.idempotencyKey);
@@ -209,6 +209,7 @@ export async function createHold(input: { userId: string; request: StayRequest; 
             totalCents: quote.price.totalCents,
             currency: quote.price.currency,
             holdExpiresAt,
+            paymentMethod: input.paymentMethod ?? "ONLINE",
             idempotencyKey: input.idempotencyKey,
           },
         });
@@ -223,6 +224,25 @@ export async function createHold(input: { userId: string; request: StayRequest; 
     }
   }
   throw new Error("Could not allocate a unique reservation reference");
+}
+
+/* ---------------------------------------------------------------- pay on site */
+
+/**
+ * Booking paid at the counter on return (customer's choice): the space is taken under the same
+ * lock as any booking, then the reservation is confirmed at once — no online payment involved.
+ * The amount stays due until staff record the payment (back office).
+ */
+export async function bookPayOnSite(input: { userId: string; request: StayRequest; details: HoldDetails; idempotencyKey: string; now?: Date }): Promise<HoldResult> {
+  const hold = await createHold({ ...input, paymentMethod: "ON_SITE" });
+  if (!hold.ok) return hold;
+  const r = await db().reservation.findUniqueOrThrow({ where: { id: hold.reservationId }, select: { paymentMethod: true, status: true } });
+  if (r.paymentMethod !== "ON_SITE") return { ok: false, reason: "IDEMPOTENCY_CONFLICT" }; // key already used for an online booking
+  if (r.status === "PENDING_PAYMENT") {
+    const c = await confirmReservation(hold.reservationId, { now: input.now });
+    if (!c.ok) throw new Error(`On-site booking could not be confirmed: ${c.reason}`);
+  }
+  return hold;
 }
 
 /* ---------------------------------------------------------------- expiry, confirmation */
@@ -281,6 +301,7 @@ export async function confirmReservation(reservationId: string, opts: { now?: Da
           startsAt: formatDateTime(r.startsAt.getTime(), r.parking.timeZone),
           endsAt: formatDateTime(r.endsAt.getTime(), r.parking.timeZone),
           total: formatCents(r.totalCents),
+          payment: r.paymentMethod === "ON_SITE" ? `Montant à régler sur place à votre retour : ${formatCents(r.totalCents)} (carte bancaire, espèces, chèques vacances)` : `Montant payé en ligne : ${formatCents(r.totalCents)}`,
         },
       },
       tx,

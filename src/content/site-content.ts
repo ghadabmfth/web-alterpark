@@ -90,7 +90,7 @@ export const RALLYE = {
 
 /** Selling points under the booking bar. Only verified facts. */
 export const BOOKING_PERKS = [
-  { icon: "card" as const, text: "Paiement sécurisé en ligne" },
+  { icon: "card" as const, text: "Payez en ligne ou à votre retour" },
   { icon: "shield" as const, text: "Vidéosurveillance et gardiennage" },
   { icon: "h24" as const, text: "Parking 7j/7 – 24h/24" },
 ];

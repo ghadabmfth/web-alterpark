@@ -5,7 +5,7 @@ import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { processOutbox } from "@/modules/notifications/outbox";
 import { runAdminAction } from "../run-action";
-import { checkIn, complete, refundReservation, rejectCancellationRequest, staffCancel } from "../reservations";
+import { checkIn, complete, recordOnSitePayment, refundReservation, rejectCancellationRequest, staffCancel } from "../reservations";
 
 const id = z.object({ id: z.uuid() });
 /** "12,50" or "12.5" € → 1250 cents; empty → 0. */
@@ -61,5 +61,13 @@ export async function refundAction(_: ActionState, fd: FormData) {
   return runAdminAction("PAYMENT_REFUND", schema, fd, async (d, actor) => {
     await refundReservation(actor, { id: d.id, amountCents: d.amount, reason: d.reason });
     return "Remboursement lancé.";
+  });
+}
+
+export async function recordOnSiteAction(_: ActionState, fd: FormData) {
+  const schema = id.extend({ amount: euros.refine((n) => n > 0, "Indiquez un montant."), method: z.enum(["CARD", "CASH", "HOLIDAY_VOUCHERS", "CHECK"], { error: "Choisissez le moyen de paiement." }) });
+  return runAdminAction("RESERVATION_MANAGE", schema, fd, async (d, actor) => {
+    await recordOnSitePayment(actor, { id: d.id, amountCents: d.amount, method: d.method });
+    return "Encaissement enregistré.";
   });
 }

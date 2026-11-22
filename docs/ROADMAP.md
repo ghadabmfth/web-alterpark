@@ -173,3 +173,13 @@ says reservations open soon.
 | Weekly encrypted backup workflow; restore drill script with scratch-database guard | ✅ drill run locally: restored counts identical to the source |
 | Launch runbook with owners (`docs/LAUNCH.md`) | ✅ |
 | Vercel database, variables, domain; Stripe test then live; e-mail domain; real restore drill; release PR to `main`; indexing | ⏳ needs the client's accounts and data (LAUNCH.md §A) — the Vercel connector available here cannot read the project, so these settings are made in the Vercel dashboard |
+
+## Change — payment at the customer's choice (22/11/2026, ADR-023)
+
+| Task | Status |
+|---|---|
+| Migration `pay_on_site` (payment method of the reservation, on-site payments) | ✅ |
+| Funnel: « Payer maintenant en ligne » or « Payer sur place à mon retour » | ✅ |
+| Back office: payment method, amount still due, « Encaissement sur place » (card, cash, holiday vouchers, cheque) | ✅ |
+| Refunds of on-site payments recorded at once; confirmation e-mail states the amount due on site; CSV column | ✅ |
+| Tests: 4 integration scenarios (confirmation, idempotency, ceiling, refunds, cancellation), e2e pay-on-site end to end | ✅ |

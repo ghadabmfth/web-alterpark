@@ -252,3 +252,19 @@ section keeps its design but makes no false promise (client decision):
 - Google rating and reviews are the figures supplied with the design (13/11/2026); update them in
   `src/config/site.ts` and `src/content/site-content.ts`.
 - The header uses the design's six links; FAQ and Espace client move to the footer.
+
+## ADR-023 — Payment at the customer's choice: online or on site (22/11/2026)
+
+The client's page designs announce « aucun paiement à l'avance, vous réglez à votre retour » and
+« chèques vacances acceptés », while rule Q1 (approved 20/11) required online payment at booking.
+Decision (recommended option, no preference expressed): **the customer chooses** at the last
+step of the funnel.
+- **Online** (unchanged): Stripe Checkout, confirmation by webhook only.
+- **On site**: the booking is confirmed at once under the same capacity lock (`bookPayOnSite`),
+  `Reservation.paymentMethod = ON_SITE`; the amount is due at the counter on return. Front-desk
+  staff (`RESERVATION_MANAGE`) record what is received (card, cash, holiday vouchers, cheque) —
+  never more than due — as `Payment` rows with provider `ON_SITE`, audit-logged.
+- Refunds of on-site payments are given back at the counter and recorded as succeeded at once;
+  online refunds still go through Stripe. Refunds no longer depend on Stripe being configured.
+- Booking works even before Stripe is set up (on-site only); the online option appears with the keys.
+- Cancellation rules are unchanged; an unpaid on-site booking cancels with nothing to refund.

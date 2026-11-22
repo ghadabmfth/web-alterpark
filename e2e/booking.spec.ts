@@ -111,3 +111,27 @@ test("a refused payment releases the space", async ({ page }) => {
   await expect(main(page).locator("header, h1").first()).toBeVisible();
   await expect(main(page)).toContainText("Annulée");
 });
+
+test("pay on site: confirmed at once, staff record the payment at the counter", async ({ page, browser }) => {
+  await fillFunnel(page, 50, "E2-005-EE");
+  await page.getByRole("radio", { name: /Payer sur place à mon retour/ }).check();
+  await expect(main(page)).toContainText("Votre réservation est confirmée immédiatement");
+  await page.getByRole("button", { name: "Confirmer ma réservation" }).click();
+  await page.waitForURL(/\/compte\/reservations\/AP-NTE-[A-Z0-9]{6}\?reservation=confirmee/);
+  const ref = new URL(page.url()).pathname.split("/").pop()!;
+  await expect(main(page)).toContainText("Réservation confirmée");
+  await expect(main(page)).toContainText("À régler sur place à votre retour");
+
+  const ctx = await browser.newContext({ storageState: STATE.admin });
+  const admin = await ctx.newPage();
+  await admin.goto(`/admin/reservations/${ref}`);
+  await expect(main(admin)).toContainText("Sur place, au retour");
+  const form = admin.getByRole("form", { name: "Encaissement sur place" });
+  await form.getByLabel("Moyen de paiement").selectOption({ label: "Chèques vacances" });
+  await form.getByRole("button", { name: "Enregistrer l’encaissement" }).click();
+  await expect(admin.locator(".ap-toasts")).toContainText("Encaissement enregistré");
+  await admin.reload();
+  await expect(main(admin)).toContainText("Encaissement sur place (Chèques vacances)");
+  await expect(admin.getByRole("form", { name: "Encaissement sur place" })).toHaveCount(0);
+  await ctx.close();
+});

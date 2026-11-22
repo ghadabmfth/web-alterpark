@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     include: { parking: { select: { name: true, timeZone: true } }, offer: { select: { name: true } } },
   });
   const csv = toCsv(
-    ["Référence", "Statut", "Parking", "Formule", "Dépôt", "Récupération", "Jours facturés", "Prénom", "Nom", "E-mail", "Téléphone", "Immatriculation", "Passagers", "Vol aller", "Vol retour", "Montant (€)", "Remboursé (€)", "Créée le"],
+    ["Référence", "Statut", "Parking", "Formule", "Dépôt", "Récupération", "Jours facturés", "Prénom", "Nom", "E-mail", "Téléphone", "Immatriculation", "Passagers", "Vol aller", "Vol retour", "Paiement", "Montant (€)", "Remboursé (€)", "Créée le"],
     rows.map((r) => [
       r.reference,
       STATUS_LABELS[r.status],
@@ -42,6 +42,7 @@ export async function GET(request: Request) {
       r.passengers,
       r.outboundFlight,
       r.returnFlight,
+      r.paymentMethod === "ON_SITE" ? "Sur place" : "En ligne",
       (r.totalCents / 100).toFixed(2).replace(".", ","),
       (r.refundedCents / 100).toFixed(2).replace(".", ","),
       formatDateTime(r.createdAt.getTime(), "Europe/Paris"),

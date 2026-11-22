@@ -134,10 +134,8 @@ export async function staffCancel(actor: Actor, input: { id: string; reason: str
     const sessions = r.payments.filter((p) => p.status === "PENDING" && p.providerSessionId).map((p) => p.providerSessionId!);
     return { refundIds, sessions };
   });
-  if (paymentsConfigured()) {
-    await executeRefunds(result.refundIds);
-    await expireSessions(result.sessions);
-  }
+  await executeRefunds(result.refundIds);
+  if (paymentsConfigured()) await expireSessions(result.sessions);
 }
 
 export async function rejectCancellationRequest(actor: Actor, input: { requestId: string; note: string }) {
@@ -161,7 +159,7 @@ export async function refundReservation(actor: Actor, input: { id: string; amoun
     await writeAudit({ actorType: "USER", actorId: actor.id, action: "reservation.refund", entityType: "Reservation", entityId: input.id, metadata: { amountCents: input.amountCents, reason: input.reason } }, tx);
     return ids;
   });
-  if (paymentsConfigured()) await executeRefunds(ids);
+  await executeRefunds(ids);
 }
 
 /** Pending cancellation requests, oldest first (dashboard and reservations page). */
@@ -183,4 +181,24 @@ export async function listPayments(actor: Actor, f: { status: string; from: stri
     db().refund.findMany({ orderBy: { createdAt: "desc" }, take: 20, include: { payment: { select: { reservation: { select: { reference: true } } } }, requestedBy: { select: { firstName: true, lastName: true } } } }),
   ]);
   return { rows, count, refunds };
+}
+
+/**
+ * Payment received at the counter for a booking paid on site (RESERVATION_MANAGE: front desk).
+ * Never more than what is still due; locked against concurrent recording.
+ */
+export async function recordOnSitePayment(actor: Actor, input: { id: string; amountCents: number; method: "CARD" | "CASH" | "HOLIDAY_VOUCHERS" | "CHECK" }) {
+  ensure(actor, "RESERVATION_MANAGE");
+  if (!Number.isInteger(input.amountCents) || input.amountCents <= 0) throw new AdminRefusal("Indiquez un montant.", "amount");
+  await db().$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "Reservation" WHERE "id" = ${input.id}::uuid FOR UPDATE`;
+    const r = await tx.reservation.findUnique({ where: { id: input.id }, include: { payments: { where: { status: "SUCCEEDED" }, select: { amountCents: true } } } });
+    if (!r) throw new AdminRefusal("Réservation introuvable.");
+    if (r.paymentMethod !== "ON_SITE") throw new AdminRefusal("Cette réservation est payée en ligne.");
+    if (!["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(r.status)) throw new AdminRefusal("Aucun encaissement possible pour ce statut.");
+    const due = r.totalCents - r.payments.reduce((n, p) => n + p.amountCents, 0);
+    if (input.amountCents > due) throw new AdminRefusal(`Le montant dépasse le reste à payer (${formatCents(Math.max(0, due))}).`, "amount");
+    const p = await tx.payment.create({ data: { reservationId: r.id, provider: "ON_SITE", status: "SUCCEEDED", amountCents: input.amountCents, currency: r.currency, onSiteMethod: input.method, recordedById: actor.id, succeededAt: new Date() } });
+    await writeAudit({ actorType: "USER", actorId: actor.id, action: "payment.on-site", entityType: "Payment", entityId: p.id, metadata: { reservationId: r.id, amountCents: input.amountCents, method: input.method } }, tx);
+  });
 }
