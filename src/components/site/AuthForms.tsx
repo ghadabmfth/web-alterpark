@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextField } from "@/components/ui/forms/TextField";
 import { Checkbox } from "@/components/ui/forms/Checkbox";
@@ -52,7 +52,18 @@ function Frame({ label, children, ...props }: { label: string; children: ReactNo
   );
 }
 
+/** `?suivant=` of the current URL (read after hydration), kept when switching login ↔ sign-up. */
+function useNextParam(): string {
+  return useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(window.location.search).get("suivant") ?? "",
+    () => "",
+  );
+}
+const withNext = (href: string, next: string) => (next ? `${href}?suivant=${encodeURIComponent(next)}` : href);
+
 export function LoginForm() {
+  const next = useNextParam();
   // Return to the protected page that sent the user here (validated again on the server).
   const { form, state, pending, formAction, onSubmit } = useActionForm<LoginInput>(loginAction, zodResolver(loginSchema), { email: "", password: "" }, () => ({
     suivant: new URLSearchParams(window.location.search).get("suivant") ?? "",
@@ -66,22 +77,28 @@ export function LoginForm() {
       <a className="text-primary underline" href={routes.forgotPassword}>Mot de passe oublié ?</a>
       <Button type="submit" fullWidth loading={pending} loadingLabel="Connexion…">Se connecter</Button>
       <p className="m-0 text-center text-text-secondary">
-        Pas encore de compte ? <a className="font-bold text-primary underline" href={routes.register}>Créer un compte</a>
+        Pas encore de compte ? <a className="font-bold text-primary underline" href={withNext(routes.register, next)}>Créer un compte</a>
       </p>
     </Frame>
   );
 }
 
 export function RegisterForm() {
-  const { form, state, pending, formAction, onSubmit } = useActionForm<RegisterInput>(registerAction, zodResolver(registerSchema), {
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    password: "",
-    passwordConfirm: "",
-    acceptTerms: false as unknown as true,
-  });
+  const next = useNextParam();
+  const { form, state, pending, formAction, onSubmit } = useActionForm<RegisterInput>(
+    registerAction,
+    zodResolver(registerSchema),
+    {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      password: "",
+      passwordConfirm: "",
+      acceptTerms: false as unknown as true,
+    },
+    () => ({ suivant: new URLSearchParams(window.location.search).get("suivant") ?? "" }),
+  );
   const e = form.formState.errors;
   return (
     <Frame label="Création de compte" action={formAction} onSubmit={onSubmit}>
@@ -110,7 +127,7 @@ export function RegisterForm() {
       </div>
       <Button type="submit" fullWidth loading={pending} loadingLabel="Création du compte…">Créer mon compte</Button>
       <p className="m-0 text-center text-text-secondary">
-        Déjà client ? <a className="font-bold text-primary underline" href={routes.login}>Se connecter</a>
+        Déjà client ? <a className="font-bold text-primary underline" href={withNext(routes.login, next)}>Se connecter</a>
       </p>
     </Frame>
   );

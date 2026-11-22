@@ -47,7 +47,9 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
     return { status: "error", fieldErrors: { email: "Un compte existe déjà avec cette adresse. Connectez-vous ou réinitialisez votre mot de passe." } };
   }
   sendEmailsSoon();
-  await signIn("credentials", { email: parsed.data.email, password: parsed.data.password, redirectTo: "/compte?bienvenue=1" });
+  // Back to where the customer was (e.g. the booking funnel), else the welcome page.
+  const next = safeNextPath(raw.suivant, "");
+  await signIn("credentials", { email: parsed.data.email, password: parsed.data.password, redirectTo: next || "/compte?bienvenue=1" });
   return { status: "success" };
 }
 

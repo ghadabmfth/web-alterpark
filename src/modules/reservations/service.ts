@@ -177,11 +177,9 @@ export async function createHold(input: { userId: string; request: StayRequest; 
         if (!q.ok) return q;
         const { quote } = q;
         const d = input.details;
-        const vehicle = await tx.vehicle.upsert({
-          where: { userId_plate: { userId: input.userId, plate: d.plate } },
-          create: { userId: input.userId, plate: d.plate },
-          update: { deletedAt: null },
-        });
+        // ON CONFLICT DO NOTHING: two bookings of the same car on different offers may run at once.
+        await tx.vehicle.createMany({ data: [{ userId: input.userId, plate: d.plate }], skipDuplicates: true });
+        const vehicle = await tx.vehicle.update({ where: { userId_plate: { userId: input.userId, plate: d.plate } }, data: { deletedAt: null } });
         const holdExpiresAt = new Date(now.getTime() + quote.parking.holdTtlMinutes * 60_000);
         const r = await tx.reservation.create({
           data: {
@@ -294,7 +292,7 @@ const customerInclude = {
   parking: { select: { name: true, slug: true, timeZone: true, freeCancellationHours: true, airportName: true } },
   offer: { select: { name: true, code: true } },
   cancellationRequests: { orderBy: { createdAt: "desc" as const }, select: { status: true, createdAt: true, decisionNote: true } },
-  payments: { select: { status: true } },
+  payments: { select: { status: true, refunds: { select: { status: true, amountCents: true } } } },
 };
 
 /** The customer's reservations, scoped by owner in the query (SECURITY.md). */
@@ -312,8 +310,8 @@ export async function getCustomerReservation(userId: string, reference: string) 
 }
 
 export type CancelResult =
-  | { ok: true; outcome: "CANCELLED" | "REQUESTED" }
-  | { ok: false; reason: "NOT_FOUND" | "NOT_CANCELLABLE" | "ALREADY_REQUESTED" | "REFUND_UNAVAILABLE" | "REASON_REQUIRED" };
+  | { ok: true; outcome: "CANCELLED" | "REQUESTED"; refundIds: string[]; sessionsToExpire: string[] }
+  | { ok: false; reason: "NOT_FOUND" | "NOT_CANCELLABLE" | "ALREADY_REQUESTED" | "REASON_REQUIRED" };
 
 /**
  * Customer cancellation (approved rule Q6):
@@ -321,21 +319,27 @@ export type CancelResult =
  * - a confirmed booking is cancelled free of charge until `freeCancellationHours` before arrival;
  * - later, a cancellation request is sent to the staff;
  * - nothing once the stay has started.
- * Paid bookings are refunded automatically on free cancellation from Phase 6; until refunds exist,
- * a paid booking is never cancelled without them (REFUND_UNAVAILABLE).
+ * A paid booking cancelled free of charge gets its full refund recorded (PENDING) in the same
+ * transaction; the caller then executes it with the provider (`executeRefunds`), and the cron retries
+ * it if the provider is unreachable — a cancellation is never left without its refund.
  */
 export async function cancelByCustomer(input: { userId: string; reference: string; reason?: string; now?: Date }): Promise<CancelResult> {
   const now = input.now ?? new Date();
   const reason = input.reason?.trim().slice(0, 1000) ?? "";
   return db().$transaction(async (tx) => {
-    const r = await tx.reservation.findFirst({ where: { userId: input.userId, reference: input.reference }, include: { parking: true, payments: { select: { status: true } }, cancellationRequests: { where: { status: "PENDING" }, select: { id: true } } } });
+    const r = await tx.reservation.findFirst({
+      where: { userId: input.userId, reference: input.reference },
+      include: { parking: true, payments: true, cancellationRequests: { where: { status: "PENDING" }, select: { id: true } } },
+    });
     if (!r) return { ok: false as const, reason: "NOT_FOUND" as const };
 
     const cancel = async (action: string) => {
       const { count } = await tx.reservation.updateMany({ where: { id: r.id, status: r.status }, data: { status: "CANCELLED", cancelledAt: now, cancellationReason: reason || null, holdExpiresAt: null } });
       if (count !== 1) return { ok: false as const, reason: "NOT_CANCELLABLE" as const }; // changed concurrently
       await writeAudit({ actorType: "USER", actorId: input.userId, action, entityType: "Reservation", entityId: r.id, metadata: { from: r.status } }, tx);
-      return { ok: true as const, outcome: "CANCELLED" as const };
+      // Open checkout sessions are closed so an abandoned booking cannot be paid afterwards.
+      const sessionsToExpire = r.payments.filter((p) => p.status === "PENDING" && p.providerSessionId).map((p) => p.providerSessionId!);
+      return { ok: true as const, outcome: "CANCELLED" as const, refundIds: [] as string[], sessionsToExpire };
     };
 
     if (r.status === "PENDING_PAYMENT") return cancel("reservation.abandon");
@@ -343,9 +347,12 @@ export async function cancelByCustomer(input: { userId: string; reference: strin
     const option = cancellationOption(r, r.parking.freeCancellationHours, now);
     if (option === "NONE") return { ok: false as const, reason: "NOT_CANCELLABLE" as const };
     if (option === "FREE") {
-      if (r.payments.some((p) => p.status === "SUCCEEDED")) return { ok: false as const, reason: "REFUND_UNAVAILABLE" as const };
       const res = await cancel("reservation.cancel");
       if (res.ok) {
+        for (const p of r.payments.filter((x) => x.status === "SUCCEEDED" && x.amountCents > x.refundedCents)) {
+          const refund = await tx.refund.create({ data: { paymentId: p.id, amountCents: p.amountCents - p.refundedCents, currency: p.currency, reason: "Annulation gratuite par le client", requestedById: input.userId } });
+          res.refundIds.push(refund.id);
+        }
         await enqueue({ template: "reservation.cancelled", recipient: r.customerEmail, userId: r.userId, dedupeKey: `reservation.cancelled:${r.id}`, payload: { firstName: r.customerFirstName, reference: r.reference, parking: r.parking.name, startsAt: formatDateTime(r.startsAt.getTime(), r.parking.timeZone) } }, tx);
       }
       return res;
@@ -359,6 +366,6 @@ export async function cancelByCustomer(input: { userId: string; reference: strin
     if (staff) {
       await enqueue({ template: "reservation.cancellation-requested", recipient: staff, dedupeKey: `reservation.cancellation-requested:${r.id}:${now.getTime()}`, payload: { reference: r.reference, customer: `${r.customerFirstName} ${r.customerLastName} <${r.customerEmail}>`, parking: r.parking.name, startsAt: formatDateTime(r.startsAt.getTime(), r.parking.timeZone), reason } }, tx);
     }
-    return { ok: true as const, outcome: "REQUESTED" as const };
+    return { ok: true as const, outcome: "REQUESTED" as const, refundIds: [], sessionsToExpire: [] };
   });
 }

@@ -18,7 +18,7 @@ describe("parseEnv", () => {
   });
 
   it("accepts Stripe test and restricted keys, rejects a publishable key as secret", () => {
-    const ok = { STRIPE_SECRET_KEY: "rk_test_abc", STRIPE_WEBHOOK_SECRET: "whsec_abc", NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_abc" };
+    const ok = { STRIPE_SECRET_KEY: "rk_test_abc", STRIPE_WEBHOOK_SECRET: "whsec_abc" };
     expect(parseEnv("stripe", ok).STRIPE_SECRET_KEY).toBe("rk_test_abc");
     expect(() => parseEnv("stripe", { ...ok, STRIPE_SECRET_KEY: "pk_test_abc" })).toThrow(/STRIPE_SECRET_KEY/);
   });

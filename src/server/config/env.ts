@@ -26,7 +26,6 @@ export const envSchemas = {
   stripe: z.object({
     STRIPE_SECRET_KEY: z.string().regex(/^(sk|rk)_(test|live)_/, "STRIPE_SECRET_KEY must be a Stripe secret or restricted key"),
     STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_", "STRIPE_WEBHOOK_SECRET must start with whsec_"),
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().regex(/^pk_(test|live)_/, "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must start with pk_test_ or pk_live_"),
   }),
   email: z.object({
     EMAIL_TRANSPORT: z.enum(["console", "resend"]).default("console"),

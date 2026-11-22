@@ -5,6 +5,7 @@ import { pageMetadata } from "@/components/seo/metadata";
 import { Alert } from "@/components/ui/feedback/Alert";
 import { routes } from "@/config/site";
 import { isBookable, listParkings } from "@/modules/parkings/queries";
+import { paymentsConfigured } from "@/modules/payments/stripe";
 
 export const metadata = pageMetadata({
   title: "Réserver une place",
@@ -29,7 +30,7 @@ export default async function BookingPage() {
         <div className="mx-auto max-w-text">
           {parkings.length ? (
             /* Fully server-rendered; the search parameters prefill it after mount. */
-            <BookingFunnel parkings={parkings} />
+            <BookingFunnel parkings={parkings} paymentsEnabled={paymentsConfigured()} />
           ) : (
             <Alert tone="info" title="Réservation en ligne bientôt disponible">
               <p>
