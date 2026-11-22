@@ -11,7 +11,9 @@ Create → Neon). It injects `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED`
 - Use **one database branch for Production and another for Preview** (Neon branching). Preview
   must never write to production data.
 - Set `DIRECT_DATABASE_URL` to the direct (unpooled) URL: migrations need it.
-- `DATABASE_URL` must be available at **build** time: `npm run build:vercel` runs
+- `DATABASE_URL` must be available at **build** time: `npm run build:vercel` first checks the
+  configuration (`scripts/check-deploy-env.ts`: refuses e.g. an indexable preview, a live Stripe key
+  on a preview, the test emulator URL, missing secrets; warns about what is expected before launch), then runs
   `prisma migrate deploy` (applies new migrations only, never resets) and the idempotent seed
   before `next build`. Without a database, the step is skipped and the site serves the
   client-supplied catalogue (accounts and contact sending are then unavailable).
@@ -76,11 +78,23 @@ incident tool, or add a Vercel Log Drain. Sign-in failures are audit entries, no
 
 - Neon: point-in-time restore (retention depends on the plan — 7 days minimum recommended for
   Production) and branch-from-timestamp to inspect past data without touching production.
-- Weekly logical export kept outside Neon: `pg_dump --format=custom "$DIRECT_DATABASE_URL"` to an
-  encrypted storage bucket (to automate in Phase 9).
-- Test a restore on a scratch branch before launch, then quarterly.
+- Weekly logical backup kept outside Neon: GitHub Actions « Database backup »
+  (`.github/workflows/backup.yml`, Sundays 02:41 UTC and on demand): `pg_dump` encrypted with
+  AES-256 (`BACKUP_PASSPHRASE`), kept 35 days as a private artifact. Inactive until the secrets
+  `BACKUP_DATABASE_URL` and `BACKUP_PASSPHRASE` are set.
+- **Restore drill** (before launch, then quarterly): download the artifact, then
+  `BACKUP_PASSPHRASE=… scripts/restore-drill.sh alterpark-….dump.gpg <scratch database URL>` —
+  refuses any database whose name does not end in `_restore` or `_test`, restores, prints row
+  counts and the latest reservation to compare with the source.
 
-## 8. Release checklist (Phase 9)
+## 7b. Health and smoke tests
 
-Preview validated end to end → `develop` merged into `main` → Production deployment → smoke
-tests (home, booking, login, back office) → `SITE_INDEXABLE=true` → sitemap submitted.
+- `GET /api/health` → `{"status":"ok","database":"ok"}` (503 if the database is unreachable): use it
+  for uptime monitoring.
+- After every deployment: `npm run smoke -- <url> [--expect-database] [--indexable]` (read-only:
+  pages, headers, robots, health, protected areas, cron and webhook refusals, 404). Protected
+  previews: set `VERCEL_AUTOMATION_BYPASS_SECRET`.
+
+## 8. Release checklist
+
+Step by step, with owners: [`LAUNCH.md`](LAUNCH.md).

@@ -14,7 +14,7 @@ production-ready before every critical workflow is tested end to end.
 | **6 — Payment** ✅ | `PaymentProvider` + Stripe Checkout, webhook (signature, idempotency), success / failure / pending / expiry / late payment, refunds, CSP | Stripe test-mode scenarios incl. duplicate and out-of-order webhooks; no confirmation without webhook |
 | **7 — Back office** ✅ | Dashboard (real KPIs, date/site filters), reservations, parkings & offers, pricing, customers, payments & refunds, contacts (status, assignment, notes), reports & CSV export, admin users, roles & permissions, settings, audit log | Every action permission-checked and audit-logged; e2e admin flows |
 | **8 — Quality** ✅ | Playwright e2e (registration, login, booking, payment sandbox, confirmation, history, admin management, contact), accessibility pass, security review, performance, error monitoring | All suites green in CI |
-| **9 — Deployment** | Vercel project, environments and variables, Neon (or chosen) PostgreSQL, migrations in CI/CD, Stripe live webhook, e-mail domain, backups & restore drill, `DEPLOYMENT.md`, then indexing enabled | Preview validated end to end before Production |
+| **9 — Deployment** 🔶 | Vercel project, environments and variables, Neon (or chosen) PostgreSQL, migrations in CI/CD, Stripe live webhook, e-mail domain, backups & restore drill, `DEPLOYMENT.md`, then indexing enabled | Preview validated end to end before Production |
 
 ## Phase 1 — implementation plan and status
 
@@ -162,3 +162,14 @@ says reservations open soon.
 | Back-office menu filtered by permission | ✅ |
 | Lighthouse (mobile, production build): performance 91–94, accessibility 100, best practices 96 (Crossroads font 404 until licensed), SEO 100 when indexable | ✅ |
 | Totals: 95 unit, 60 integration, 28 end-to-end | ✅ |
+
+## Phase 9 — status
+
+| Task | Status |
+|---|---|
+| Configuration check at the start of every Vercel build (errors stop the build, warnings printed) | ✅ unit-tested |
+| `/api/health` (database reachability, 503 when down) and `npm run smoke` for every deployment | ✅ verified on a production build |
+| Migrations on deploy (`migrate deploy`, never reset) and idempotent seed | ✅ since Phase 4 |
+| Weekly encrypted backup workflow; restore drill script with scratch-database guard | ✅ drill run locally: restored counts identical to the source |
+| Launch runbook with owners (`docs/LAUNCH.md`) | ✅ |
+| Vercel database, variables, domain; Stripe test then live; e-mail domain; real restore drill; release PR to `main`; indexing | ⏳ needs the client's accounts and data (LAUNCH.md §A) — the Vercel connector available here cannot read the project, so these settings are made in the Vercel dashboard |

@@ -1,0 +1,55 @@
+name: Database backup
+
+# Weekly logical backup of the production database, encrypted, kept 35 days as a private workflow
+# artifact (in addition to the provider's point-in-time restore). Restore drill:
+# scripts/restore-drill.sh. Does nothing until both secrets are set (Settings → Secrets → Actions):
+#   BACKUP_DATABASE_URL  direct (unpooled) URL, ideally of a read-only role
+#   BACKUP_PASSPHRASE    long random passphrase, stored in the team's password manager
+
+on:
+  schedule:
+    - cron: "41 2 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    env:
+      BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check configuration
+        id: config
+        run: |
+          if [ -z "$BACKUP_DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "Backup secrets are not configured: nothing to do."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install PostgreSQL 16 client
+        if: steps.config.outputs.enabled == 'true'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq postgresql-client-16
+      - name: Dump and encrypt
+        if: steps.config.outputs.enabled == 'true'
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y-%m-%dT%H%MZ)
+          /usr/lib/postgresql/16/bin/pg_dump --format=custom --no-owner --no-privileges "$BACKUP_DATABASE_URL" \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-fd 3 3<<<"$BACKUP_PASSPHRASE" \
+                  --output "alterpark-$stamp.dump.gpg"
+          ls -lh alterpark-*.dump.gpg
+          echo "FILE=alterpark-$stamp.dump.gpg" >> "$GITHUB_ENV"
+      - name: Keep 35 days
+        if: steps.config.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 35
+          if-no-files-found: error

@@ -219,3 +219,14 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
   reported as a violation on every page with a form.
 - **Back-office menu by permission**: the menu is rendered with the session (inside Suspense); the
   prerendered shell shows no entry rather than entries the role cannot open.
+
+## ADR-021 — Phase 9 deployment safeguards
+
+- **Configuration checked by the build itself**, not by a checklist alone: the dangerous mistakes
+  (indexable preview, live key on a preview, e2e emulator URL, payments without webhook secret,
+  missing secrets once a database exists, non-https site URL in production) stop the deployment.
+- **Health endpoint and read-only smoke test** give the same verification for Preview and
+  Production, scriptable after each deploy.
+- **Backups outside the database provider**: weekly `pg_dump`, AES-256 encrypted, 35 days as a
+  private GitHub artifact (no extra storage account); the restore drill refuses non-scratch targets.
+- **Production stays on the holding page** until Preview has passed the runbook (B1–B7).
