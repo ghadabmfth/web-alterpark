@@ -50,3 +50,39 @@ jobs:
       - run: npm run test:integration
       # Built without DATABASE_URL, as before the database is provisioned (fallback catalogue).
       - run: npm run build
+
+  e2e:
+    name: End-to-end (Playwright, production build, Stripe emulator)
+    runs-on: ubuntu-24.04
+    needs: quality
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: alterpark
+          POSTGRES_PASSWORD: alterpark
+          POSTGRES_DB: alterpark_e2e_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U alterpark -d alterpark_e2e_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      E2E_DATABASE_URL: postgresql://alterpark:alterpark@localhost:5432/alterpark_e2e_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install -g npm@11.6.2
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Prepares the database, builds, starts the app and the Stripe emulator, runs every scenario.
+      - run: npm run test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Permission } from "@/generated/prisma/enums";
-import { can, getCurrentUser, requireStaff, requireUser } from "@/server/auth/session";
+import { can, getCurrentUser, requireUser } from "@/server/auth/session";
 import { logoutAction } from "@/modules/auth/actions";
 import { Button } from "@/components/ui/actions/Button";
 import { EmptyState } from "@/components/ui/feedback/EmptyState";
@@ -12,11 +12,6 @@ import { EmptyState } from "@/components/ui/feedback/EmptyState";
 
 export async function AccountGate({ path, children }: { path: string; children: ReactNode }) {
   await requireUser(path);
-  return <>{children}</>;
-}
-
-export async function StaffGate({ children }: { children: ReactNode }) {
-  await requireStaff();
   return <>{children}</>;
 }
 

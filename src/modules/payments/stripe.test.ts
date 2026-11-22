@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import Stripe from "stripe";
 import { InvalidWebhookError } from "./provider";
-import { StripeProvider } from "./stripe";
+import { emulatorEndpoint, StripeProvider } from "./stripe";
 
 const SECRET = "whsec_test_secret_for_unit_tests";
 const provider = new StripeProvider("sk_test_unit", SECRET);
@@ -52,5 +52,15 @@ describe("Stripe webhook verification", () => {
     expect(await parse("checkout.session.expired", session({ payment_status: "unpaid" }))).toMatchObject({ kind: "checkout.expired" });
     expect(await parse("refund.updated", { id: "re_1", object: "refund", status: "succeeded", metadata: { refundId: "r-1" }, failure_reason: null })).toMatchObject({ kind: "refund.updated", providerRefundId: "re_1", refundId: "r-1", status: "SUCCEEDED" });
     expect(await parse("customer.created", { id: "cus_1", object: "customer" })).toMatchObject({ kind: "ignored" });
+  });
+});
+
+describe("Stripe emulator endpoint (end-to-end tests)", () => {
+  it("is used with test keys only", () => {
+    expect(emulatorEndpoint("sk_test_x", "http://localhost:12111")).toEqual({ host: "localhost", port: 12111, protocol: "http" });
+    expect(emulatorEndpoint("rk_test_x", "http://localhost:12111").host).toBe("localhost");
+    expect(emulatorEndpoint("sk_live_x", "http://localhost:12111")).toEqual({});
+    expect(emulatorEndpoint("rk_live_x", "http://localhost:12111")).toEqual({});
+    expect(emulatorEndpoint("sk_test_x", undefined)).toEqual({});
   });
 });

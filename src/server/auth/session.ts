@@ -6,6 +6,7 @@ import type { Permission } from "@/generated/prisma/enums";
 import { hasDatabase } from "@/server/db/client";
 import { loadSessionUser, type SessionUser } from "@/modules/auth/service";
 import { hasPermission } from "@/modules/auth/permissions";
+import { isSafeNextPath } from "./safe-path";
 import { auth } from "./auth";
 
 /*
@@ -28,7 +29,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
 /** Internal paths only: prevents open redirects through ?suivant=. */
 export function safeNextPath(next: string | null | undefined, fallback = "/compte"): string {
-  return next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : fallback;
+  return isSafeNextPath(next) ? next! : fallback;
 }
 
 export async function requireUser(next = "/compte"): Promise<SessionUser> {
