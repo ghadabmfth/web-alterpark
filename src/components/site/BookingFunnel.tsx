@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Stepper } from "@/components/ui/navigation/Stepper";
@@ -18,13 +19,19 @@ import { routes } from "@/config/site";
 import { bookingFormSchema, MAX_PASSENGERS, type BookingFormData, type BookingFormInput } from "@/modules/reservations/schemas";
 import { formatDateTime, formatDuration, validateStay, type StayField, type ValidStay } from "@/modules/reservations/domain/stay";
 import { quoteAction, type QuoteState } from "@/modules/reservations/actions";
+import { funnelSessionAction, startCheckoutAction, type FunnelSession } from "@/modules/payments/actions";
 
 /*
  * Booking funnel. Step 1 is checked twice: instantly in the browser (shared rules), then by the
  * server (quoteAction), which re-validates the stay and returns the real availability and the
- * price computed from the database. Online payment arrives in Phase 6: until then the summary says
- * so and nothing is recorded — no price is invented and no confirmation is faked.
+ * price computed from the database. « Payer » re-validates everything on the server, holds the
+ * space and redirects to the hosted payment page; the reservation is confirmed only by the
+ * payment webhook. The customer must be signed in (ADR-011): the funnel is saved in this tab
+ * (sessionStorage) while they sign in or create their account, then restored.
  */
+
+const SAVED_KEY = "alterpark:funnel";
+const newKey = () => crypto.randomUUID().replace(/-/g, "");
 
 export interface FunnelParking {
   slug: string;
@@ -54,7 +61,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
+export function BookingFunnel({ parkings, paymentsEnabled }: { parkings: FunnelParking[]; paymentsEnabled: boolean }) {
   const [step, setStep] = useState(0);
   /** Stay validated when leaving step 1; the summary shows exactly what was checked. */
   const [validStay, setValidStay] = useState<ValidStay | null>(null);
@@ -63,6 +70,12 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
   const [unavailable, setUnavailable] = useState<string | null>(null);
   const [quoting, setQuoting] = useState(false);
   const unavailableRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [session, setSession] = useState<FunnelSession | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+  /** One key per quoted stay: a double click or a retry returns the same reservation. */
+  const payKey = useRef<string>("");
   const heading = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
 
@@ -109,6 +122,16 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
   // whole form is server-rendered (no Suspense fallback, no layout shift).
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
+    if (q.get("reprise")) {
+      // Back from sign-in: restore what the customer had typed (this tab only).
+      try {
+        const saved = sessionStorage.getItem(SAVED_KEY);
+        if (saved) form.reset({ ...form.getValues(), ...(JSON.parse(saved) as Partial<BookingFormInput>) });
+      } catch {
+        /* storage unavailable: the customer fills the form again */
+      }
+      return;
+    }
     const p = parkings.find((x) => x.slug === q.get("parking"));
     if (!p && !q.get("depart")) return;
     const pick = (k: string) => q.get(k) ?? "";
@@ -122,6 +145,24 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
       returnTime: pick("heureRetour"),
     });
   }, [form, parkings]);
+
+  // Signed-in customers book on their account; their details prefill the empty fields.
+  useEffect(() => {
+    let live = true;
+    funnelSessionAction()
+      .then((s) => {
+        if (!live) return;
+        setSession(s);
+        if (!s.signedIn) return;
+        for (const k of ["firstName", "lastName", "email", "phone"] as const) {
+          if (!form.getValues(k)) form.setValue(k, s[k]);
+        }
+      })
+      .catch(() => live && setSession({ signedIn: false }));
+    return () => {
+      live = false;
+    };
+  }, [form]);
 
   // A refusal from the server (full, no rate…) is not tied to a field: move focus to the message.
   useEffect(() => {
@@ -162,6 +203,7 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
       const r = await quoteAction({ parking, offer, departureDate, departureTime, returnDate, returnTime });
       if (r.status === "ok") {
         setQuote(r);
+        payKey.current = newKey();
         return true;
       }
       setQuote(null);
@@ -189,6 +231,49 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   };
 
+  const goToSignIn = (path: "/connexion" | "/inscription") => {
+    try {
+      const values: Partial<BookingFormInput> = { ...getValues() };
+      delete values.acceptTerms; // consent is given again, never restored
+      sessionStorage.setItem(SAVED_KEY, JSON.stringify(values));
+    } catch {
+      /* storage unavailable */
+    }
+    router.push(`${path}?suivant=${encodeURIComponent(`${routes.booking}?reprise=1`)}`);
+  };
+
+  const pay = async () => {
+    setPayError(null);
+    if (!(await trigger())) {
+      setPayError("Certaines informations sont à corriger : revenez aux étapes précédentes.");
+      return;
+    }
+    setPaying(true);
+    try {
+      const r = await startCheckoutAction(getValues(), payKey.current || (payKey.current = newKey()));
+      if (r.status === "redirect") {
+        try {
+          sessionStorage.removeItem(SAVED_KEY);
+        } catch {}
+        window.location.assign(r.url); // hosted payment page; the button stays busy meanwhile
+        return;
+      }
+      setPaying(false);
+      if (r.status === "auth") return setSession({ signedIn: false });
+      if (r.status === "stay" || r.status === "invalid") {
+        const errors = r.status === "stay" ? r.errors : r.fieldErrors;
+        (Object.entries(errors) as [FieldPath<BookingFormInput>, string][]).forEach(([field, message]) => setError(field, { type: "server", message }));
+        const target = STEP_FIELDS.findIndex((fields) => fields.some((f) => f in errors));
+        setStep(target === -1 ? 0 : target);
+        return;
+      }
+      setPayError(r.message);
+    } catch {
+      setPaying(false);
+      setPayError("La connexion a été interrompue. Vérifiez votre connexion et réessayez : aucune somme n’a été débitée.");
+    }
+  };
+
   const offerLabel = parking?.offers.find((o) => o.code === v.offer)?.label ?? "";
 
   return (
@@ -213,9 +298,19 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
                   Continuer
                 </Button>
               ) : (
-                <Button size="sm" disabled aria-describedby="payment-unavailable">
-                  Payer et confirmer
-                </Button>
+                paymentsEnabled && session?.signedIn ? (
+                  <Button size="sm" onClick={pay} loading={paying} loadingLabel="Redirection vers le paiement…">
+                    {quote ? `Payer ${quote.total}` : "Payer et confirmer"}
+                  </Button>
+                ) : paymentsEnabled ? (
+                  <Button size="sm" onClick={() => goToSignIn("/connexion")} disabled={!session}>
+                    Se connecter pour payer
+                  </Button>
+                ) : (
+                  <Button size="sm" disabled aria-describedby="payment-unavailable">
+                    Payer et confirmer
+                  </Button>
+                )
               )}
             </>
           }
@@ -283,7 +378,11 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
               <TextField label="Adresse e-mail" type="email" required autoComplete="email" help="Votre confirmation sera envoyée à cette adresse." error={errors.email?.message} {...register("email")} />
               <TextField label="Téléphone" type="tel" required autoComplete="tel" error={errors.phone?.message} {...register("phone")} />
             </div>
-            <p className="m-0 text-text-secondary">Un compte client est créé avec ces informations : il vous permet de retrouver et d’annuler vos réservations.</p>
+            <p className="m-0 text-text-secondary">
+              {session?.signedIn
+                ? `La réservation sera enregistrée sur votre compte (${session.email}). Les coordonnées ci-dessus sont celles du conducteur.`
+                : "Un compte client est nécessaire pour payer : il vous permet de retrouver, modifier et annuler vos réservations. Vous pourrez vous connecter ou le créer au moment du paiement, sans perdre votre saisie."}
+            </p>
             <div className="flex flex-col gap-2">
               <Checkbox
                 label={
@@ -315,11 +414,30 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
                 ]}
               />
             ) : null}
-            <div id="payment-unavailable">
-              <Alert tone="info" title="Paiement en ligne bientôt disponible">
-                <p>Les places disponibles et le prix ci-dessus sont vérifiés en temps réel. Le paiement sécurisé sera activé prochainement : aucune réservation n’est enregistrée et aucune place n’est bloquée pour le moment.</p>
+            {payError ? (
+              <Alert tone="error" title="Paiement non démarré">
+                <p>{payError}</p>
               </Alert>
-            </div>
+            ) : null}
+            {!paymentsEnabled ? (
+              <div id="payment-unavailable">
+                <Alert tone="info" title="Paiement en ligne bientôt disponible">
+                  <p>Les places disponibles et le prix ci-dessus sont vérifiés en temps réel. Le paiement sécurisé sera activé prochainement : aucune réservation n’est enregistrée et aucune place n’est bloquée pour le moment.</p>
+                </Alert>
+              </div>
+            ) : session && !session.signedIn ? (
+              <Alert tone="info" title="Connectez-vous pour payer">
+                <p>
+                  Votre saisie est conservée.{" "}
+                  <button type="button" className="text-primary underline" onClick={() => goToSignIn("/inscription")}>Créer un compte</button>{" "}
+                  si vous n’en avez pas encore.
+                </p>
+              </Alert>
+            ) : (
+              <p className="m-0 text-text-secondary">
+                Vous allez être redirigé vers la page de paiement sécurisée de notre prestataire Stripe. Votre place est bloquée pendant 30 minutes ; la réservation est confirmée dès la validation du paiement.
+              </p>
+            )}
           </div>
         </Card>
       </form>

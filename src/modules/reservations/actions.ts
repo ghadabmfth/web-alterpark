@@ -13,6 +13,8 @@ import type { ActionState } from "@/lib/action-state";
 import type { StayErrors } from "./domain/stay";
 import { searchSchema } from "./schemas";
 import { cancelByCustomer, quoteStay } from "./service";
+import { executeRefunds, expireSessions } from "@/modules/payments/service";
+import { paymentsConfigured } from "@/modules/payments/stripe";
 
 /*
  * Reservation Server Actions. The quote is public (read-only, rate-limited per IP); cancellation
@@ -58,7 +60,6 @@ const CANCEL_ERRORS = {
   NOT_FOUND: "Réservation introuvable.",
   NOT_CANCELLABLE: "Cette réservation ne peut plus être annulée en ligne. Contactez-nous.",
   ALREADY_REQUESTED: "Une demande d’annulation est déjà en cours de traitement.",
-  REFUND_UNAVAILABLE: "L’annulation en ligne d’une réservation payée sera disponible prochainement. Contactez-nous pour l’annuler.",
   REASON_REQUIRED: "Indiquez le motif de votre demande (5 caractères au minimum).",
 } as const;
 
@@ -71,10 +72,20 @@ export async function cancelReservationAction(_prev: ActionState, formData: Form
   }
   const r = await cancelByCustomer({ userId: user.id, reference: parsed.data.reference, reason: parsed.data.reason });
   if (!r.ok) return { status: "error", message: CANCEL_ERRORS[r.reason], ...(r.reason === "REASON_REQUIRED" ? { fieldErrors: { reason: CANCEL_ERRORS.REASON_REQUIRED } } : {}) };
+  if ((r.refundIds.length || r.sessionsToExpire.length) && paymentsConfigured()) {
+    // The cancellation and its refund are recorded; the provider calls follow (retried by the cron).
+    await executeRefunds(r.refundIds);
+    after(() => expireSessions(r.sessionsToExpire));
+  }
   after(() => processOutbox().catch((e) => console.error("outbox", e)));
   refresh();
   return {
     status: "success",
-    message: r.outcome === "CANCELLED" ? "Votre réservation est annulée." : "Votre demande d’annulation a été transmise. Nous vous répondrons rapidement.",
+    message:
+      r.outcome === "REQUESTED"
+        ? "Votre demande d’annulation a été transmise. Nous vous répondrons rapidement."
+        : r.refundIds.length
+          ? "Votre réservation est annulée. Le remboursement intégral est en cours : il apparaîtra sur votre relevé sous 5 à 10 jours."
+          : "Votre réservation est annulée.",
   };
 }

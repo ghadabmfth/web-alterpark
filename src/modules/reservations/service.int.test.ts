@@ -1,48 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { db } from "@/server/db/client";
-import { utcToZoned } from "./domain/stay";
 import { REFERENCE_RE } from "./domain/reference";
-import { cancelByCustomer, confirmReservation, createHold, expireHolds, getCustomerReservation, listCustomerReservations, quoteStay, type HoldDetails, type StayRequest } from "./service";
-
-const TZ = "Europe/Paris";
-const DAY = 86_400_000;
-const rand = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-const key = () => `k_${rand()}${rand()}`.slice(0, 40);
-
-async function fixture({ capacity = 1, status = "ACTIVE" }: { capacity?: number; status?: "ACTIVE" | "DRAFT" } = {}) {
-  const slug = `test-${rand()}`;
-  const parking = await db().parking.create({
-    data: {
-      slug, name: `Parking ${slug}`, airportCode: "NTE", airportName: "Nantes Atlantique", addressLine: "1 rue du Test", postalCode: "44000", city: "Nantes", status,
-      offers: {
-        create: {
-          code: "eco", name: "Éco", capacity,
-          prices: {
-            create: [
-              { validFrom: new Date("2020-01-01"), mode: "PER_DAY", amountCents: 1000, minDays: 1, maxDays: 7, extraDayCents: 500 },
-              { validFrom: new Date("2020-01-01"), mode: "FLAT", amountCents: 2500, minDays: 1, maxDays: 3, priority: 5 },
-            ],
-          },
-        },
-      },
-    },
-  });
-  return { parking, slug };
-}
-
-async function customer() {
-  const role = await db().role.findUniqueOrThrow({ where: { key: "CUSTOMER" } });
-  return db().user.create({ data: { email: `${rand()}@example.com`, firstName: "Léa", lastName: "Test", passwordHash: "x", roleId: role.id } });
-}
-
-/** A stay starting `inDays` days from now at 10:00 local time, lasting `days` × 24 h. */
-function stay(slug: string, inDays: number, days: number): StayRequest {
-  const start = utcToZoned(Date.now() + inDays * DAY, TZ).date;
-  const end = utcToZoned(Date.now() + (inDays + days) * DAY, TZ).date;
-  return { parkingSlug: slug, offerCode: "eco", departure: { date: start, time: "10:00" }, ret: { date: end, time: "10:00" } };
-}
-
-const details: HoldDetails = { plate: "AB-123-CD", passengers: 2, outboundFlight: "AF1234", returnFlight: "", firstName: "Léa", lastName: "Test", email: "lea@example.com", phone: "0612345678" };
+import { cancelByCustomer, confirmReservation, createHold, expireHolds, getCustomerReservation, listCustomerReservations, quoteStay } from "./service";
+import { customer, details, fixture, key, rand, stay } from "@/test/booking-fixtures";
 
 describe("quote", () => {
   it("prices with the database rates and reports availability", async () => {
@@ -170,7 +130,7 @@ describe("customer access and cancellation", () => {
     const [a, b] = await Promise.all([customer(), customer()]);
     const r = await createHold({ userId: a.id, request: stay(slug, 10, 2), details, idempotencyKey: key() });
     if (!r.ok) throw new Error();
-    expect(await cancelByCustomer({ userId: a.id, reference: r.reference })).toEqual({ ok: true, outcome: "CANCELLED" });
+    expect(await cancelByCustomer({ userId: a.id, reference: r.reference })).toMatchObject({ ok: true, outcome: "CANCELLED" });
     expect((await createHold({ userId: b.id, request: stay(slug, 10, 2), details, idempotencyKey: key() })).ok).toBe(true);
   });
 
@@ -184,24 +144,28 @@ describe("customer access and cancellation", () => {
       return r;
     };
     const early = await book(5);
-    expect(await cancelByCustomer({ userId: user.id, reference: early.reference })).toEqual({ ok: true, outcome: "CANCELLED" });
+    expect(await cancelByCustomer({ userId: user.id, reference: early.reference })).toMatchObject({ ok: true, outcome: "CANCELLED" });
 
     const soon = await book(5);
     const { startsAt } = await db().reservation.findUniqueOrThrow({ where: { id: soon.reservationId } });
     const at = async (h: number) => new Date(startsAt.getTime() - h * 3_600_000);
     expect(await cancelByCustomer({ userId: user.id, reference: soon.reference, reason: "", now: await at(10) })).toEqual({ ok: false, reason: "REASON_REQUIRED" });
-    expect(await cancelByCustomer({ userId: user.id, reference: soon.reference, reason: "Vol annulé par la compagnie", now: await at(10) })).toEqual({ ok: true, outcome: "REQUESTED" });
+    expect(await cancelByCustomer({ userId: user.id, reference: soon.reference, reason: "Vol annulé par la compagnie", now: await at(10) })).toMatchObject({ ok: true, outcome: "REQUESTED" });
     expect(await cancelByCustomer({ userId: user.id, reference: soon.reference, reason: "Encore", now: await at(9) })).toEqual({ ok: false, reason: "ALREADY_REQUESTED" });
     expect(await cancelByCustomer({ userId: user.id, reference: soon.reference, now: await at(-1) })).toEqual({ ok: false, reason: "NOT_CANCELLABLE" });
   });
 
-  it("never cancels a paid booking without a refund (refunds arrive in Phase 6)", async () => {
+  it("free cancellation of a paid booking records its full refund in the same transaction", async () => {
     const { slug } = await fixture();
     const user = await customer();
     const r = await createHold({ userId: user.id, request: stay(slug, 10, 2), details, idempotencyKey: key() });
     if (!r.ok) throw new Error();
     await confirmReservation(r.reservationId);
-    await db().payment.create({ data: { reservationId: r.reservationId, provider: "STRIPE", status: "SUCCEEDED", amountCents: 2500, providerPaymentId: `pi_test_${rand()}` } });
-    expect(await cancelByCustomer({ userId: user.id, reference: r.reference })).toEqual({ ok: false, reason: "REFUND_UNAVAILABLE" });
+    const payment = await db().payment.create({ data: { reservationId: r.reservationId, provider: "STRIPE", status: "SUCCEEDED", amountCents: 2500, providerPaymentId: `pi_test_${rand()}` } });
+    const res = await cancelByCustomer({ userId: user.id, reference: r.reference });
+    expect(res).toMatchObject({ ok: true, outcome: "CANCELLED" });
+    if (!res.ok) throw new Error();
+    expect(res.refundIds).toHaveLength(1);
+    expect(await db().refund.findUniqueOrThrow({ where: { id: res.refundIds[0] } })).toMatchObject({ paymentId: payment.id, amountCents: 2500, status: "PENDING" });
   });
 });

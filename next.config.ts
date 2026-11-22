@@ -1,10 +1,35 @@
 import type { NextConfig } from "next";
 
 /*
- * Security headers applied to every route. The Content-Security-Policy is added in Phase 6,
- * once the Stripe domains it must allow are wired in.
+ * Security headers applied to every route.
+ *
+ * Content-Security-Policy (ADR-018): payment happens on Stripe's hosted page (a top-level
+ * navigation), so no Stripe script, frame or connection is needed here. Scripts are limited to our
+ * own origin; inline scripts must stay allowed because a nonce would force every page to render
+ * per request (incompatible with the prerendered shells of Cache Components). Everything else —
+ * connections, frames, forms, plugins, base URL, framing by others — is locked down.
  */
+const isDev = process.env.NODE_ENV === "development";
+const isPreview = process.env.VERCEL_ENV === "preview";
+const vercelLive = isPreview ? " https://vercel.live" : ""; // preview toolbar only
+
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${vercelLive}`,
+  "style-src 'self' 'unsafe-inline'",
+  `img-src 'self' data: blob:${vercelLive}`,
+  "font-src 'self'",
+  `connect-src 'self'${isDev ? " ws:" : ""}${vercelLive}`,
+  `frame-src https://www.youtube-nocookie.com${vercelLive}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+].join("; ");
+
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "DENY" },

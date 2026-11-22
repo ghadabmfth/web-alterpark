@@ -34,7 +34,8 @@ Create → Neon). It injects `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED`
 | `DESIGN_SYSTEM_GALLERY` | — | `true` | Component gallery on previews |
 | `SEED_SUPER_ADMIN_EMAIL` / `_PASSWORD` | once | — | See §3, then delete |
 
-Stripe variables arrive in Phase 6 (`.env.example` documents them).
+| `STRIPE_SECRET_KEY` | live key (restricted `rk_live_`) | test key `sk_test_` / `rk_test_` | Payment stays disabled until set |
+| `STRIPE_WEBHOOK_SECRET` | from the live endpoint | from the test endpoint | `whsec_…`, one per endpoint |
 
 ## 3. First super administrator
 
@@ -43,13 +44,28 @@ Stripe variables arrive in Phase 6 (`.env.example` documents them).
 3. Sign in at `/connexion`, open **Mon profil**, change the password.
 4. **Delete both variables** in Vercel.
 
-## 4. Scheduled job
+## 4. Stripe
 
-`/api/cron/notifications` retries e-mails that failed, marks unpaid holds past their time as EXPIRED (availability already ignores them) and purges old rate-limit counters. E-mails
+1. Stripe dashboard → Developers → API keys: create a **restricted key** with write access to
+   Checkout Sessions and Refunds (test mode for Preview, live mode for Production).
+2. Developers → Webhooks → Add endpoint: `https://<domain>/api/webhooks/stripe` (Preview: the
+   preview URL; Vercel Deployment Protection must let Stripe through — use a protection bypass for
+   automation or a dedicated preview domain). Events:
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.async_payment_failed`, `checkout.session.expired`, `refund.created`,
+   `refund.updated`, `refund.failed`.
+3. Copy the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET`, the key into
+   `STRIPE_SECRET_KEY`, redeploy. The « Payer » button appears in the funnel.
+4. Test mode: card `4242 4242 4242 4242`, 3-D Secure `4000 0025 0000 3155`, declined
+   `4000 0000 0000 0002`. Locally: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
+
+## 5. Scheduled job
+
+`/api/cron/notifications` retries e-mails that failed, marks unpaid holds past their time as EXPIRED (availability already ignores them), retries refunds Stripe could not take yet, and purges old rate-limit counters. E-mails
 are normally sent right after each request; the job is a safety net. The Hobby plan allows **one run
 per day** (configured at 03:17 UTC); on Pro, set `*/10 * * * *` in `vercel.json`.
 
-## 5. Backups and recovery
+## 6. Backups and recovery
 
 - Neon: point-in-time restore (retention depends on the plan — 7 days minimum recommended for
   Production) and branch-from-timestamp to inspect past data without touching production.
@@ -57,7 +73,7 @@ per day** (configured at 03:17 UTC); on Pro, set `*/10 * * * *` in `vercel.json`
   encrypted storage bucket (to automate in Phase 9).
 - Test a restore on a scratch branch before launch, then quarterly.
 
-## 6. Release checklist (Phase 9)
+## 7. Release checklist (Phase 9)
 
 Preview validated end to end → `develop` merged into `main` → Production deployment → smoke
 tests (home, booking, login, back office) → `SITE_INDEXABLE=true` → sitemap submitted.

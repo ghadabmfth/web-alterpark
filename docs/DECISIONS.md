@@ -159,3 +159,29 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
   at prerender time; the AppShell resolves the current link inside `<Suspense>` with an identical
   fallback, so the shell stays prerendered.
 - **Demo data is a local script**, never part of the seed or deployment, and refuses remote databases.
+
+## ADR-018 — Phase 6 payment choices
+
+- **Hosted Stripe Checkout, opened by a server action.** No Stripe script on our pages; the
+  browser navigates to Stripe. Card data never reaches Alterpark.
+- **Two idempotency layers.** Our booking key (one per quoted stay, from the funnel) returns the same
+  reservation; Stripe's key `checkout:<reservation id>` returns the same session. The session's
+  `expires_at` is derived from the stored hold (hold + 2 min, Stripe's minimum lifetime is 30 min),
+  so a retry sends identical parameters.
+- **The webhook is the only path to CONFIRMED.** Each event is stored once (provider + event id);
+  each step is a guarded `UPDATE … WHERE status …`, so duplicates and out-of-order events are
+  harmless. A failed processing returns 500 and Stripe retries it.
+- **Money always goes back when a booking cannot be honoured**: late payment with no space, wrong
+  amount, booking cancelled meanwhile. Refunds are recorded before calling Stripe and retried by
+  the cron; their final status comes from Stripe's refund events.
+- **A failed or expired checkout releases the space at once** instead of waiting for the hold.
+- **Concurrent inserts use `ON CONFLICT DO NOTHING`** (payments, webhook events, vehicles): found by
+  the double-click test, where two parallel requests raced on the same session.
+- **Signed in to pay (ADR-011).** The funnel stores the form in `sessionStorage` (this tab only,
+  never the consent box) while the customer signs in or creates an account.
+- **CSP without nonces.** A nonce forces every page to render per request, which Cache Components'
+  prerendered shells cannot do. Scripts are limited to our origin (inline allowed); connections,
+  frames (YouTube only), forms, plugins, base URL and framing are locked down. Revisit when
+  Next.js SRI (experimental) is stable.
+- **Auth.js and prerendering.** `getCurrentUser` awaits `connection()` before `auth()`: Auth.js draws
+  random values before reading the cookie, which Cache Components reported on every account page.
