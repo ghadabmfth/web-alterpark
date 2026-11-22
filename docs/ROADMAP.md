@@ -10,7 +10,7 @@ production-ready before every critical workflow is tested end to end.
 | **2 — Design system** ✅ | Port the 30 components to TSX (server-first, `ap-*` classes, props of `index.d.ts`); add documented extensions: Table, Badge, Tabs, Pagination, DropdownMenu, DateTimeField, Skeleton, EmptyState, Toast, Card, StatTile, Sidebar, PageHeader, FilterBar, ConfirmDialog; `/dev/design-system` gallery (not deployed to production) | Every component rendered in all states at 390 / 768 / 1440 px; keyboard and screen-reader checks; visual comparison with the supplied previews |
 | **3 — Front-end foundation** ✅ | Public layout (Header, Footer, SocialRail), home, parkings, parking details, how it works, FAQ, contact, legal pages, auth pages, booking funnel UI, customer-area and admin shells; metadata, sitemap, robots, structured data (`ParkingFacility`, `FAQPage`, `BreadcrumbList`) | Pages responsive and accessible (axe clean), Lighthouse ≥ 90 on mobile for public pages |
 | **4 — Back end & database** ✅ | First migration, seed (roles, permissions, three sites as `DRAFT`), Prisma client, Auth.js (sign-up, login, verification, reset), permission helpers, rate limiting, audit log, structured logger | Integration tests against PostgreSQL; protected routes refuse unauthorised access server-side |
-| **5 — Reservation engine** | Date rules, pricing engine, availability with row lock, holds and expiry cron, lifecycle transitions, references, cancellation rules and requests, e-mail outbox | Unit tests (pricing, dates, availability, transitions, permissions); concurrency test: N parallel bookings on the last space → exactly one |
+| **5 — Reservation engine** ✅ | Date rules, pricing engine, availability with row lock, holds and expiry cron, lifecycle transitions, references, cancellation rules and requests, e-mail outbox | Unit tests (pricing, dates, availability, transitions, permissions); concurrency test: N parallel bookings on the last space → exactly one |
 | **6 — Payment** | `PaymentProvider` + Stripe Checkout, webhook (signature, idempotency), success / failure / pending / expiry / late payment, refunds, CSP | Stripe test-mode scenarios incl. duplicate and out-of-order webhooks; no confirmation without webhook |
 | **7 — Back office** | Dashboard (real KPIs, date/site filters), reservations, parkings & offers, pricing, customers, payments & refunds, contacts (status, assignment, notes), reports & CSV export, admin users, roles & permissions, settings, audit log | Every action permission-checked and audit-logged; e2e admin flows |
 | **8 — Quality** | Playwright e2e (registration, login, booking, payment sandbox, confirmation, history, admin management, contact), accessibility pass, security review, performance, error monitoring | All suites green in CI |
@@ -87,3 +87,23 @@ retour » instead of « Découvrez nos Services Plus » (no Services Plus page i
 
 All sites are DRAFT (approved rule Q3) until capacities, addresses and rates are entered: the
 booking funnel says reservations open soon. Phase 5 needs at least one ACTIVE site with capacity.
+
+## Phase 5 — status
+
+| Task | Status |
+|---|---|
+| Pricing engine: rate chosen by arrival date (site calendar), stay length and priority; FLAT / PER_DAY, extra days beyond `maxDays`; no rate → no price (never guessed); price snapshot on the reservation | ✅ `src/modules/pricing` |
+| Availability: peak occupancy over the requested interval (consecutive stays share a space); confirmed, checked-in and unexpired holds count | ✅ `src/modules/availability` |
+| Hold: one transaction, offer row locked (`FOR UPDATE`), stay, price and capacity re-checked server-side, idempotency key, vehicle saved, customer snapshot, audit entry | ✅ `createHold` |
+| Lifecycle transitions, references `AP-NTE-7K3Q9M` (random, unambiguous alphabet, collision retried), hold expiry (cron; availability ignores expired holds even before it runs) | ✅ |
+| Confirmation service, idempotent, with late payment (confirms only if a space is still free) and confirmation e-mail | ✅ called by the Stripe webhook in Phase 6 |
+| Cancellation (rule Q6): abandon a pending payment; free until 24 h before arrival; reasoned request after (staff notified); nothing once started; a paid booking is never cancelled without its refund | ✅ refunds in Phase 6 |
+| Funnel: step 1 checked by the server (real price and availability, rate-limited); payment button still disabled and stated | ✅ |
+| Customer area: dashboard (upcoming stays), reservations list, detail with cancellation, scoped by owner (another customer's reference is not found) | ✅ |
+| Local demo data (`npm run db:demo`): fictitious capacities and rates, labelled, local databases only | ✅ |
+| Tests: 82 unit (pricing, occupancy, transitions, references, cancellation, dates); 27 integration incl. **8 parallel bookings of the last space → exactly one**, parallel retries with one idempotency key → one reservation; 12 end-to-end checks (funnel quote, refusal message and focus, list, detail, cancellation, not-found, axe) | ✅ |
+
+**Needed from the client before bookings open:** capacity per offer, the rate grid (periods,
+durations, amounts), confirmed addresses for Marseille and Roissy, and the cancellation and lead-time
+rules if they differ from the approved defaults. Until then every site stays DRAFT and the funnel
+says reservations open soon.

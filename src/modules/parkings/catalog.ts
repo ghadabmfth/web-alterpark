@@ -53,6 +53,9 @@ export const STATIC_PARKINGS: readonly ParkingSummary[] = [
       },
     ],
     minLeadMinutes: 120,
+    maxStayDays: 60,
+    bookingHorizonDays: 365,
+    freeCancellationHours: 24,
   },
   {
     slug: "marseille",
@@ -67,6 +70,9 @@ export const STATIC_PARKINGS: readonly ParkingSummary[] = [
     practicalInfo: [],
     offers: [],
     minLeadMinutes: 120,
+    maxStayDays: 60,
+    bookingHorizonDays: 365,
+    freeCancellationHours: 24,
   },
   {
     slug: "paris-roissy",
@@ -81,5 +87,8 @@ export const STATIC_PARKINGS: readonly ParkingSummary[] = [
     practicalInfo: [],
     offers: [],
     minLeadMinutes: 120,
+    maxStayDays: 60,
+    bookingHorizonDays: 365,
+    freeCancellationHours: 24,
   },
 ];

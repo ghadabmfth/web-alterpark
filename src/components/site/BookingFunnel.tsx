@@ -17,11 +17,13 @@ import { StatusIcon } from "@/components/ui/icons/icons";
 import { routes } from "@/config/site";
 import { bookingFormSchema, MAX_PASSENGERS, type BookingFormData, type BookingFormInput } from "@/modules/reservations/schemas";
 import { formatDateTime, formatDuration, validateStay, type StayField, type ValidStay } from "@/modules/reservations/domain/stay";
+import { quoteAction, type QuoteState } from "@/modules/reservations/actions";
 
 /*
- * Booking funnel (Phase 3: interface and client-side validation).
- * Server-side availability, pricing and the hold are Phase 5; online payment is Phase 6. The
- * summary step says so explicitly: no price is invented and no confirmation is faked.
+ * Booking funnel. Step 1 is checked twice: instantly in the browser (shared rules), then by the
+ * server (quoteAction), which re-validates the stay and returns the real availability and the
+ * price computed from the database. Online payment arrives in Phase 6: until then the summary says
+ * so and nothing is recorded — no price is invented and no confirmation is faked.
  */
 
 export interface FunnelParking {
@@ -56,6 +58,11 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
   const [step, setStep] = useState(0);
   /** Stay validated when leaving step 1; the summary shows exactly what was checked. */
   const [validStay, setValidStay] = useState<ValidStay | null>(null);
+  /** Server quote for the stay validated at step 1. */
+  const [quote, setQuote] = useState<Extract<QuoteState, { status: "ok" }> | null>(null);
+  const [unavailable, setUnavailable] = useState<string | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const unavailableRef = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
 
@@ -116,6 +123,11 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
     });
   }, [form, parkings]);
 
+  // A refusal from the server (full, no rate…) is not tied to a field: move focus to the message.
+  useEffect(() => {
+    if (unavailable) unavailableRef.current?.focus();
+  }, [unavailable]);
+
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
@@ -142,12 +154,39 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
   const focusFirstInvalid = () =>
     requestAnimationFrame(() => document.querySelector<HTMLElement>("[aria-invalid='true'], [data-invalid='true'] input")?.focus());
 
+  /** Real availability and price from the server; false keeps the customer on step 1. */
+  const checkQuote = async (): Promise<boolean> => {
+    const { parking, offer, departureDate, departureTime, returnDate, returnTime } = getValues();
+    setQuoting(true);
+    try {
+      const r = await quoteAction({ parking, offer, departureDate, departureTime, returnDate, returnTime });
+      if (r.status === "ok") {
+        setQuote(r);
+        return true;
+      }
+      setQuote(null);
+      if (r.status === "invalid") (Object.entries(r.errors) as [StayField, string][]).forEach(([field, message]) => setError(field, { type: "stay", message }));
+      else setUnavailable(r.message);
+      return false;
+    } catch {
+      setUnavailable("La vérification des disponibilités a échoué. Vérifiez votre connexion et réessayez.");
+      return false;
+    } finally {
+      setQuoting(false);
+    }
+  };
+
   const next = async () => {
+    setUnavailable(null);
     const fieldsOk = await trigger(STEP_FIELDS[step]);
     // Step 1 reports every problem at once: missing choices and stay rules together.
     const stayOk = step === 0 ? checkStay() : true;
-    if (fieldsOk && stayOk) setStep((s) => Math.min(STEPS.length - 1, s + 1));
-    else focusFirstInvalid();
+    if (!fieldsOk || !stayOk) return focusFirstInvalid();
+    if (step === 0 && !(await checkQuote())) {
+      if (Object.keys(form.formState.errors).length) focusFirstInvalid();
+      return;
+    }
+    setStep((s) => Math.min(STEPS.length - 1, s + 1));
   };
 
   const offerLabel = parking?.offers.find((o) => o.code === v.offer)?.label ?? "";
@@ -170,7 +209,7 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
                 </Button>
               ) : null}
               {step < STEPS.length - 1 ? (
-                <Button size="sm" onClick={next}>
+                <Button size="sm" onClick={next} loading={quoting} loadingLabel="Vérification…">
                   Continuer
                 </Button>
               ) : (
@@ -221,6 +260,13 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
                 timeProps={register("returnTime")}
               />
             </div>
+            {unavailable ? (
+              <div ref={unavailableRef} tabIndex={-1} className="outline-none">
+                <Alert tone="warning" title="Réservation impossible">
+                  <p>{unavailable}</p>
+                </Alert>
+              </div>
+            ) : null}
           </div>
 
           <div hidden={step !== 1} className="grid gap-8 md:grid-cols-2">
@@ -265,13 +311,13 @@ export function BookingFunnel({ parkings }: { parkings: FunnelParking[] }) {
                   { term: "Véhicule", value: v.plate.trim().toUpperCase() },
                   { term: "Passagers", value: String(v.passengers) },
                   { term: "Client", value: `${v.firstName} ${v.lastName} — ${v.email}` },
-                  { term: "Prix", value: "Calculé lors de la vérification des disponibilités" },
+                  { term: "Prix TTC", value: quote ? quote.total : "—" },
                 ]}
               />
             ) : null}
             <div id="payment-unavailable">
-              <Alert tone="info" title="Réservation en ligne bientôt disponible">
-                <p>La vérification des places, le calcul du prix et le paiement sécurisé seront activés dans les prochaines étapes du projet. Aucune réservation n’est enregistrée pour le moment.</p>
+              <Alert tone="info" title="Paiement en ligne bientôt disponible">
+                <p>Les places disponibles et le prix ci-dessus sont vérifiés en temps réel. Le paiement sécurisé sera activé prochainement : aucune réservation n’est enregistrée et aucune place n’est bloquée pour le moment.</p>
               </Alert>
             </div>
           </div>

@@ -19,6 +19,8 @@ export const RATE_LIMITS = {
   register: { name: "register:ip", limit: 5, windowSeconds: 60 * 60 },
   passwordReset: { name: "reset:ip", limit: 5, windowSeconds: 60 * 60 },
   contact: { name: "contact:ip", limit: 5, windowSeconds: 60 * 60 },
+  quote: { name: "quote:ip", limit: 60, windowSeconds: 10 * 60 },
+  reservationChange: { name: "reservation-change:user", limit: 10, windowSeconds: 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** Start of the fixed window containing `now`. */

@@ -4,7 +4,7 @@ Airport parking reservation and management platform for Nantes, Marseille and Pa
 public website, online booking with secure payment, customer area and administration back office.
 Developed by OuiDev.
 
-**Status: Phases 1–4 complete (foundation, design system, front-end, database and authentication). Next: Phase 5, reservation engine.** Accounts, roles, contact and the back-office access control work; bookings and payments arrive in Phases 5–6. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status: Phases 1–5 complete (foundation, design system, front-end, database and authentication, reservation engine). Next: Phase 6, payment.** The funnel shows real availability and prices; reservations are confirmed only once online payment (Phase 6) exists. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
 
@@ -33,6 +33,7 @@ Deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 | `npm run lint` · `npm run typecheck` · `npm test` | Quality checks (also run in CI) |
 | `npm run db:validate` · `npm run db:format` | Prisma schema |
 | `npm run db:migrate` · `npm run db:deploy` · `npm run db:seed` | Migrations (dev / deploy) and seed |
+| `npm run db:demo` | **Local only**: opens Nantes with fictitious capacities and rates labelled « DÉMO » (`-- --undo` to revert) |
 | `npm run test:integration` | Integration tests on PostgreSQL (`TEST_DATABASE_URL`, name ending in `_test`) |
 | `npm run check` | All checks except the build |
 
