@@ -45,8 +45,11 @@ component at 390, 768 and 1440 px.
 
 ## ADR-006 — Font licences
 
-Crossroads is supplied under a "personal use" licence: not committed, git-ignored; headings fall back
-to Montserrat until a commercial web licence is bought and the file is placed in `public/fonts/`.
+Crossroads is supplied under a "personal use" licence. Initially not committed (headings in
+Montserrat). **22/11/2026 — client decision:** the file supplied with the « Accueil » design is used as
+is; the client takes responsibility for the licence (commercial web licence to buy before launch).
+Digits and punctuation, absent or watermarked in this edition, are served by Montserrat 800 (as in
+the design system).
 Stars use Font Awesome 6 Pro paths: licence to confirm. Montserrat (OFL) is committed.
 
 ## ADR-007 — Versions
@@ -230,3 +233,22 @@ from production builds unless `DESIGN_SYSTEM_GALLERY=true`.
 - **Backups outside the database provider**: weekly `pg_dump`, AES-256 encrypted, 35 days as a
   private GitHub artifact (no extra storage account); the restore drill refuses non-scratch targets.
 - **Production stays on the holding page** until Preview has passed the runbook (B1–B7).
+
+## ADR-022 — Home and Services Plus follow the client's « Accueil » design (22/11/2026)
+
+The client supplied the home page and the Services Plus page as built mock-ups (same component CSS
+as the design system, verified identical). The site now reproduces them section by section, with
+the existing components. Where the design shows something the platform does not do yet, the
+section keeps its design but makes no false promise (client decision):
+- **Loyalty programme**: shown with a « Bientôt » eyebrow and « arrive bientôt » (rule Q9: out of v1).
+- **Mobile application**: store badges appear only once real store URLs are set
+  (`appStoreLinks` in `src/config/site.ts`); until then « Bientôt disponible ».
+- **Services Plus**: « Demander ce service » opens the contact form prefilled with the service
+  (services are not part of the online booking); prices are the client's.
+- **« dès » prices in the booking bar** come from the active rates (one day, same engine as the
+  booking) — never typed into the page.
+- **Booking perks** keep the approved rules (payment online at booking), not the design's
+  « paiement à votre retour ».
+- Google rating and reviews are the figures supplied with the design (13/11/2026); update them in
+  `src/config/site.ts` and `src/content/site-content.ts`.
+- The header uses the design's six links; FAQ and Espace client move to the footer.

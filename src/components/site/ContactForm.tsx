@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextField } from "@/components/ui/forms/TextField";
 import { Select } from "@/components/ui/forms/Select";
@@ -27,6 +28,15 @@ export function ContactForm({ parkings }: { parkings: { value: string; label: st
     () => ({ startedAt: String(Math.round(performance.timeOrigin)) }),
   );
   const errors = form.formState.errors;
+
+  // « Demander ce service » on the Services Plus page: ?service=<name> prefills the request.
+  useEffect(() => {
+    const service = new URLSearchParams(window.location.search).get("service")?.slice(0, 80);
+    if (!service || form.getValues("message")) return;
+    form.setValue("subject", "OTHER");
+    form.setValue("parking", "nantes");
+    form.setValue("message", `Bonjour, je souhaite réserver le service « ${service} » pendant mon stationnement. Merci de me recontacter.`);
+  }, [form]);
 
   if (state.status === "success") {
     return <Alert tone="success" title="Message envoyé">{state.message}</Alert>;
