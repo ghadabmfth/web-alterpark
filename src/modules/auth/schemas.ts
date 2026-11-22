@@ -33,6 +33,29 @@ export const registerSchema = z
 
 export const forgotPasswordSchema = z.object({ email });
 
+const newPassword = z.string().min(PASSWORD_MIN, `${PASSWORD_MIN} caractères au minimum.`).max(PASSWORD_MAX, `${PASSWORD_MAX} caractères au maximum.`);
+
+export const resetPasswordSchema = z
+  .object({ token: z.string().min(20).max(200), password: newPassword, passwordConfirm: z.string() })
+  .refine((d) => d.password === d.passwordConfirm, { path: ["passwordConfirm"], message: "Les deux mots de passe ne correspondent pas." });
+
+export const changePasswordSchema = z
+  .object({ currentPassword: z.string().min(1, "Indiquez votre mot de passe actuel.").max(PASSWORD_MAX), password: newPassword, passwordConfirm: z.string() })
+  .refine((d) => d.password === d.passwordConfirm, { path: ["passwordConfirm"], message: "Les deux mots de passe ne correspondent pas." })
+  .refine((d) => d.password !== d.currentPassword, { path: ["password"], message: "Choisissez un mot de passe différent de l’actuel." });
+
+export const profileSchema = z.object({
+  firstName: z.string().trim().min(1, "Indiquez votre prénom.").max(100, "100 caractères au maximum."),
+  lastName: z.string().trim().min(1, "Indiquez votre nom.").max(100, "100 caractères au maximum."),
+  phone: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || (/^\+?[0-9 .()-]+$/.test(v) && /^(\D*\d){8,15}\D*$/.test(v)), "Numéro invalide. Exemple : 06 12 34 56 78"),
+});
+
 export type LoginInput = z.input<typeof loginSchema>;
 export type RegisterInput = z.input<typeof registerSchema>;
 export type ForgotPasswordInput = z.input<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;
+export type ChangePasswordInput = z.input<typeof changePasswordSchema>;
+export type ProfileInput = z.input<typeof profileSchema>;

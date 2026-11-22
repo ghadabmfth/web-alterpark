@@ -1,11 +1,12 @@
 import type { ParkingSummary } from "./types";
 
 /*
- * STATIC CATALOGUE — Phase 3 only. Replaced by the Prisma repository in Phase 4 (same shape).
+ * FALLBACK + SEED SOURCE. Used (1) by prisma/seed.ts to create the sites, and (2) by the queries
+ * only when no database is configured (a static build before the database is provisioned).
  *
  * Contains only facts supplied by the client (design system, Nantes site). Nothing is invented:
- * - Marseille and Paris-Roissy have no confirmed address, offers or prices yet → status DRAFT,
- *   shown as "bientôt disponible", not bookable.
+ * - Every site is DRAFT (approved rule Q3): no capacity is known yet, so nothing is bookable.
+ * - Marseille and Paris-Roissy have no confirmed address, offers or prices yet.
  * - No price is published: `fromCents` stays empty until the client validates the rate grid
  *   (the design system's €45 / €35 "dès" prices are marked "to verify").
  */
@@ -18,7 +19,7 @@ export const STATIC_PARKINGS: readonly ParkingSummary[] = [
     city: "Nantes",
     region: "Pays de la Loire",
     timeZone: "Europe/Paris",
-    status: "ACTIVE",
+    status: "DRAFT",
     address: { line: "1 Rue Dieudonné Costes", postalCode: "44860", city: "Saint-Aignan-de-Grandlieu", country: "FR" },
     phone: "02 40 731 237",
     email: "contact@alterpark.fr",

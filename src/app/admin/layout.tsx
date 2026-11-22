@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { AppShell } from "@/components/ui/layout/AppShell";
-import { PreviewNotice } from "@/components/site/PreviewNotice";
-import { Badge } from "@/components/ui/feedback/Badge";
+import { LoadingRegion, Skeleton } from "@/components/ui/feedback/Skeleton";
+import { StaffGate, UserMenu } from "@/components/site/AreaGates";
 import { routes } from "@/config/site";
 
 export const metadata: Metadata = { title: { default: "Back-office", template: "%s | Back-office ALTERPARK" }, robots: { index: false, follow: false } };
@@ -22,10 +23,22 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
         { title: "Pilotage", items: [{ label: "Rapports", href: a("rapports") }] },
         { title: "Administration", items: [{ label: "Utilisateurs", href: a("utilisateurs") }, { label: "Rôles et permissions", href: a("roles") }, { label: "Paramètres", href: a("parametres") }, { label: "Journal d’audit", href: a("journal") }] },
       ]}
-      topbar={<Badge tone="warning">Accès non protégé — aperçu</Badge>}
+      topbar={
+        <Suspense fallback={null}>
+          <UserMenu />
+        </Suspense>
+      }
     >
-      <PreviewNotice area="Le back-office" />
-      {children}
+      <Suspense
+        fallback={
+          <LoadingRegion label="Chargement du back-office…">
+            <Skeleton width="40%" />
+            <Skeleton variant="block" />
+          </LoadingRegion>
+        }
+      >
+        <StaffGate>{children}</StaffGate>
+      </Suspense>
     </AppShell>
   );
 }

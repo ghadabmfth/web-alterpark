@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { AppShell } from "@/components/ui/layout/AppShell";
-import { Button } from "@/components/ui/actions/Button";
-import { PreviewNotice } from "@/components/site/PreviewNotice";
+import { LoadingRegion, Skeleton } from "@/components/ui/feedback/Skeleton";
+import { AccountGate, UserMenu } from "@/components/site/AreaGates";
 import { routes } from "@/config/site";
 
 export const metadata: Metadata = { title: { default: "Mon compte", template: "%s | Mon compte ALTERPARK" }, robots: { index: false, follow: false } };
@@ -24,10 +25,22 @@ export default function AccountLayout({ children }: LayoutProps<"/compte">) {
         },
         { title: "Site", items: [{ label: "Réserver une place", href: routes.booking }, { label: "Retour au site", href: routes.home }] },
       ]}
-      topbar={<Button href={routes.login} size="sm" variant="secondary">Se connecter</Button>}
+      topbar={
+        <Suspense fallback={null}>
+          <UserMenu />
+        </Suspense>
+      }
     >
-      <PreviewNotice area="L’espace client" />
-      {children}
+      <Suspense
+        fallback={
+          <LoadingRegion label="Chargement de votre espace…">
+            <Skeleton width="40%" />
+            <Skeleton variant="block" />
+          </LoadingRegion>
+        }
+      >
+        <AccountGate path={routes.account}>{children}</AccountGate>
+      </Suspense>
     </AppShell>
   );
 }

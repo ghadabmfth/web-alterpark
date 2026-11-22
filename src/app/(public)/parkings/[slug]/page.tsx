@@ -68,14 +68,14 @@ export default async function ParkingPage({ params }: PageProps<"/parkings/[slug
         </Section>
       )}
 
-      {bookable ? (
+      {p.practicalInfo.length || p.address || p.phone ? (
         <Section labelledBy="infos-title">
           <div className="grid gap-12 lg:grid-cols-2">
             <div className="flex flex-col gap-8">
               <div id="infos-title">
                 <SectionHeading title="Infos pratiques" typing={false} />
               </div>
-              <FeatureList columns={1} items={p.practicalInfo.map((t) => ({ icon: "pin" as const, title: t }))} />
+              {p.practicalInfo.length ? <FeatureList columns={1} items={p.practicalInfo.map((t) => ({ icon: "pin" as const, title: t }))} /> : null}
             </div>
             <Card title="Accès et contact" titleAs="h3">
               <DescriptionList

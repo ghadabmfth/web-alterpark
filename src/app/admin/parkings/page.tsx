@@ -4,6 +4,7 @@ import { DataTable } from "@/components/ui/data/DataTable";
 import { Badge } from "@/components/ui/feedback/Badge";
 import { Alert } from "@/components/ui/feedback/Alert";
 import { routes } from "@/config/site";
+import { RequirePermission } from "@/components/site/AreaGates";
 import { isBookable, listParkings } from "@/modules/parkings/queries";
 import type { ParkingSummary } from "@/modules/parkings/types";
 
@@ -13,14 +14,14 @@ export const metadata: Metadata = { title: "Sites et offres" };
 export default async function AdminParkingsPage() {
   const parkings = await listParkings();
   return (
-    <>
+    <RequirePermission permission="PARKING_READ">
       <PageHeader
         title="Sites et offres"
         description="Parkings, aéroports desservis et formules proposées."
         breadcrumbs={[{ label: "Back-office", href: routes.admin }, { label: "Sites et offres" }]}
       />
       <Alert tone="info" title="Lecture seule" className="mb-6">
-        <p>Catalogue fourni par le client, affiché tel quel. La saisie des capacités, adresses et tarifs se fera ici en phase 7.</p>
+        <p>Données de la base. Tous les sites sont en brouillon tant que les capacités, adresses et tarifs ne sont pas saisis : la saisie se fera ici en phase 7.</p>
       </Alert>
       <DataTable<ParkingSummary>
         caption="Parkings"
@@ -34,6 +35,6 @@ export default async function AdminParkingsPage() {
           { key: "status", header: "Statut", cell: (p) => (isBookable(p) ? <Badge tone="success">Ouvert à la réservation</Badge> : <Badge tone="info">Brouillon</Badge>) },
         ]}
       />
-    </>
+    </RequirePermission>
   );
 }

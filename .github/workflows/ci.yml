@@ -17,9 +17,21 @@ jobs:
   quality:
     name: Lint, types, tests, schema, build
     runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: alterpark
+          POSTGRES_PASSWORD: alterpark
+          POSTGRES_DB: alterpark_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U alterpark -d alterpark_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_SITE_URL: https://www.example.invalid
+      TEST_DATABASE_URL: postgresql://alterpark:alterpark@localhost:5432/alterpark_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,4 +46,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run db:validate
+      # Applies the migrations to the CI database (non-destructive) and runs the seed.
+      - run: npm run test:integration
+      # Built without DATABASE_URL, as before the database is provisioned (fallback catalogue).
       - run: npm run build

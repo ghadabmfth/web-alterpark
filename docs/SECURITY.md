@@ -1,24 +1,25 @@
 # Security
 
-Status: design for Phases 4–8. ✓ = in place today.
+Status: Phase 4 in place (authentication, authorisation, rate limiting, audit, contact); payment parts in Phase 6. ✓ = in place today.
 
 ## Authentication
 
-- Auth.js (v5) with an e-mail + password credentials provider; passwords hashed with **Argon2id**.
-- Sessions in a signed, encrypted, `HttpOnly`, `Secure`, `SameSite=Lax` cookie. Every server-side
+- ✓ Auth.js (v5) with an e-mail + password credentials provider; passwords hashed with **Argon2id** (m=19 MiB, t=2, p=1). Unknown accounts are verified against a dummy hash: constant response time.
+- ✓ Sessions in a signed, encrypted, `HttpOnly`, `Secure`, `SameSite=Lax` cookie (7 days). Every server-side
   check re-reads the user and compares `sessionVersion`: changing a password, a role or disabling an
   account revokes every existing session immediately.
-- E-mail verification and password reset with single-use, short-lived tokens; only their SHA-256
-  hash is stored. Reset responses never reveal whether an e-mail exists.
-- Login, sign-up and reset are rate-limited per IP hash and per e-mail; generic error messages.
+- ✓ E-mail verification (48 h) and password reset (1 h) with single-use tokens consumed atomically;
+  only their SHA-256 hash is stored; a new reset link invalidates older ones; confirmation is an
+  explicit POST so link scanners cannot use it up. Reset responses never reveal whether an e-mail exists.
+- ✓ Login (inside Auth.js `authorize`, so the raw `/api/auth/callback/credentials` endpoint is covered too: 20 / 15 min per IP, 8 / 15 min per account), sign-up (5 / h per IP), reset (5 / h) and contact (5 / h) are rate-limited; generic error messages.
 
 ## Authorisation
 
 - Roles `CUSTOMER`, `ADMIN`, `SUPER_ADMIN` + custom staff roles; permissions from a fixed catalogue.
-- Checks live in the **data-access layer** (`requireUser`, `requirePermission`) and run in every
+- ✓ Checks live in the **data-access layer** (`requireUser`, `requirePermission`) and run in every
   Server Action, route handler and server page. `proxy.ts` only does optimistic redirects; it is
   never the security boundary.
-- Customers' queries are always scoped by their own `userId` (ownership in the `WHERE` clause, not
+- ✓ Customers' queries are always scoped by their own `userId` (ownership in the `WHERE` clause, not
   checked after loading). Unknown or foreign resources return 404.
 - Only `SUPER_ADMIN` manages roles and admin accounts; an admin cannot raise their own permissions.
 
@@ -43,8 +44,8 @@ Status: design for Phases 4–8. ✓ = in place today.
 
 ## Abuse and privacy
 
-- Rate limiting in PostgreSQL (fixed windows) — works on serverless without extra services.
-- Contact form: honeypot, minimum fill time, rate limit, optional Turnstile.
+- ✓ Rate limiting in PostgreSQL (fixed windows, atomic upsert) — works on serverless without extra services.
+- ✓ Contact form: honeypot, minimum fill time, rate limit (bots get the same success answer); optional Turnstile later.
 - IP addresses are stored only as salted hashes. GDPR: account deletion anonymises personal data
   while keeping accounting records; retention periods to confirm with the client.
 
@@ -56,6 +57,9 @@ Status: design for Phases 4–8. ✓ = in place today.
 - Dependencies pinned to exact versions ✓; `npm audit --audit-level=high` runs in CI ✓.
 
 ## Audit trail
+
+✓ In place for registration, logins (success and failure), e-mail verification, password reset and
+change, profile changes. Phase 7 adds back-office actions.
 
 Sensitive actions (refunds, cancellations, price and capacity changes, role/permission changes,
 admin account changes, settings) and every reservation/payment state change write an `AuditLog`
