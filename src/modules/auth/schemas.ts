@@ -16,19 +16,34 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Indiquez votre mot de passe.").max(PASSWORD_MAX),
 });
 
+const civility = z.enum(["MME", "M"], { error: "Choisissez une civilité." });
+const companyName = z.string().trim().max(120, "120 caractères au maximum.");
+const postalCode = z
+  .string()
+  .trim()
+  .min(1, "Indiquez votre code postal.")
+  .refine((v) => v === "" || /^[A-Za-z0-9 -]{3,10}$/.test(v), "Code postal invalide. Exemple : 44000");
+const phoneRequired = z
+  .string()
+  .trim()
+  .min(1, "Indiquez votre numéro de téléphone.")
+  .refine((v) => v === "" || (/^\+?[0-9 .()-]+$/.test(v) && /^(\D*\d){8,15}\D*$/.test(v)), "Numéro invalide. Exemple : 06 12 34 56 78");
+
 export const registerSchema = z
   .object({
+    civility,
     firstName: z.string().trim().min(1, "Indiquez votre prénom.").max(100, "100 caractères au maximum."),
     lastName: z.string().trim().min(1, "Indiquez votre nom.").max(100, "100 caractères au maximum."),
+    companyName,
     email,
-    phone: z
-      .string()
-      .trim()
-      .refine((v) => v === "" || (/^\+?[0-9 .()-]+$/.test(v) && /^(\D*\d){8,15}\D*$/.test(v)), "Numéro invalide. Exemple : 06 12 34 56 78"),
+    emailConfirm: z.string().trim(),
+    postalCode,
+    phone: phoneRequired,
     password: z.string().min(PASSWORD_MIN, `${PASSWORD_MIN} caractères au minimum.`).max(PASSWORD_MAX, `${PASSWORD_MAX} caractères au maximum.`),
     passwordConfirm: z.string(),
-    acceptTerms: z.literal(true, { error: "Acceptez les conditions générales de vente pour continuer." }),
+    acceptTerms: z.literal(true, { error: "Acceptez la politique de gestion des données et les conditions générales pour continuer." }),
   })
+  .refine((d) => d.email.toLowerCase() === d.emailConfirm.toLowerCase(), { path: ["emailConfirm"], message: "Les deux adresses e-mail ne correspondent pas." })
   .refine((d) => d.password === d.passwordConfirm, { path: ["passwordConfirm"], message: "Les deux mots de passe ne correspondent pas." });
 
 export const forgotPasswordSchema = z.object({ email });
@@ -45,6 +60,9 @@ export const changePasswordSchema = z
   .refine((d) => d.password !== d.currentPassword, { path: ["password"], message: "Choisissez un mot de passe différent de l’actuel." });
 
 export const profileSchema = z.object({
+  civility: z.union([z.literal(""), civility]),
+  companyName,
+  postalCode: z.union([z.literal(""), postalCode]),
   firstName: z.string().trim().min(1, "Indiquez votre prénom.").max(100, "100 caractères au maximum."),
   lastName: z.string().trim().min(1, "Indiquez votre nom.").max(100, "100 caractères au maximum."),
   phone: z

@@ -89,7 +89,7 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
   const user = await requireUser("/compte/profil");
   const parsed = profileSchema.safeParse(formObject(formData));
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrorsOf(parsed.error) };
-  await updateProfile(user.id, parsed.data, await requestFingerprint());
+  await updateProfile(user.id, { ...parsed.data, civility: parsed.data.civility || null }, await requestFingerprint());
   return { status: "success", message: "Vos coordonnées ont été enregistrées." };
 }
 

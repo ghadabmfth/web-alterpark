@@ -41,6 +41,11 @@ enum Permission {
   AUDIT_LOG_READ
 }
 
+enum Civility {
+  MME
+  M
+}
+
 enum UserStatus {
   ACTIVE
   DISABLED
@@ -79,6 +84,9 @@ model User {
   firstName        String     @db.VarChar(100)
   lastName         String     @db.VarChar(100)
   phone            String?    @db.VarChar(32)
+  civility         Civility?
+  companyName      String?    @db.VarChar(120)
+  postalCode       String?    @db.VarChar(12)
   roleId           String     @db.Uuid
   status           UserStatus @default(ACTIVE)
   /// Incremented on password change, role change or disable: invalidates every issued session.

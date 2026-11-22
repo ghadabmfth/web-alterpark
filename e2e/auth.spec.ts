@@ -1,20 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { E2E } from "../playwright.config";
-import { main, STATE } from "./support/helpers";
+import { main, signUp, STATE } from "./support/helpers";
 
 /* Accounts: sign-up, sign-in errors, sign-out, reset without enumeration, protected areas. */
 
 test("sign-up creates the account and opens the customer area", async ({ page }) => {
   const email = `nouveau.${Date.now()}@e2e.test`;
   await page.goto("/inscription");
-  const form = page.getByRole("form", { name: "Création de compte" });
-  await form.getByLabel("Prénom").fill("Nora");
-  await form.getByLabel(/^Nom/).fill("Nouvelle");
-  await form.getByLabel("Adresse e-mail").fill(email);
-  await form.getByLabel(/^Mot de passe/).first().fill("une phrase de passe solide");
-  await form.getByLabel("Confirmez le mot de passe").fill("une phrase de passe solide");
-  await form.getByLabel(/J’accepte/).check();
-  await form.getByRole("button", { name: "Créer mon compte" }).click();
+  await signUp(page, { firstName: "Nora", lastName: "Nouvelle", email });
   await page.waitForURL((u) => u.pathname === "/compte");
   await expect(main(page)).toContainText("Bonjour Nora");
   await expect(main(page)).toContainText("Adresse e-mail à confirmer");
@@ -73,14 +66,7 @@ test("the admin session from setup is valid", async ({ browser }) => {
 test("a customer deletes their account (GDPR) and can no longer sign in", async ({ page }) => {
   const email = `suppr.${Date.now()}@e2e.test`;
   await page.goto("/inscription");
-  const form = page.getByRole("form", { name: "Création de compte" });
-  await form.getByLabel("Prénom").fill("Sam");
-  await form.getByLabel(/^Nom/).fill("Supprime");
-  await form.getByLabel("Adresse e-mail").fill(email);
-  await form.getByLabel(/^Mot de passe/).first().fill("une phrase de passe solide");
-  await form.getByLabel("Confirmez le mot de passe").fill("une phrase de passe solide");
-  await form.getByLabel(/J’accepte/).check();
-  await form.getByRole("button", { name: "Créer mon compte" }).click();
+  await signUp(page, { firstName: "Sam", lastName: "Supprime", email });
   await page.waitForURL((u) => u.pathname === "/compte");
 
   await page.goto("/compte/profil");

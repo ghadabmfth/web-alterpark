@@ -33,3 +33,19 @@ export async function login(page: Page, email: string, password: string, next = 
   await form.getByRole("button", { name: /Se connecter/ }).click();
   await page.waitForURL((u) => u.pathname === next.split("?")[0]);
 }
+
+/** Fills the « Première réservation ? » form (sign-up) on /inscription and submits it. */
+export async function signUp(page: Page, who: { firstName: string; lastName: string; email: string }, password = "une phrase de passe solide") {
+  const form = page.getByRole("form", { name: "Création de compte" });
+  await form.getByLabel("Civilité").selectOption("MME");
+  await form.getByLabel("Prénom").fill(who.firstName);
+  await form.getByLabel(/^Nom/).fill(who.lastName);
+  await form.getByLabel(/^Adresse e-mail/).fill(who.email);
+  await form.getByLabel("Confirmez l’adresse e-mail").fill(who.email);
+  await form.getByLabel("Code postal").fill("44000");
+  await form.getByLabel("Téléphone").fill("06 12 34 56 78");
+  await form.getByLabel(/^Mot de passe/).first().fill(password);
+  await form.getByLabel("Confirmez le mot de passe").fill(password);
+  await form.getByLabel(/j’accepte votre politique/).check();
+  await form.getByRole("button", { name: "S’inscrire" }).click();
+}
