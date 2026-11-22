@@ -11,6 +11,9 @@ export type TemplatePayloads = {
   "auth.reset-password": { firstName: string; url: string };
   "auth.password-changed": { firstName: string };
   "contact.received": { name: string; email: string; subject: string; message: string; parking?: string };
+  "reservation.confirmed": { firstName: string; reference: string; parking: string; offer: string; startsAt: string; endsAt: string; total: string };
+  "reservation.cancelled": { firstName: string; reference: string; parking: string; startsAt: string };
+  "reservation.cancellation-requested": { reference: string; customer: string; parking: string; startsAt: string; reason: string };
 };
 
 export type TemplateName = keyof TemplatePayloads;
@@ -45,6 +48,18 @@ export function renderEmail<T extends TemplateName>(template: T, to: string, pay
     case "contact.received": {
       const p = payload as TemplatePayloads["contact.received"];
       return { to, subject: `Nouvelle demande de contact : ${p.subject}`, ...layout("Nouvelle demande de contact", [`De : ${p.name} <${p.email}>`, ...(p.parking ? [`Parking : ${p.parking}`] : []), `Sujet : ${p.subject}`, p.message], { label: "Ouvrir le back-office", url: absoluteUrl("/admin/contacts") }) };
+    }
+    case "reservation.confirmed": {
+      const p = payload as TemplatePayloads["reservation.confirmed"];
+      return { to, subject: `Réservation confirmée — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre réservation ${p.reference} est confirmée.`, `Parking : ${p.parking} — ${p.offer}`, `Dépôt du véhicule : ${p.startsAt}`, `Récupération : ${p.endsAt}`, `Montant payé : ${p.total}`], { label: "Voir ma réservation", url: absoluteUrl(`/compte/reservations/${p.reference}`) }) };
+    }
+    case "reservation.cancelled": {
+      const p = payload as TemplatePayloads["reservation.cancelled"];
+      return { to, subject: `Réservation annulée — ${p.reference}`, ...layout(`Bonjour ${p.firstName},`, [`Votre réservation ${p.reference} (${p.parking}, ${p.startsAt}) est annulée.`], { label: "Mes réservations", url: absoluteUrl("/compte/reservations") }) };
+    }
+    case "reservation.cancellation-requested": {
+      const p = payload as TemplatePayloads["reservation.cancellation-requested"];
+      return { to, subject: `Demande d’annulation — ${p.reference}`, ...layout("Nouvelle demande d’annulation", [`Réservation : ${p.reference}`, `Client : ${p.customer}`, `Parking : ${p.parking} — arrivée ${p.startsAt}`, `Motif : ${p.reason}`], { label: "Ouvrir le back-office", url: absoluteUrl("/admin/reservations") }) };
     }
   }
   throw new Error(`Unknown e-mail template: ${String(template)}`);
