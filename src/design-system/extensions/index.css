@@ -1,0 +1,24 @@
+/*
+ * Design-system EXTENSIONS ("Proposé"): components the application needs and the supplied system
+ * does not define. Built only from existing tokens and the system's own idioms; documented in
+ * docs/design-system/extensions.md. Unlike the supplied files, these must not contain any colour
+ * literal (enforced by src/design-system/design-system.test.ts).
+ * Breakpoints in @media mirror bp-sm 576 / bp-md 768 / bp-lg 1024 (variables are not allowed there).
+ */
+@import "./badge.css";
+@import "./card.css";
+@import "./stat.css";
+@import "./table.css";
+@import "./pagination.css";
+@import "./tabs.css";
+@import "./menu.css";
+@import "./skeleton.css";
+@import "./empty.css";
+@import "./toast.css";
+@import "./page-header.css";
+@import "./filters.css";
+@import "./datetime.css";
+@import "./description-list.css";
+@import "./app-shell.css";
+@import "./stepper.css";
+@import "./pages.css";

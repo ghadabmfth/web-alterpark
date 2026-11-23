@@ -1,0 +1,34 @@
+/* Proposé (extension). AppShell for the back office and the customer area: sidebar on
+   `surface-sunken` (as the mobile drawer) with the 10 px orange filet of the header on top,
+   active link in `primary` with a 3 px orange marker; below 1024 px the sidebar becomes a drawer. */
+.ap-shell { display: grid; min-height: 100dvh; grid-template-columns: minmax(0, 1fr); }
+.ap-shell__side { position: fixed; inset: 0 auto 0 0; z-index: var(--z-modal); display: flex; flex-direction: column; width: min(88vw, 300px); padding: 0 0 var(--space-6); background: var(--surface-sunken); box-shadow: var(--shadow-elevated); transform: translateX(-105%); transition: transform var(--duration-slow) var(--ease-standard); overflow-y: auto; }
+.ap-shell__side::before { content: ""; display: block; height: 10px; background: var(--primary); }
+.ap-shell.is-open .ap-shell__side { transform: none; }
+.ap-shell__scrim { position: fixed; inset: 0; z-index: var(--z-overlay); background: var(--overlay-modal); opacity: 0; pointer-events: none; transition: opacity var(--duration-slow) var(--ease-standard); }
+.ap-shell.is-open .ap-shell__scrim { opacity: 1; pointer-events: auto; }
+.ap-shell__brand { display: flex; align-items: center; justify-content: space-between; padding: var(--space-6) var(--space-6) var(--space-4); }
+.ap-shell__brand .ap-logo svg, .ap-shell__brand .ap-svg svg { width: 110px; height: auto; }
+.ap-shell__context { margin: 0 var(--space-6) var(--space-4); font: 700 14px/20px var(--font-sans); color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.ap-shell__nav ul { margin: 0; padding: 0; list-style: none; }
+.ap-shell__group + .ap-shell__group { margin-top: var(--space-4); }
+.ap-shell__group-title { margin: 0 var(--space-6) var(--space-2); font: 700 14px/20px var(--font-sans); color: var(--text-muted); }
+.ap-shell__nav a { position: relative; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); color: var(--text-primary); font: 700 16px/24px var(--font-sans); text-decoration: none; }
+.ap-shell__nav a:hover { background: var(--surface); color: var(--primary); }
+.ap-shell__nav a[aria-current="page"] { color: var(--primary); background: var(--surface); }
+.ap-shell__nav a[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: var(--space-2); bottom: var(--space-2); width: 3px; border-radius: 0 var(--radius-pill) var(--radius-pill) 0; background: var(--primary); }
+.ap-shell__close { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-primary); cursor: pointer; }
+.ap-shell__close svg { width: 24px; height: 24px; }
+.ap-shell__main { display: flex; flex-direction: column; min-width: 0; }
+.ap-shell__top { position: sticky; top: 0; z-index: var(--z-header); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 64px; padding: 0 var(--space-4); background: var(--surface); box-shadow: inset 0 -1px 0 var(--surface-raised); }
+.ap-shell__burger { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-primary); cursor: pointer; }
+.ap-shell__burger svg { width: 24px; height: 24px; }
+.ap-shell__content { flex: 1; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: var(--space-6) var(--space-4) var(--space-16); }
+@media (min-width: 768px) { .ap-shell__content { padding: var(--space-8) var(--space-8) var(--space-16); } }
+@media (min-width: 1024px) {
+  .ap-shell { grid-template-columns: 280px minmax(0, 1fr); }
+  .ap-shell__side { position: sticky; top: 0; height: 100dvh; width: auto; transform: none; box-shadow: none; z-index: var(--z-raised); }
+  .ap-shell__scrim, .ap-shell__close, .ap-shell__burger { display: none; }
+  .ap-shell__top { padding: 0 var(--space-8); }
+}
+@media (prefers-reduced-motion: reduce) { .ap-shell__side, .ap-shell__scrim { transition: none; } }

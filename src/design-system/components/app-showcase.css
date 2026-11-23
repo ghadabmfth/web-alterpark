@@ -1,0 +1,172 @@
+/* Verbatim from docs/design-system/reference/bundle.css (lines 705–876). Do not edit: replace with a new delivery. */
+/* ---------- AppShowcase : maquette animée de l'application de réservation ----------
+   Tout est en em, rapporté à la largeur du conteneur (cqw) : le visuel garde ses proportions à toutes les tailles.
+   Boucle de 16 s : Dates → Véhicule → Récapitulatif → Confirmation (4 s chacune). */
+.apsc { container-type: inline-size; position: relative; width: 100%; max-width: 684px; aspect-ratio: 684 / 738; margin-inline: auto; }
+.apsc__stage { position: absolute; inset: 0; font-size: 1.95cqw; font-family: var(--font-sans); color: var(--text-primary); }
+.apsc__glow { position: absolute; left: 18%; top: 16%; width: 64%; height: 64%; border-radius: 50%; background: radial-gradient(closest-side, rgba(246, 146, 30, 0.28), transparent); filter: blur(1em); animation: apsc-glow 6s ease-in-out infinite alternate; }
+
+/* Téléphones */
+.apsc__phone { position: absolute; width: 21em; height: 43em; }
+.apsc__phone--back { left: 5%; top: 15%; transform: rotate(-9deg); z-index: 1; }
+.apsc__phone--front { right: 5%; top: 6%; transform: rotate(7deg); z-index: 2; }
+.apsc__body { position: relative; width: 100%; height: 100%; padding: 0.6em; border-radius: 3.2em; background: linear-gradient(145deg, #4a4048, #1c181b 60%); box-shadow: 0 2.5em 4em rgba(0, 0, 0, 0.55), inset 0 0 0 0.12em rgba(255, 255, 255, 0.12); animation: apsc-bob 6s ease-in-out infinite alternate; }
+.apsc__phone--back .apsc__body { animation-delay: -3s; }
+.apsc__body::before { content: ""; position: absolute; right: -0.25em; top: 9em; width: 0.25em; height: 4em; border-radius: 0 0.2em 0.2em 0; background: #2a2428; }
+.apsc__screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 2.65em; background: var(--surface); display: flex; flex-direction: column; }
+.apsc__island { position: absolute; top: 0.7em; left: 50%; transform: translateX(-50%); width: 5.6em; height: 1.5em; border-radius: 1em; background: #000; z-index: 5; }
+.apsc__status { display: flex; justify-content: space-between; align-items: center; padding: 0.9em 1.6em 0.4em; font-size: 0.72em; font-weight: 700; }
+.apsc__status i { display: inline-block; width: 1.6em; height: 0.75em; margin-left: 0.3em; border-radius: 0.2em; border: 0.12em solid currentColor; position: relative; }
+.apsc__status i::after { content: ""; position: absolute; inset: 0.1em 0.5em 0.1em 0.1em; background: currentColor; border-radius: 0.05em; }
+.apsc__appbar { display: flex; align-items: center; justify-content: space-between; padding: 0.4em 1.2em 0.7em; }
+.apsc__brand { font-family: var(--font-display); font-size: 0.78em; line-height: 0.95; letter-spacing: 0.12em; text-transform: uppercase; }
+.apsc__brand b { color: var(--primary); font-weight: 400; }
+.apsc__avatar { width: 2em; height: 2em; border-radius: 50%; background: var(--surface-raised); display: grid; place-items: center; font-size: 0.75em; font-weight: 700; color: var(--primary); }
+.apsc__content { position: relative; flex: 1; padding: 0 1.2em; min-height: 0; }
+
+/* Éléments communs */
+.apsc-card { background: var(--surface-raised); border-radius: 1.1em; padding: 0.9em 1em; }
+.apsc-label { font-size: 0.62em; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+.apsc-val { font-size: 0.9em; font-weight: 700; margin-top: 0.2em; }
+.apsc-btn { display: flex; align-items: center; justify-content: center; height: 3em; border-radius: 99em; background: var(--primary); color: var(--on-primary); font-weight: 700; font-size: 0.82em; }
+.apsc-chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.35em 0.75em; border-radius: 99em; background: var(--surface-raised); font-size: 0.66em; font-weight: 700; }
+.apsc-chip.is-on { background: var(--primary); color: var(--on-primary); }
+.apsc-dot { width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 rgba(76, 195, 138, 0.6); animation: apsc-pulse 1.8s ease-out infinite; }
+
+/* Téléphone arrière : accueil de l'app */
+.apsc-hello { font-size: 1.15em; font-weight: 700; margin: 0.2em 0 0.8em; }
+.apsc-hello span { display: block; font-size: 0.6em; font-weight: 400; color: var(--text-secondary); margin-bottom: 0.15em; }
+.apsc-next { display: grid; grid-template-columns: 1fr auto; gap: 0.4em 0.6em; align-items: center; margin-bottom: 0.8em; border: 0.1em solid rgba(246, 146, 30, 0.45); }
+.apsc-qr-mini { grid-row: span 2; width: 3.2em; height: 3.2em; border-radius: 0.5em; background: #fff; padding: 0.3em; }
+.apsc-map { position: relative; height: 11.5em; padding: 0; overflow: hidden; margin-bottom: 0.8em; }
+.apsc-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.apsc-route { stroke-dasharray: 6 5; animation: apsc-dash 1.6s linear infinite; }
+.apsc-pin { transform-box: fill-box; transform-origin: 50% 100%; animation: apsc-pin 2.4s ease-in-out infinite; }
+.apsc-pin-ring { transform-box: fill-box; transform-origin: center; animation: apsc-ring 2.4s ease-out infinite; }
+.apsc-map .apsc-chip { position: absolute; left: 0.7em; bottom: 0.7em; background: rgba(38, 38, 38, 0.92); }
+.apsc-points { margin-bottom: 0.8em; }
+.apsc-points__row { display: flex; justify-content: space-between; align-items: baseline; }
+.apsc-points__row b { font-size: 1.1em; }
+.apsc-points__row b small { font-size: 0.6em; color: var(--text-secondary); font-weight: 400; }
+.apsc-bar { height: 0.45em; border-radius: 1em; background: var(--surface); margin-top: 0.6em; overflow: hidden; }
+.apsc-bar i { display: block; height: 100%; width: 83%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--accent)); transform-origin: left; animation: apsc-fill 8s ease-in-out infinite; }
+.apsc-nav { display: flex; justify-content: space-around; padding: 0.7em 0.6em 1.3em; border-top: 0.08em solid rgba(255, 255, 255, 0.08); background: var(--surface-sunken); }
+.apsc-nav span { display: flex; flex-direction: column; align-items: center; gap: 0.25em; font-size: 0.55em; color: var(--text-muted); font-weight: 700; }
+.apsc-nav span.is-on { color: var(--primary); }
+.apsc-nav svg { width: 2.6em; height: 2.6em; }
+
+/* Téléphone avant : parcours de réservation */
+.apsc-steps { padding: 0 1.2em 0.7em; }
+.apsc-steps__top { position: relative; height: 1.5em; }
+.apsc-steps__label { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: center; opacity: 0; animation: apsc-label 16s infinite; }
+.apsc-steps__label b { font-size: 1.05em; }
+.apsc-steps__label small { font-size: 0.62em; color: var(--text-muted); font-weight: 700; }
+.apsc-progress { height: 0.32em; border-radius: 1em; background: var(--surface-raised); margin-top: 0.55em; overflow: hidden; }
+.apsc-progress i { display: block; height: 100%; width: 100%; background: var(--primary); border-radius: inherit; transform-origin: left; animation: apsc-progress 16s infinite; }
+.apsc-flow { position: relative; flex: 1; }
+.apsc-pane { position: absolute; inset: 0; padding: 0.3em 1.2em 1.4em; display: flex; flex-direction: column; gap: 0.7em; opacity: 0; animation: apsc-pane 16s infinite; }
+.apsc-pane > .apsc-btn { margin-top: auto; }
+.apsc-pane:nth-child(2), .apsc-steps__label:nth-child(2) { animation-delay: -12s; }
+.apsc-pane:nth-child(3), .apsc-steps__label:nth-child(3) { animation-delay: -8s; }
+.apsc-pane:nth-child(4), .apsc-steps__label:nth-child(4) { animation-delay: -4s; }
+
+/* 1. Dates */
+.apsc-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em; }
+.apsc-dates .apsc-card { padding: 0.7em 0.8em; }
+.apsc-dates .apsc-card:first-child { box-shadow: inset 0 0 0 0.12em var(--primary); }
+.apsc-cal { padding: 0.8em; }
+.apsc-cal__head { display: flex; justify-content: space-between; font-size: 0.75em; font-weight: 700; margin-bottom: 0.6em; }
+.apsc-cal__head span { color: var(--primary); }
+.apsc-cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.2em 0; text-align: center; font-size: 0.62em; }
+.apsc-cal__grid b { color: var(--text-muted); font-weight: 700; padding-bottom: 0.3em; }
+.apsc-cal__grid span { padding: 0.45em 0; }
+.apsc-cal__grid .in { animation: apsc-range 16s infinite; animation-delay: calc(var(--d) * 70ms); }
+.apsc-cal__grid .end { border-radius: 99em; animation: apsc-end 16s infinite; animation-delay: calc(var(--d) * 70ms); }
+.apsc-cal__grid .start { border-radius: 99em 0 0 99em; }
+.apsc-cal__grid .stop { border-radius: 0 99em 99em 0; }
+.apsc-days { align-self: flex-start; }
+
+/* 2. Véhicule */
+.apsc-car { display: flex; align-items: center; gap: 0.8em; }
+.apsc-car svg { width: 4.5em; height: 2.4em; color: var(--primary); animation: apsc-drive 16s infinite; animation-delay: -12s; }
+.apsc-field { background: var(--surface-raised); border-radius: 0.9em; padding: 0.6em 0.9em; border: 0.12em solid transparent; }
+.apsc-field.is-focus { border-color: var(--primary); }
+.apsc-plate { display: inline-flex; align-items: center; gap: 0.5em; margin-top: 0.3em; }
+.apsc-plate__eu { width: 1.2em; height: 1.7em; border-radius: 0.2em; background: #2b4fd8; color: #fff; font-size: 0.55em; display: grid; place-items: end center; padding-bottom: 0.15em; font-weight: 700; }
+.apsc-plate__txt { font-size: 1.05em; font-weight: 800; letter-spacing: 0.12em; clip-path: inset(0 100% 0 0); animation: apsc-type 16s steps(9) infinite; animation-delay: -12s; }
+.apsc-caret { width: 0.1em; height: 1.1em; background: var(--primary); animation: apsc-caret 0.9s steps(1) infinite; }
+.apsc-chips { display: flex; flex-wrap: wrap; gap: 0.4em; }
+.apsc-row { display: flex; justify-content: space-between; align-items: center; }
+.apsc-stepper { display: flex; align-items: center; gap: 0.6em; font-weight: 700; }
+.apsc-stepper i { width: 1.6em; height: 1.6em; border-radius: 50%; display: grid; place-items: center; background: var(--surface); font-style: normal; color: var(--primary); }
+.apsc-note { font-size: 0.6em; color: var(--text-secondary); line-height: 1.5; }
+
+/* 3. Récapitulatif */
+.apsc-lines { display: flex; flex-direction: column; gap: 0.55em; font-size: 0.72em; }
+.apsc-lines .apsc-row span:first-child { color: var(--text-secondary); }
+.apsc-lines .apsc-row b { font-weight: 700; }
+.apsc-lines .is-promo { color: var(--success); }
+.apsc-lines hr { border: 0; border-top: 0.1em dashed rgba(255, 255, 255, 0.2); margin: 0.2em 0; width: 100%; }
+.apsc-total { font-size: 1.4em; font-weight: 800; }
+.apsc-toggle { width: 2.4em; height: 1.35em; border-radius: 1em; background: var(--primary); position: relative; }
+.apsc-toggle::after { content: ""; position: absolute; top: 0.18em; right: 0.18em; width: 1em; height: 1em; border-radius: 50%; background: var(--surface); }
+.apsc-pay { display: flex; align-items: center; gap: 0.7em; font-size: 0.72em; }
+.apsc-pay i { width: 2.6em; height: 1.7em; border-radius: 0.3em; background: linear-gradient(135deg, #f6921e, #f05a28); }
+.apsc-pane:nth-child(3) .apsc-btn { animation: apsc-press 16s infinite; animation-delay: -8s; }
+
+/* 4. Confirmation */
+.apsc-done { align-items: center; text-align: center; }
+.apsc-check { width: 5.2em; height: 5.2em; margin-top: 0.4em; color: var(--success); }
+.apsc-check circle { stroke-dasharray: 160; stroke-dashoffset: 160; animation: apsc-draw-c 16s infinite; animation-delay: -4s; }
+.apsc-check path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: apsc-draw-p 16s infinite; animation-delay: -4s; }
+.apsc-done h4 { margin: 0; font-size: 1.2em; }
+.apsc-done p { margin: 0; font-size: 0.7em; color: var(--text-secondary); }
+.apsc-ticket { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 0.6em; align-items: center; text-align: left; background: #fff; color: #313131; border-radius: 1em; padding: 0.8em; position: relative; }
+.apsc-ticket::before, .apsc-ticket::after { content: ""; position: absolute; top: 50%; width: 1em; height: 1em; border-radius: 50%; background: var(--surface); transform: translateY(-50%); }
+.apsc-ticket::before { left: -0.5em; } .apsc-ticket::after { right: -0.5em; }
+.apsc-ticket .apsc-label { color: #6b6b6b; }
+.apsc-ticket .apsc-val { color: #313131; }
+.apsc-qr { width: 4.6em; height: 4.6em; }
+.apsc-btn--ghost { background: transparent; color: var(--primary); box-shadow: inset 0 0 0 0.12em var(--primary); }
+
+/* Pastilles flottantes */
+.apsc__badge { position: absolute; z-index: 3; display: flex; align-items: center; gap: 0.6em; padding: 0.7em 1em; border-radius: 1.1em; background: rgba(38, 38, 38, 0.9); backdrop-filter: blur(6px); box-shadow: 0 1em 2em rgba(0, 0, 0, 0.45), inset 0 0 0 0.08em rgba(255, 255, 255, 0.1); font-size: 0.85em; animation: apsc-float 5s ease-in-out infinite alternate; }
+.apsc__badge small { display: block; font-size: 0.75em; color: var(--text-secondary); font-weight: 400; }
+.apsc__badge b { display: block; }
+.apsc__badge-ico { width: 2.2em; height: 2.2em; border-radius: 0.7em; display: grid; place-items: center; background: rgba(246, 146, 30, 0.16); color: var(--primary); }
+.apsc__badge-ico svg { width: 1.3em; height: 1.3em; }
+.apsc__badge--a { left: 0; top: 7%; }
+.apsc__badge--b { right: 0; bottom: 9%; animation-delay: -2.5s; }
+
+/* Animations */
+@keyframes apsc-bob { from { transform: translateY(-0.6em); } to { transform: translateY(0.6em); } }
+@keyframes apsc-float { from { transform: translateY(-0.5em); } to { transform: translateY(0.5em); } }
+@keyframes apsc-glow { from { opacity: 0.6; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+@keyframes apsc-pulse { 0% { box-shadow: 0 0 0 0 rgba(76, 195, 138, 0.6); } 100% { box-shadow: 0 0 0 0.6em rgba(76, 195, 138, 0); } }
+@keyframes apsc-dash { to { stroke-dashoffset: -22; } }
+@keyframes apsc-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8%); } }
+@keyframes apsc-ring { 0% { transform: scale(0.4); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+@keyframes apsc-fill { 0% { transform: scaleX(0.2); } 40%, 100% { transform: scaleX(1); } }
+@keyframes apsc-pane { 0% { opacity: 0; transform: translateX(14%); } 3%, 22% { opacity: 1; transform: none; } 25%, 100% { opacity: 0; transform: translateX(-14%); } }
+@keyframes apsc-label { 0% { opacity: 0; } 3%, 22% { opacity: 1; } 25%, 100% { opacity: 0; } }
+@keyframes apsc-progress { 0%, 24% { transform: scaleX(0.25); } 25%, 49% { transform: scaleX(0.5); } 50%, 74% { transform: scaleX(0.75); } 75%, 100% { transform: scaleX(1); } }
+@keyframes apsc-range { 0%, 6% { background: transparent; } 8%, 23% { background: rgba(246, 146, 30, 0.22); } 25%, 100% { background: transparent; } }
+@keyframes apsc-end { 0%, 6% { background: transparent; color: inherit; } 8%, 23% { background: var(--primary); color: var(--on-primary); } 25%, 100% { background: transparent; color: inherit; } }
+@keyframes apsc-type { 0%, 4% { clip-path: inset(0 100% 0 0); } 14%, 25% { clip-path: inset(0 0 0 0); } 26%, 100% { clip-path: inset(0 100% 0 0); } }
+@keyframes apsc-caret { 50% { opacity: 0; } }
+@keyframes apsc-drive { 0% { transform: translateX(-40%); } 6%, 22% { transform: none; } 25%, 100% { transform: translateX(40%); } }
+@keyframes apsc-press { 0%, 17% { transform: none; } 19% { transform: scale(0.94); } 21%, 100% { transform: none; } }
+@keyframes apsc-draw-c { 0%, 3% { stroke-dashoffset: 160; } 9%, 25% { stroke-dashoffset: 0; } 26%, 100% { stroke-dashoffset: 160; } }
+@keyframes apsc-draw-p { 0%, 7% { stroke-dashoffset: 40; } 12%, 25% { stroke-dashoffset: 0; } 26%, 100% { stroke-dashoffset: 40; } }
+
+/* Sans animation : l'étape « Dates » s'affiche, immobile. */
+@media (prefers-reduced-motion: reduce) {
+  .apsc *, .apsc *::before, .apsc *::after { animation: none !important; }
+  .apsc-pane:first-child, .apsc-steps__label:first-child { opacity: 1; }
+  .apsc-progress i { transform: scaleX(0.25); }
+  .apsc-cal__grid .in { background: rgba(246, 146, 30, 0.22); }
+  .apsc-cal__grid .end { background: var(--primary); color: var(--on-primary); }
+  .apsc-plate__txt { clip-path: none; }
+}
+
+@media (prefers-reduced-motion: reduce) { .ap-root *, .ap-root *::before, .ap-root *::after { transition-duration: 1ms !important; scroll-behavior: auto !important; } }

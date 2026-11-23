@@ -1,0 +1,8 @@
+/* Proposé (extension). Tabs (navigation between sub-pages): active tab underlined by an orange rule,
+   echoing the system's orange filets; dotted rule under the row. */
+.ap-tabs { overflow-x: auto; background-image: linear-gradient(to right, var(--border-divider) 3px, transparent 3px); background-size: 8px 1px; background-repeat: repeat-x; background-position: bottom; }
+.ap-tabs ul { display: flex; gap: var(--space-6); margin: 0; padding: 0; list-style: none; }
+.ap-tabs a { position: relative; display: block; padding: var(--space-3) 0; font: 700 16px/24px var(--font-sans); color: var(--text-secondary); text-decoration: none; white-space: nowrap; }
+.ap-tabs a:hover { color: var(--text-primary); }
+.ap-tabs a[aria-current="page"] { color: var(--primary); }
+.ap-tabs a[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: var(--radius-pill); background: var(--primary); }

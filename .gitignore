@@ -29,5 +29,6 @@ next-env.d.ts
 *.pem
 npm-debug.log*
 
-# Crossroads is licensed "personal use" only: never commit it (see docs/DECISIONS.md, ADR-006)
-/public/fonts/Crossroads-*
+e2e/.auth/
+playwright-report/
+test-results/

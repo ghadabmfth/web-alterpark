@@ -1,0 +1,7 @@
+/* Proposé (extension). DescriptionList: label/value pairs of detail pages, dotted rule between rows. */
+.ap-dl { display: grid; margin: 0; font: 400 16px/24px var(--font-sans); }
+.ap-dl > div { display: grid; gap: var(--space-1); padding: var(--space-3) 0; background-image: linear-gradient(to right, var(--border-divider) 3px, transparent 3px); background-size: 8px 1px; background-repeat: repeat-x; background-position: bottom; }
+.ap-dl > div:last-child { background-image: none; }
+.ap-dl dt { color: var(--text-secondary); font-weight: 700; }
+.ap-dl dd { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; }
+@media (min-width: 576px) { .ap-dl > div { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--space-4); } }

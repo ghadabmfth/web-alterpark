@@ -74,3 +74,27 @@ describe("source files", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe("component styles", () => {
+  const read = (p: string) => readFileSync(path.join(dir, p), "utf8");
+
+  it("are the reference bundle split verbatim (fonts and typography sections live elsewhere)", () => {
+    const bundle = readFileSync(path.resolve(dir, "../../docs/design-system/reference/bundle.css"), "utf8");
+    const order = [...read("components/index.css").matchAll(/@import "\.\/(.+?)";/g)].map((m) => m[1]!);
+    expect(order.length).toBe(30);
+    const strip = (css: string) => css.split("\n").slice(1).join("\n").trimEnd();
+    for (const name of order) {
+      const part = strip(read(`components/${name}`));
+      expect(bundle.includes(part), `${name} differs from the bundle`).toBe(true);
+    }
+  });
+
+  it("extensions and component overrides contain no colour literal", () => {
+    const files = [
+      ...readdirSync(path.join(dir, "extensions")).map((f) => `extensions/${f}`),
+      "overrides-components.css",
+    ];
+    const offenders = files.filter((f) => /#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(read(f)));
+    expect(offenders).toEqual([]);
+  });
+});

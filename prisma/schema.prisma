@@ -1,5 +1,5 @@
-// ALTERPARK — data model (PHASE 1 PROPOSAL, pending approval).
-// Explained in docs/DATA-MODEL.md. No migration is generated before approval (Phase 4).
+// ALTERPARK — data model (approved 20/11/2026).
+// Explained in docs/DATA-MODEL.md. First migration: Phase 4.
 //
 // Conventions
 // - Primary keys: UUID v7 (time-ordered, native `uuid` column).
@@ -41,6 +41,11 @@ enum Permission {
   AUDIT_LOG_READ
 }
 
+enum Civility {
+  MME
+  M
+}
+
 enum UserStatus {
   ACTIVE
   DISABLED
@@ -79,6 +84,9 @@ model User {
   firstName        String     @db.VarChar(100)
   lastName         String     @db.VarChar(100)
   phone            String?    @db.VarChar(32)
+  civility         Civility?
+  companyName      String?    @db.VarChar(120)
+  postalCode       String?    @db.VarChar(12)
   roleId           String     @db.Uuid
   status           UserStatus @default(ACTIVE)
   /// Incremented on password change, role change or disable: invalidates every issued session.
@@ -271,42 +279,43 @@ enum ReservationStatus {
 }
 
 model Reservation {
-  id                 String            @id @default(uuid(7)) @db.Uuid
+  id                 String                   @id @default(uuid(7)) @db.Uuid
   /// Human reference, e.g. AP-NTE-7K3Q9M. Unique, non-sequential.
-  reference          String            @unique @db.VarChar(20)
-  userId             String            @db.Uuid
-  parkingId          String            @db.Uuid
-  offerId            String            @db.Uuid
-  priceId            String?           @db.Uuid
-  vehicleId          String?           @db.Uuid
-  status             ReservationStatus @default(PENDING_PAYMENT)
-  startsAt           DateTime          @db.Timestamptz(3)
-  endsAt             DateTime          @db.Timestamptz(3)
+  reference          String                   @unique @db.VarChar(20)
+  userId             String                   @db.Uuid
+  parkingId          String                   @db.Uuid
+  offerId            String                   @db.Uuid
+  priceId            String?                  @db.Uuid
+  vehicleId          String?                  @db.Uuid
+  status             ReservationStatus        @default(PENDING_PAYMENT)
+  startsAt           DateTime                 @db.Timestamptz(3)
+  endsAt             DateTime                 @db.Timestamptz(3)
   billedDays         Int
-  passengers         Int               @default(1)
-  outboundFlight     String?           @db.VarChar(16)
-  returnFlight       String?           @db.VarChar(16)
-  customerNote       String?           @db.VarChar(1000)
+  passengers         Int                      @default(1)
+  outboundFlight     String?                  @db.VarChar(16)
+  returnFlight       String?                  @db.VarChar(16)
+  customerNote       String?                  @db.VarChar(1000)
   // Snapshots: the booking stays exact if the account, vehicle or tariff changes later.
-  customerFirstName  String            @db.VarChar(100)
-  customerLastName   String            @db.VarChar(100)
-  customerEmail      String            @db.VarChar(190)
-  customerPhone      String            @db.VarChar(32)
-  vehiclePlate       String            @db.VarChar(20)
+  customerFirstName  String                   @db.VarChar(100)
+  customerLastName   String                   @db.VarChar(100)
+  customerEmail      String                   @db.VarChar(190)
+  customerPhone      String                   @db.VarChar(32)
+  vehiclePlate       String                   @db.VarChar(20)
   priceSnapshot      Json
   totalCents         Int
-  currency           String            @default("EUR") @db.Char(3)
-  refundedCents      Int               @default(0)
-  holdExpiresAt      DateTime?         @db.Timestamptz(3)
+  currency           String                   @default("EUR") @db.Char(3)
+  refundedCents      Int                      @default(0)
+  paymentMethod      ReservationPaymentMethod @default(ONLINE)
+  holdExpiresAt      DateTime?                @db.Timestamptz(3)
   /// Client-generated key: a double click or network retry returns the same reservation.
-  idempotencyKey     String            @unique @db.VarChar(64)
-  confirmedAt        DateTime?         @db.Timestamptz(3)
-  checkedInAt        DateTime?         @db.Timestamptz(3)
-  completedAt        DateTime?         @db.Timestamptz(3)
-  cancelledAt        DateTime?         @db.Timestamptz(3)
-  cancellationReason String?           @db.VarChar(500)
-  createdAt          DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+  idempotencyKey     String                   @unique @db.VarChar(64)
+  confirmedAt        DateTime?                @db.Timestamptz(3)
+  checkedInAt        DateTime?                @db.Timestamptz(3)
+  completedAt        DateTime?                @db.Timestamptz(3)
+  cancelledAt        DateTime?                @db.Timestamptz(3)
+  cancellationReason String?                  @db.VarChar(500)
+  createdAt          DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime                 @updatedAt @db.Timestamptz(3)
 
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
   parking              Parking               @relation(fields: [parkingId], references: [id], onDelete: Restrict)
@@ -355,6 +364,24 @@ model CancellationRequest {
 
 enum PaymentProvider {
   STRIPE
+  /// Paid at the counter on return, recorded by staff.
+  ON_SITE
+}
+
+/// How the customer chose to pay when booking.
+enum ReservationPaymentMethod {
+  /// Online at booking (Stripe Checkout): confirmed by the payment webhook.
+  ONLINE
+  /// At the counter on return: confirmed at booking, the amount is due on site.
+  ON_SITE
+}
+
+/// Means of payment of an on-site payment.
+enum OnSitePaymentMethod {
+  CARD
+  CASH
+  HOLIDAY_VOUCHERS
+  CHECK
 }
 
 enum PaymentStatus {
@@ -368,22 +395,25 @@ enum PaymentStatus {
 
 /// One row per payment attempt. Card data never reaches Alterpark: only provider identifiers.
 model Payment {
-  id                String          @id @default(uuid(7)) @db.Uuid
-  reservationId     String          @db.Uuid
+  id                String               @id @default(uuid(7)) @db.Uuid
+  reservationId     String               @db.Uuid
   provider          PaymentProvider
   /// e.g. Stripe Checkout Session id.
-  providerSessionId String?         @unique @db.VarChar(255)
+  providerSessionId String?              @unique @db.VarChar(255)
   /// e.g. Stripe PaymentIntent id.
-  providerPaymentId String?         @unique @db.VarChar(255)
+  providerPaymentId String?              @unique @db.VarChar(255)
   amountCents       Int
-  currency          String          @default("EUR") @db.Char(3)
-  status            PaymentStatus   @default(PENDING)
-  refundedCents     Int             @default(0)
-  failureCode       String?         @db.VarChar(100)
-  failureMessage    String?         @db.VarChar(500)
-  succeededAt       DateTime?       @db.Timestamptz(3)
-  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
-  updatedAt         DateTime        @updatedAt @db.Timestamptz(3)
+  currency          String               @default("EUR") @db.Char(3)
+  status            PaymentStatus        @default(PENDING)
+  refundedCents     Int                  @default(0)
+  /// ON_SITE payments: means of payment and the staff member who recorded it.
+  onSiteMethod      OnSitePaymentMethod?
+  recordedById      String?              @db.Uuid
+  failureCode       String?              @db.VarChar(100)
+  failureMessage    String?              @db.VarChar(500)
+  succeededAt       DateTime?            @db.Timestamptz(3)
+  createdAt         DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime             @updatedAt @db.Timestamptz(3)
 
   reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Restrict)
   refunds     Refund[]

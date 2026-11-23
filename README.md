@@ -4,8 +4,7 @@ Airport parking reservation and management platform for Nantes, Marseille and Pa
 public website, online booking with secure payment, customer area and administration back office.
 Developed by OuiDev.
 
-**Status: Phase 1 complete (audit and foundation), awaiting approval.** The site currently shows a
-holding page; no booking feature exists yet. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status: Phases 1–8 complete; Phase 9 (deployment) ready on the code side — the launch now depends on the accounts and data listed in [`docs/LAUNCH.md`](docs/LAUNCH.md).** Online booking works end to end once Stripe keys are set and a site is opened from the back office (capacities and rates entered). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
 
@@ -15,21 +14,33 @@ Playwright · Vercel. Exact versions in `package.json`.
 
 ## Getting started
 
-Requirements: Node.js 22 (`.nvmrc`), npm 11, PostgreSQL 16 from Phase 4.
+Requirements: Node.js 22 (`.nvmrc`), npm 11, PostgreSQL 16.
 
 ```bash
 npm install -g npm@11.6.2
-npm ci
-cp .env.example .env.local
+npm ci                 # also generates the Prisma client
+cp .env.example .env.local   # then fill DATABASE_URL, AUTH_SECRET, IP_HASH_SALT, CRON_SECRET…
+npm run db:migrate     # apply migrations to your local database
+npm run db:seed        # roles, permissions, sites (+ super admin if SEED_SUPER_ADMIN_* are set)
 npm run dev            # http://localhost:3000
 ```
+
+Deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 | Script | Purpose |
 |---|---|
 | `npm run dev` / `build` / `start` | Next.js |
 | `npm run lint` · `npm run typecheck` · `npm test` | Quality checks (also run in CI) |
 | `npm run db:validate` · `npm run db:format` | Prisma schema |
+| `npm run db:migrate` · `npm run db:deploy` · `npm run db:seed` | Migrations (dev / deploy) and seed |
+| `npm run db:demo` | **Local only**: opens Nantes with fictitious capacities and rates labelled « DÉMO » (`-- --undo` to revert) |
+| `npm run test:integration` | Integration tests on PostgreSQL (`TEST_DATABASE_URL`, name ending in `_test`) |
+| `npm run test:e2e` | Playwright end-to-end suite: prepares `alterpark_e2e_test`, builds, starts the app and a local Stripe emulator (`E2E_DATABASE_URL` to override) |
+| `npm run smoke -- <url>` | Read-only smoke test of a deployment (`--expect-database`, `--indexable`) |
 | `npm run check` | All checks except the build |
+
+Design-system gallery: `npm run dev`, then open http://localhost:3000/dev/design-system
+(and `/dev/design-system/shell` for the back-office layout).
 
 Fonts: Montserrat is included. **Crossroads (headings) is not**: its licence is "personal use"
 only. After buying a commercial web licence, place the file at `public/fonts/Crossroads-Regular.ttf`
@@ -43,9 +54,12 @@ only. After buying a commercial web licence, place the file at `public/fonts/Cro
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, folder structure, workflows, rendering, deployment |
 | [`docs/DATA-MODEL.md`](docs/DATA-MODEL.md) | Entities, relationships, constraints, status machines |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Authentication, authorisation, payments, abuse, secrets |
+| [`docs/SECURITY-REVIEW.md`](docs/SECURITY-REVIEW.md) | Pre-launch security review (Phase 8) and recommendations |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Architecture decision records |
+| [`docs/LAUNCH.md`](docs/LAUNCH.md) | Launch runbook: who does what, Preview then Production |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phases and exit criteria |
 | [`src/design-system/README.md`](src/design-system/README.md) | How to use the design-system layer |
+| [`docs/design-system/extensions.md`](docs/design-system/extensions.md) | Extensions to the system and porting notes |
 | [`docs/design-system/`](docs/design-system/README.md) | Supplied design system: charter, analysis, responsive rules, component sheets, reference bundle |
 
 ## Repository rules
