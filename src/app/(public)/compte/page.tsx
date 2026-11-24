@@ -1,15 +1,16 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Button } from "@/components/ui/actions/Button";
-import { Alert } from "@/components/ui/feedback/Alert";
 import { Badge } from "@/components/ui/feedback/Badge";
 import { LoadingRegion, Skeleton } from "@/components/ui/feedback/Skeleton";
 import { accentTitle } from "@/components/ui/lib/accent-title";
 import { assets } from "@/components/ui/lib/assets";
-import Image from "next/image";
+import { formatCents } from "@/components/ui/lib/format";
+import { LineIcon, type LineIconName } from "@/components/site/pages/LineIcon";
 import { routes } from "@/config/site";
 import { logoutAction } from "@/modules/auth/actions";
-import { listUpcomingCustomerReservations } from "@/modules/reservations/service";
+import { customerReservationStats, listUpcomingCustomerReservations } from "@/modules/reservations/service";
 import { STATUS_LABELS, STATUS_TONES } from "@/modules/reservations/domain/status";
 import { formatDateTime } from "@/modules/reservations/domain/stay";
 import { requireUser } from "@/server/auth/session";
@@ -18,110 +19,166 @@ import { hasDatabase } from "@/server/db/client";
 export const metadata: Metadata = { title: "Mon espace client", robots: { index: false, follow: false } };
 
 /*
- * Espace client — client design (Nov. 2026): the dashboard sits in the public site chrome (hero
- * with the customer's initials, three link columns). The detailed pages keep the account shell.
+ * Espace client — dashboard in the site chrome: compact welcome band, counters, the next booking
+ * highlighted, then shortcut tiles. Detailed pages keep the account shell.
  */
-type Item = { label: string; href?: string; note?: string };
-
 const account = routes.account;
-const COLUMNS: { title: string; items: Item[] }[] = [
-  {
-    title: "Vos informations",
-    items: [
-      { label: "Consultez et mettez à jour vos coordonnées", href: `${account}/profil` },
-      // Loyalty programme announced as « Bientôt » on the home page: no fake balance.
-      { label: "Mes points de fidélité", note: "bientôt disponible" },
-      { label: "Informations utiles pour votre voyage", href: routes.howItWorks },
-      { label: "Plan d’accès au parking", href: routes.access },
-      { label: "Désactiver votre compte", href: `${account}/profil#suppression` },
-    ],
-  },
-  {
-    title: "Vos réservations",
-    items: [
-      { label: "Accédez à l’historique de vos réservations", href: `${account}/reservations` },
-      { label: "Annulez une réservation", href: `${account}/reservations` },
-      { label: "Ajouter une nouvelle réservation", href: routes.booking },
-      { label: "Mes paiements", href: `${account}/paiements` },
-    ],
-  },
-  {
-    title: "Assistance & support",
-    items: [
-      { label: "Contactez notre service client", href: `${account}/support` },
-      { label: "Lire les CGV ALTERPARK", href: routes.terms },
-    ],
-  },
+
+type Tile = { icon: LineIconName; title: string; text: string; href?: string; soon?: boolean };
+
+const TILES: Tile[] = [
+  { icon: "calendar", title: "Mes réservations", text: "Historique, détail et annulation", href: `${account}/reservations` },
+  { icon: "card", title: "Mes paiements", text: "Paiements et remboursements", href: `${account}/paiements` },
+  { icon: "user", title: "Mon profil", text: "Coordonnées et mot de passe", href: `${account}/profil` },
+  { icon: "map", title: "Plan d’accès", text: "Itinéraires jusqu’au parking", href: routes.access },
+  { icon: "bus", title: "Comment ça marche", text: "Dépôt, navette et retour", href: routes.howItWorks },
+  { icon: "help", title: "Aide et contact", text: "Une question ? Écrivez-nous", href: `${account}/support` },
+  { icon: "file", title: "Conditions générales", text: "CGV ALTERPARK", href: routes.terms },
+  // Loyalty programme announced as « Bientôt » on the home page: shown, never faked.
+  { icon: "star", title: "Points de fidélité", text: "Bientôt disponible", soon: true },
 ];
 
-function Initials({ firstName, lastName }: { firstName: string; lastName: string }) {
-  return <span className="acc-hero__avatar" aria-hidden>{`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()}</span>;
+function TileCard({ t }: { t: Tile }) {
+  const inner = (
+    <>
+      <span className="acc-tile__ico"><LineIcon name={t.icon} /></span>
+      <span className="acc-tile__body">
+        <b>{t.title}</b>
+        <span>{t.text}</span>
+      </span>
+      {t.href ? <LineIcon name="arrow" className="acc-tile__arrow" /> : null}
+    </>
+  );
+  return <li>{t.href ? <a className="acc-tile" href={t.href}>{inner}</a> : <div className="acc-tile acc-tile--soon" aria-disabled="true">{inner}</div>}</li>;
 }
 
 async function Dashboard() {
   const user = await requireUser(routes.account);
-  const upcoming = hasDatabase() ? await listUpcomingCustomerReservations(user.id) : [];
+  const [upcoming, stats] = hasDatabase()
+    ? await Promise.all([listUpcomingCustomerReservations(user.id, 3), customerReservationStats(user.id)])
+    : [[], { total: 0, upcoming: 0 }];
+  const [next, ...later] = upcoming;
+  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   return (
     <>
-      <section className="ap-root ap-hero acc-hero" aria-labelledby="account-title">
-        <div className="ap-hero__bg" aria-hidden>
-          <Image src={assets.heroPhoto.src} width={assets.heroPhoto.width} height={assets.heroPhoto.height} alt="" sizes="100vw" quality={60} preload />
+      <section className="ap-root acc-band" aria-labelledby="account-title">
+        <div className="acc-band__bg" aria-hidden>
+          <Image src={assets.heroPhoto.src} width={assets.heroPhoto.width} height={assets.heroPhoto.height} alt="" sizes="100vw" quality={50} preload />
         </div>
-        <div className="ap-hero__content">
-          <div className="acc-hero__id">
-            <Initials firstName={user.firstName} lastName={user.lastName} />
+        <div className="page-wrap acc-band__inner">
+          <div className="acc-id">
+            <span className="acc-id__avatar" aria-hidden>{initials}</span>
+            <div className="acc-id__text">
+              <p className="acc-id__hello">Espace client</p>
+              <h1 id="account-title" className="h2 ap-h2">{accentTitle(`Bonjour ${user.firstName} !`)}</h1>
+              <p className="acc-id__mail">{user.email}</p>
+            </div>
+          </div>
+          <div className="acc-band__actions">
+            <Button href={routes.booking}>Nouvelle réservation</Button>
             <form action={logoutAction}>
-              <button type="submit" className="acc-hero__logout" aria-label="Se déconnecter" title="Se déconnecter">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden focusable="false">
-                  <path d="M10 17l5-5-5-5M15 12H3M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5" />
-                </svg>
+              <button type="submit" className="acc-logout">
+                <LineIcon name="logout" />
+                Se déconnecter
               </button>
             </form>
           </div>
-          <p className="acc-hero__email">{user.email}</p>
-          <h1 id="account-title" className="display ap-display">{accentTitle(`Bonjour ${user.firstName} ${user.lastName} !`)}</h1>
-          <p className="body ap-body">Bienvenue dans votre espace client Alterpark ! Ici, vous pouvez gérer facilement vos réservations et retrouver toutes les informations liées à votre stationnement.</p>
-          <Button href={routes.booking}>Nouvelle réservation</Button>
         </div>
       </section>
-      <div className="ap-page">
+
+      <div className="page-wrap acc-dash">
         {!user.emailVerified ? (
-          <div className="page-wrap">
-            <Alert tone="warning" title="Adresse e-mail à confirmer">
-              <p>
-                Un lien de confirmation a été envoyé à <span className="break-all">{user.email}</span>. Confirmez votre adresse pour sécuriser votre compte.
-              </p>
-            </Alert>
+          <div className="acc-notice" role="status">
+            <LineIcon name="mail" className="acc-notice__ico" />
+            <p>
+              <b>Confirmez votre adresse e-mail.</b> Un lien a été envoyé à <span className="break-all">{user.email}</span> pour sécuriser votre compte.
+            </p>
           </div>
         ) : null}
-        {upcoming.length ? (
-          <section className="page-wrap acc-upcoming" aria-labelledby="upcoming-title">
-            <h2 id="upcoming-title" className="h2 ap-h2">{accentTitle("Vos prochaines réservations")}</h2>
-            <ul>
-              {upcoming.map((r) => (
+
+        <ul className="acc-stats" aria-label="En bref">
+          <li>
+            <span className="acc-stats__num">{stats.upcoming}</span>
+            <span>{stats.upcoming > 1 ? "réservations à venir" : "réservation à venir"}</span>
+          </li>
+          <li>
+            <span className="acc-stats__num">{stats.total}</span>
+            <span>{stats.total > 1 ? "réservations au total" : "réservation au total"}</span>
+          </li>
+          <li>
+            <LineIcon name="shield" className="acc-stats__ico" />
+            <span>{user.emailVerified ? "Compte vérifié" : "E-mail à confirmer"}</span>
+          </li>
+        </ul>
+
+        <section className="acc-next" aria-labelledby="next-title">
+          <h2 id="next-title" className="acc-section-title">Prochaine réservation</h2>
+          {next ? (
+            <article className="acc-booking">
+              <header className="acc-booking__head">
+                <div>
+                  <p className="acc-booking__ref">{next.reference}</p>
+                  <h3>{next.parking.name}</h3>
+                  <p className="acc-booking__offer">{next.offer.name}</p>
+                </div>
+                <Badge tone={STATUS_TONES[next.status]}>{STATUS_LABELS[next.status]}</Badge>
+              </header>
+              <dl className="acc-booking__dates">
+                <div>
+                  <dt>Dépôt du véhicule</dt>
+                  <dd>{formatDateTime(next.startsAt.getTime(), next.parking.timeZone)}</dd>
+                </div>
+                <div>
+                  <dt>Récupération</dt>
+                  <dd>{formatDateTime(next.endsAt.getTime(), next.parking.timeZone)}</dd>
+                </div>
+                <div>
+                  <dt>{next.paymentMethod === "ON_SITE" ? "À régler sur place" : "Montant"}</dt>
+                  <dd>{formatCents(next.totalCents)}</dd>
+                </div>
+              </dl>
+              <footer className="acc-booking__actions">
+                <Button href={`${account}/reservations/${next.reference}`} size="sm">Voir le détail</Button>
+                <Button href={`${routes.access}/${next.parking.slug}`} size="sm" variant="outline">Plan d’accès</Button>
+              </footer>
+            </article>
+          ) : (
+            <div className="acc-empty">
+              <LineIcon name="calendar" className="acc-empty__ico" />
+              <div>
+                <h3>Aucune réservation à venir</h3>
+                <p>Réservez votre place en quelques clics : paiement en ligne ou sur place à votre retour.</p>
+              </div>
+              <Button href={routes.booking} size="sm">Réserver une place</Button>
+            </div>
+          )}
+          {later.length ? (
+            <ul className="acc-later">
+              {later.map((r) => (
                 <li key={r.id}>
-                  <a className="font-bold text-primary underline" href={`${account}/reservations/${r.reference}`}>{`${r.reference} — ${r.parking.name}`}</a>
-                  <span>{formatDateTime(r.startsAt.getTime(), r.parking.timeZone)}</span>
-                  <Badge tone={STATUS_TONES[r.status]}>{STATUS_LABELS[r.status]}</Badge>
+                  <a href={`${account}/reservations/${r.reference}`}>
+                    <span className="acc-later__ref">{r.reference}</span>
+                    <span>{formatDateTime(r.startsAt.getTime(), r.parking.timeZone)}</span>
+                    <Badge tone={STATUS_TONES[r.status]}>{STATUS_LABELS[r.status]}</Badge>
+                  </a>
                 </li>
               ))}
             </ul>
-          </section>
-        ) : null}
-        <nav className="page-wrap acc-cols" aria-label="Votre espace client">
-          {COLUMNS.map((c) => (
-            <div key={c.title}>
-              <h2 className="h2 ap-h2">{accentTitle(c.title)}</h2>
-              <ul>
-                {c.items.map((it) => (
-                  <li key={it.label}>
-                    {it.href ? <a href={it.href}>{it.label}</a> : <span>{it.label} <em>({it.note})</em></span>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          ) : null}
+        </section>
+
+        <nav className="acc-shortcuts" aria-labelledby="shortcuts-title">
+          <h2 id="shortcuts-title" className="acc-section-title">Accès rapides</h2>
+          <ul className="acc-tiles">
+            {TILES.map((t) => (
+              <TileCard key={t.title} t={t} />
+            ))}
+          </ul>
         </nav>
+
+        <p className="acc-foot">
+          Vous souhaitez fermer votre compte ? <a href={`${account}/profil#suppression`}>Supprimer mon compte</a>
+        </p>
       </div>
     </>
   );

@@ -19,7 +19,14 @@ export async function publicNav(): Promise<NavLink[]> {
         { label: "Application mobile", href: "/#application" },
       ],
     },
-    { label: "Plan accès", href: routes.access },
+    {
+      label: "Plan accès",
+      children: [
+        { label: "Nantes Atlantique", href: `${routes.access}/nantes` },
+        { label: "Marseille Provence", href: `${routes.access}/marseille` },
+        { label: "Paris-Roissy", href: `${routes.access}/paris-roissy` },
+      ],
+    },
     { label: "Contactez-nous", href: routes.contact },
   ];
 }

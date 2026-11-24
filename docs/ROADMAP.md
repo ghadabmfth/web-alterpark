@@ -199,3 +199,11 @@ Questions for the client:
 - The shuttle drop-off point is « P11 Eco » on Comment ça marche but « P1 Couvert » in the home page news: which one is right?
 - Missing photos: the airport control tower (Plan accès hero), a hand holding keys (banner), the timeline thumbnails (GCA logo, lockdown, shuttle) and the Comment ça marche hero. Existing photos are used for now.
 - The Rallye du Cœur URL: the « En savoir + » button is hidden until we have it.
+
+## Plan d'accès for the three sites (Nov. 2026)
+
+`/plan-acces/{nantes,marseille,paris-roissy}`. `/plan-acces` now redirects (308) to Nantes, and the header has a « Plan accès » menu with the three sites. The maps are drawn from data (`src/content/access-maps.ts`), with one shared page component.
+
+Still needed from the client:
+- **Roissy**: street number, phone and opening hours. Only « Rue des Frères Lumière, 77290 Mitry-Mory » is shown.
+- **Marseille**: the plan supplied is the airport meeting point. There is no road itinerary or address for the site yet, and no phone or hours. Please also confirm the meeting-point wording (« zone loueurs, à côté du parking PB Minute ») and that we may publish this plan, which is based on the airport's map.
