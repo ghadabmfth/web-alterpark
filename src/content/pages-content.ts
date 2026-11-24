@@ -93,10 +93,11 @@ export const HOW_STEPS: HowStep[] = [
   },
 ];
 
-export type RouteStep = { icon: "motorway" | "right" | "left" | "roundaboutLeft" | "roundaboutRight"; title: string; text: string; distance: string };
+export type RouteStep = { icon: "motorway" | "right" | "left" | "roundaboutLeft" | "roundaboutRight" | "walk" | "meet"; title: string; text: string; distance?: string };
 
 /** "1,4 km" / "450 m" → metres. */
-export function distanceMetres(d: string): number {
+export function distanceMetres(d: string | undefined): number {
+  if (!d) return 0;
   const m = /([0-9]+(?:,[0-9]+)?)\s*(km|m)/i.exec(d);
   if (!m?.[1] || !m[2]) return 0;
   const v = Number(m[1].replace(",", "."));
@@ -107,7 +108,12 @@ export function formatDistance(metres: number): string {
   return metres >= 1000 ? `${(Math.round(metres / 100) / 10).toLocaleString("fr-FR")} km` : `${Math.round(metres)} m`;
 }
 
-export type AccessRoute = { id: string; compass: "S" | "N"; title: string; exit: string; origin: string; steps: RouteStep[] };
+/**
+ * One itinerary. `compass` is the letter in the round badge (N, S, or a hall letter); `jump` the
+ * label of the quick link (defaults to « Depuis le nord / sud »); `origin` enables the Google Maps
+ * button (driving itineraries only).
+ */
+export type AccessRoute = { id: string; compass: string; jump?: string; title: string; exit: string; origin?: string; mode?: "car" | "walk"; steps: RouteStep[] };
 
 /** Nantes itineraries (client design « Plan accès », Nov. 2026). */
 export const NANTES_ROUTES: AccessRoute[] = [

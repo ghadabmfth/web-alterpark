@@ -206,4 +206,4 @@ Questions for the client:
 
 Still needed from the client:
 - **Roissy**: street number, phone and opening hours. Only « Rue des Frères Lumière, 77290 Mitry-Mory » is shown.
-- **Marseille**: the plan supplied is the airport meeting point. There is no road itinerary or address for the site yet, and no phone or hours. Please also confirm the meeting-point wording (« zone loueurs, à côté du parking PB Minute ») and that we may publish this plan, which is based on the airport's map.
+- **Marseille**: the page now matches the other two sites. The Terminal 1 plan is redrawn in SVG from the client's meeting-point plan, with two walking routes (from hall A and from hall B) to the meeting point. Still needed: the road itinerary to the airport, the phone and hours, and confirmation of the meeting-point wording (« zone loueurs, à côté du parking PB Minute »).

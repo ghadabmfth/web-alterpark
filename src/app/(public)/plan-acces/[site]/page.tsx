@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: PageProps<"/plan-acces/[site]
   if (!site) return {};
   return pageMetadata({
     title: `Plan d’accès ${site.label}`,
-    description: site.meetingPoint
-      ? `${site.name} : plan du point de rencontre et adresse pour nous retrouver.`
+    description: site.routes.every((r) => r.mode === "walk")
+      ? `${site.name} : plan du Terminal 1 et trajet à pied jusqu’à notre point de rencontre.`
       : `${site.name} : adresse, plan d’accès et itinéraires pour rejoindre notre parking près de l’aéroport.`,
     path: `${routes.access}/${site.slug}`,
   });
