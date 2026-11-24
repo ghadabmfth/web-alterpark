@@ -329,6 +329,16 @@ export async function listUpcomingCustomerReservations(userId: string, limit = 3
   return db().reservation.findMany({ where: { userId, endsAt: { gt: now }, status: { in: ["CONFIRMED", "CHECKED_IN"] } }, orderBy: { startsAt: "asc" }, include: customerInclude, take: limit });
 }
 
+/** Counters of the customer dashboard (cancelled and expired bookings are left out). */
+export async function customerReservationStats(userId: string, now = new Date()) {
+  const kept = { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] as ("CONFIRMED" | "CHECKED_IN" | "COMPLETED")[] };
+  const [total, upcoming] = await Promise.all([
+    db().reservation.count({ where: { userId, status: kept } }),
+    db().reservation.count({ where: { userId, endsAt: { gt: now }, status: { in: ["CONFIRMED", "CHECKED_IN"] } } }),
+  ]);
+  return { total, upcoming };
+}
+
 export async function getCustomerReservation(userId: string, reference: string) {
   return db().reservation.findFirst({ where: { userId, reference }, include: customerInclude });
 }
