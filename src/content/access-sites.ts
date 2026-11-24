@@ -1,12 +1,12 @@
 import { assets, type BrandImage } from "@/components/ui/lib/assets";
 import { siteContact } from "@/config/site";
-import { NANTES_MAP, ROISSY_MAP, type AccessMapData } from "./access-maps";
+import { MARSEILLE_MAP, NANTES_MAP, ROISSY_MAP, type AccessMapData } from "./access-maps";
 import { NANTES_ROUTES, type AccessRoute } from "./pages-content";
 
 /*
  * « Plan accès » of the three sites (client designs, Nov. 2026). Only what the client supplied:
- * Marseille has a meeting-point plan but no road itinerary yet; Roissy's street number, phone and
- * hours are unknown (docs/ROADMAP.md).
+ * Marseille is a meeting point at Terminal 1 (walking routes from the arrivals, no road itinerary
+ * yet); Roissy's street number, phone and hours are unknown (docs/ROADMAP.md).
  */
 export type AccessSlug = "nantes" | "marseille" | "paris-roissy";
 
@@ -23,8 +23,7 @@ export interface AccessSite {
   addressLines: string[];
   hours?: string;
   phone?: string;
-  map?: AccessMapData;
-  meetingPoint?: { image: BrandImage; alt: string; title: string; text: string; steps: string[] };
+  map: AccessMapData;
   routes: AccessRoute[];
   tips: string[];
 }
@@ -68,6 +67,35 @@ const ROISSY_ROUTES: AccessRoute[] = [
   },
 ];
 
+/** Walking routes from the Terminal 1 arrivals to the meeting point (client plan). */
+const MARSEILLE_ROUTES: AccessRoute[] = [
+  {
+    id: "depuis-le-hall-b",
+    compass: "B",
+    jump: "Depuis le hall B",
+    title: "Vous arrivez au hall B ?",
+    exit: "Terminal 1 – Arrivées hall B",
+    mode: "walk",
+    steps: [
+      { icon: "walk", title: "Sortez par les arrivées du hall B", text: "Avancez tout droit jusqu’au trottoir de la Dépose Express." },
+      { icon: "meet", title: "Traversez la Dépose Express : le point de rencontre est en face", text: "Notre équipe vous attend devant la zone loueurs (Hertz, Europcar, Avis…), à côté du parking PB Minute." },
+    ],
+  },
+  {
+    id: "depuis-le-hall-a",
+    compass: "A",
+    jump: "Depuis le hall A",
+    title: "Vous arrivez au hall A ?",
+    exit: "Terminal 1 – Arrivées hall A",
+    mode: "walk",
+    steps: [
+      { icon: "walk", title: "Sortez par les arrivées du hall A", text: "Avancez jusqu’au trottoir de la Dépose Express." },
+      { icon: "left", title: "Longez le terminal vers la gauche, en direction du hall B", text: "Suivez le trottoir le long de la Dépose Express, en passant devant la station de taxis." },
+      { icon: "meet", title: "Au niveau du hall B, traversez : le point de rencontre est en face", text: "Notre équipe vous attend devant la zone loueurs (Hertz, Europcar, Avis…), à côté du parking PB Minute." },
+    ],
+  },
+];
+
 export const ACCESS_SITES: AccessSite[] = [
   {
     slug: "nantes",
@@ -93,23 +121,13 @@ export const ACCESS_SITES: AccessSite[] = [
     label: "Marseille",
     name: "ALTERPARK Marseille Provence",
     title: "Comment rejoindre Alterpark - Marseille ? Notre point de rencontre à l’aéroport Marseille Provence !",
-    intro: "Retrouvez notre équipe au point de rencontre indiqué sur le plan, au Terminal 1 de l’aéroport Marseille Provence.",
+    intro: "Retrouvez notre équipe au point de rencontre indiqué sur le plan, au Terminal 1 de l’aéroport Marseille Provence, à quelques pas des arrivées des halls A et B.",
     heroImage: assets.heroPhoto,
     destination: "Aéroport Marseille Provence, Terminal 1, 13700 Marignane",
     addressLines: ["Aéroport Marseille Provence", "Terminal 1 – zone loueurs"],
-    meetingPoint: {
-      image: { src: "/brand/photos/marseille-point-de-rencontre.webp", width: 1080, height: 662 },
-      alt: "Plan du Terminal 1 de l’aéroport Marseille Provence : depuis les arrivées des halls A et B, suivre les flèches le long de la Dépose Express jusqu’au point de rencontre, devant la zone loueurs (Hertz, Europcar, Avis…), à côté du parking PB Minute.",
-      title: "Le point de rencontre",
-      text: "Le point de rencontre se trouve au Terminal 1, devant la zone des loueurs de voitures (Hertz, Europcar, Avis…), à côté du parking PB Minute.",
-      steps: [
-        "Depuis les arrivées du hall A ou du hall B, sortez du terminal.",
-        "Longez la Dépose Express en direction du hall B, comme indiqué par les flèches.",
-        "Le point de rencontre est devant la zone loueurs, à côté du parking PB Minute.",
-      ],
-    },
-    routes: [],
-    tips: [],
+    map: MARSEILLE_MAP,
+    routes: MARSEILLE_ROUTES,
+    tips: ["Le point de rencontre est indiqué par l’étoile sur le plan : devant la zone loueurs, à côté du parking PB Minute."],
   },
   {
     slug: "paris-roissy",

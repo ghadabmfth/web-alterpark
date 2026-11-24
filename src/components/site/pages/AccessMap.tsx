@@ -54,12 +54,23 @@ export function AccessMap({ map }: { map: AccessMapData }) {
       <div className="amap__scroll" tabIndex={0} role="region" aria-label="Plan d’accès schématique (faites défiler horizontalement sur mobile)">
         <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-labelledby={`amap-title-${w}`} className="amap__svg" style={{ minWidth: map.minWidth, ["--amap-fs" as string]: `${fs}px` }}>
           <title id={`amap-title-${w}`}>{map.title}</title>
+          {map.areas?.map((a) => (
+            <path key={a.d} className={`amap__area amap__area--${a.tone}`} d={a.d} />
+          ))}
           <g className="amap__roads" style={{ strokeWidth: map.road.outer }}>
             {map.roads.map((d) => <path key={d} d={d} />)}
           </g>
           <g className="amap__roads-inner" style={{ strokeWidth: map.road.inner }}>
             {map.roads.map((d) => <path key={d} d={d} />)}
           </g>
+          {map.areas?.map((a) =>
+            a.label && a.lx !== undefined && a.ly !== undefined ? (
+              <Lines key={`l-${a.d}`} lines={a.label} x={a.lx} y={a.ly + fs * 0.35 - ((a.label.length - 1) * fs * 1.2) / 2} anchor="middle" step={fs * 1.2} />
+            ) : null,
+          )}
+          {map.labels?.map((l) => (
+            <text key={`${l.text}-${l.x}`} className={`amap__label${l.strong ? " amap__label--strong" : ""}${l.ink ? " amap__label--ink" : ""}`} x={l.x} y={l.y} textAnchor="middle">{l.text}</text>
+          ))}
           {map.streets?.map((s) => (
             <text key={s.text} className="amap__street" x={s.x} y={s.y} textAnchor="middle" transform={s.rotate ? `rotate(${s.rotate} ${s.x} ${s.y})` : undefined}>{s.text}</text>
           ))}
@@ -107,12 +118,24 @@ export function AccessMap({ map }: { map: AccessMapData }) {
               </g>
             );
           })}
-          <g className="amap__brand-group">
-            <Pin x={map.brand.pin[0]} y={map.brand.pin[1]} s={ps} />
-            <text className="amap__brand" x={map.brand.x} y={map.brand.y} style={{ fontSize: map.brand.size, letterSpacing: map.brand.size / 4 }}>ALTER</text>
-            <text className="amap__brand" x={map.brand.x} y={map.brand.y + map.brand.size} style={{ fontSize: map.brand.size, letterSpacing: map.brand.size / 4 }}>PARK</text>
-            <text className="amap__label amap__label--accent" x={map.brand.x} y={map.brand.y + map.brand.size * 1.7}>L’autre parking</text>
-          </g>
+          {map.brand ? (
+            <g className="amap__brand-group">
+              <Pin x={map.brand.pin[0]} y={map.brand.pin[1]} s={ps} />
+              <text className="amap__brand" x={map.brand.x} y={map.brand.y} style={{ fontSize: map.brand.size, letterSpacing: map.brand.size / 4 }}>ALTER</text>
+              <text className="amap__brand" x={map.brand.x} y={map.brand.y + map.brand.size} style={{ fontSize: map.brand.size, letterSpacing: map.brand.size / 4 }}>PARK</text>
+              <text className="amap__label amap__label--accent" x={map.brand.x} y={map.brand.y + map.brand.size * 1.7}>L’autre parking</text>
+            </g>
+          ) : null}
+          {map.meeting ? (
+            <g className="amap__meeting">
+              <path className="amap__callout" d={`M${map.meeting.x} ${map.meeting.y + 14}L${map.meeting.x + 20} ${map.meeting.y + 140}`} />
+              <rect className="amap__meeting-box" x={map.meeting.x - 110} y={map.meeting.y + 140} width={260} height={fs * 1.25 * map.meeting.label.length + 18} rx={6} />
+              {map.meeting.label.map((t, i) => (
+                <text key={t} className={`amap__meeting-text${i ? "" : " amap__meeting-text--main"}`} x={map.meeting!.x + 20} y={map.meeting!.y + 140 + 9 + fs + i * fs * 1.25} textAnchor="middle">{t}</text>
+              ))}
+              <path className="amap__star" d={`M${map.meeting.x} ${map.meeting.y - 16}l4.5 11.5 11.5 4.5-11.5 4.5-4.5 11.5-4.5-11.5-11.5-4.5 11.5-4.5z`} />
+            </g>
+          ) : null}
         </svg>
       </div>
     </figure>

@@ -55,6 +55,8 @@ const ROUTE: Record<RouteStep["icon"], ReactNode> = {
   motorway: <path d="M10 6h12M8 10h16M12 10l-3 16M20 10l3 16M16 13v3M16 19v3M16 25v1" />,
   right: <path d="M8 26V16a6 6 0 0 1 6-6h12M21 5l5 5-5 5" />,
   left: <path d="M24 26V16a6 6 0 0 0-6-6H6M11 5l-5 5 5 5" />,
+  walk: <><circle cx="17" cy="5" r="2.5" /><path d="m13 28 3-8-3-4 1-6 5 4 4 1M14 10l-4 3-1 5M16 20l3 3 1 5" /></>,
+  meet: <path d="m16 4 3 8.5 8.5 3.5-8.5 3.5L16 28l-3-8.5L4.5 16 13 12.5 16 4Z" />,
   roundaboutLeft: <><circle cx="19" cy="14" r="6" /><path d="M19 20v8M13 14H5M9 10l-4 4 4 4" /></>,
   roundaboutRight: <><circle cx="13" cy="14" r="6" /><path d="M13 20v8M19 14h8M23 10l4 4-4 4" /></>,
 };
@@ -67,7 +69,7 @@ export function RouteIcon({ name, className }: { name: RouteStep["icon"]; classN
   );
 }
 
-export function CompassIcon({ letter, className }: { letter: "S" | "N"; className?: string }) {
+export function CompassIcon({ letter, className }: { letter: string; className?: string }) {
   return (
     <svg className={className} viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden focusable="false">
       <circle cx="20" cy="20" r="14" />

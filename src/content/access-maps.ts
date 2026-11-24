@@ -29,7 +29,13 @@ export interface AccessMapData {
   parkingSigns?: { x: number; y: number; label: string }[];
   badges?: { x: number; y: number; text: string }[];
   streets?: { x: number; y: number; text: string; rotate?: number }[];
-  brand: { pin: [number, number]; x: number; y: number; size: number };
+  brand?: { pin: [number, number]; x: number; y: number; size: number };
+  /** Filled areas (buildings, car parks) with an optional centred label. */
+  areas?: { d: string; tone: "building" | "parking" | "parking-alt" | "zone" | "road"; label?: string[]; lx?: number; ly?: number }[];
+  /** Free labels (e.g. « TERMINAL 1 »). */
+  labels?: { x: number; y: number; text: string; strong?: boolean; ink?: boolean }[];
+  /** Meeting point star with its label. */
+  meeting?: { x: number; y: number; label: string[] };
   fontSize: number;
 }
 
@@ -171,4 +177,49 @@ export const ROISSY_MAP: AccessMapData = {
   ],
   brand: { pin: [772, 795], x: 790, y: 792, size: 22 },
   fontSize: 14,
+};
+
+/**
+ * Marseille Provence, Terminal 1: redrawn from the client's meeting-point plan (car parks, hall A and
+ * hall B arrivals, Dépose Express, walking routes to the meeting point). Not to scale.
+ */
+export const MARSEILLE_MAP: AccessMapData = {
+  title:
+    "Plan schématique du Terminal 1 de l’aéroport Marseille Provence : depuis les arrivées des halls A et B, suivre le trottoir le long de la Dépose Express jusqu’au point de rencontre, devant la zone loueurs (Hertz, Europcar, Avis…), à côté du parking PB Minute.",
+  viewBox: [1080, 662],
+  minWidth: 720,
+  road: { outer: 24, inner: 20 },
+  roads: ["M335 300H820", "M235 300V662", "M510 300V430H640V560", "M662 560H700"],
+  roundabouts: [[640, 560]],
+  roundaboutRadius: 20,
+  route: "M350 232V300L378 322M545 228V274H352",
+  arrows: [[350, 270, 90], [545, 252, 90], [450, 274, 180], [378, 322, 38]],
+  areas: [
+    { d: "M90 140L300 50L325 75L190 130H800V245H560V225H330V245H110Z", tone: "building" },
+    { d: "M880 130H1080V245H880Z", tone: "building" },
+    { d: "M430 234H510V262H430Z", tone: "zone", label: ["Taxi"], lx: 470, ly: 248 },
+    { d: "M120 252H325V292H120Z", tone: "parking-alt", label: ["P6 Premium"], lx: 222, ly: 272 },
+    { d: "M830 280H1080V320H830Z", tone: "zone", label: ["Gare routière"], lx: 955, ly: 300 },
+    { d: "M245 322H380V440H245Z", tone: "parking", label: ["PB", "Minute"], lx: 312, ly: 381 },
+    { d: "M392 322H500V410H392Z", tone: "zone", label: ["Zone", "loueurs"], lx: 446, ly: 366 },
+    { d: "M522 322H680V410H522Z", tone: "parking-alt", label: ["P1", "Premium"], lx: 601, ly: 366 },
+    { d: "M690 322H790V410H690Z", tone: "parking", label: ["PA", "Minute"], lx: 740, ly: 366 },
+    { d: "M40 330H220V520H40Z", tone: "zone", label: ["Parc", "croisiéristes"], lx: 130, ly: 425 },
+    { d: "M700 440H1080V662H700Z", tone: "parking", label: ["P3", "Eco"], lx: 890, ly: 551 },
+    { d: "M250 590H560V662H250Z", tone: "parking-alt", label: ["P7"], lx: 405, ly: 626 },
+  ],
+  labels: [
+    { x: 560, y: 168, text: "TERMINAL 1", strong: true, ink: true },
+    { x: 980, y: 193, text: "TERMINAL 2", strong: true, ink: true },
+    { x: 220, y: 205, text: "Hall B", strong: true, ink: true },
+    { x: 700, y: 205, text: "Hall A", strong: true, ink: true },
+    { x: 350, y: 220, text: "Arrivées", ink: true },
+    { x: 545, y: 215, text: "Arrivées", ink: true },
+    { x: 640, y: 305, text: "DÉPOSE EXPRESS" },
+  ],
+  places: [{ x: 610, y: 620, label: ["Station", "Total"], side: "right" }],
+  motorways: [],
+  airport: { x: 60, y: 60, beside: ["Aéroport", "Marseille Provence"], align: "start", size: 34 },
+  meeting: { x: 390, y: 335, label: ["Point de rencontre", "Meeting point"] },
+  fontSize: 15,
 };
