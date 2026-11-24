@@ -10,7 +10,7 @@ test("sign-up creates the account and opens the customer area", async ({ page })
   await signUp(page, { firstName: "Nora", lastName: "Nouvelle", email });
   await page.waitForURL((u) => u.pathname === "/compte");
   await expect(main(page)).toContainText("Bonjour Nora");
-  await expect(main(page)).toContainText("Adresse e-mail à confirmer");
+  await expect(main(page)).toContainText("Confirmez votre adresse e-mail");
 
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await page.waitForURL((u) => !u.pathname.startsWith("/compte"));
