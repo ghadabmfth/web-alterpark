@@ -93,20 +93,7 @@ export const HOW_STEPS: HowStep[] = [
   },
 ];
 
-export type RouteStep = { icon: "motorway" | "right" | "roundaboutLeft" | "roundaboutRight"; title: string; text: string; distance: string };
-
-export const ACCESS_PAGE = {
-  title: "Comment rejoindre Alterpark ? Accès à notre parking près de l’aéroport de Nantes !",
-  intro: "L’itinéraire indiqué est donné à titre informatif et peut varier en fonction des conditions de circulation, des travaux ou des déviations. Assurez-vous de respecter le code de la route et la signalisation en vigueur.",
-  destination: "1 Rue Dieudonné Costes, 44860 Saint-Aignan-de-Grandlieu",
-  hours: "7 jours/7 et 24h/24",
-  /** Arrival tips: approved rules and facts already published on the site. */
-  tips: [
-    "Présentez-vous à l’accueil avec votre référence de réservation.",
-    "Comptez environ 15 minutes entre l’accueil et votre arrivée au terminal (hors périodes d’affluence).",
-    "À votre retour, appelez-nous depuis la desserte : la navette vient vous chercher en quelques minutes.",
-  ],
-};
+export type RouteStep = { icon: "motorway" | "right" | "left" | "roundaboutLeft" | "roundaboutRight"; title: string; text: string; distance: string };
 
 /** "1,4 km" / "450 m" → metres. */
 export function distanceMetres(d: string): number {
@@ -120,7 +107,10 @@ export function formatDistance(metres: number): string {
   return metres >= 1000 ? `${(Math.round(metres / 100) / 10).toLocaleString("fr-FR")} km` : `${Math.round(metres)} m`;
 }
 
-export const ACCESS_ROUTES: { id: string; compass: "S" | "N"; title: string; exit: string; origin: string; steps: RouteStep[] }[] = [
+export type AccessRoute = { id: string; compass: "S" | "N"; title: string; exit: string; origin: string; steps: RouteStep[] };
+
+/** Nantes itineraries (client design « Plan accès », Nov. 2026). */
+export const NANTES_ROUTES: AccessRoute[] = [
   {
     id: "depuis-le-sud",
     compass: "S",

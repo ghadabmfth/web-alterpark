@@ -139,7 +139,7 @@ async function Dashboard() {
               </dl>
               <footer className="acc-booking__actions">
                 <Button href={`${account}/reservations/${next.reference}`} size="sm">Voir le détail</Button>
-                <Button href={routes.access} size="sm" variant="outline">Plan d’accès</Button>
+                <Button href={`${routes.access}/${next.parking.slug}`} size="sm" variant="outline">Plan d’accès</Button>
               </footer>
             </article>
           ) : (
