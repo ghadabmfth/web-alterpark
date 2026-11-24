@@ -14,14 +14,19 @@ describe("itinerary distances", () => {
     expect(formatDistance(450)).toBe("450 m");
   });
   it("every step of every site has a readable distance", () => {
-    for (const site of ACCESS_SITES) for (const r of site.routes) for (const s of r.steps) expect(distanceMetres(s.distance), `${site.slug} ${s.title}`).toBeGreaterThan(0);
+    for (const site of ACCESS_SITES) for (const r of site.routes) if (r.mode !== "walk") for (const s of r.steps) expect(distanceMetres(s.distance), `${site.slug} ${s.title}`).toBeGreaterThan(0);
   });
 });
 
 describe("access sites", () => {
-  it("covers the three parkings with a map or a meeting point each", () => {
+  it("covers the three parkings, each with a map and itineraries", () => {
     expect(ACCESS_SITES.map((s) => s.slug)).toEqual(["nantes", "marseille", "paris-roissy"]);
-    for (const s of ACCESS_SITES) expect(Boolean(s.map || s.meetingPoint), s.slug).toBe(true);
+    for (const s of ACCESS_SITES) {
+      expect(s.map.title.length, s.slug).toBeGreaterThan(40);
+      expect(s.routes.length, s.slug).toBeGreaterThan(0);
+      // Driving routes need a distance on every step; walking routes need none.
+      for (const r of s.routes) if (r.mode !== "walk") expect(r.origin, r.id).toBeTruthy();
+    }
     expect(accessSite("lyon")).toBeUndefined();
   });
 });

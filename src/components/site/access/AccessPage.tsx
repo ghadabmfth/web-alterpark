@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Hero } from "@/components/ui/patterns/Hero";
 import { Button } from "@/components/ui/actions/Button";
 import { accentTitle } from "@/components/ui/lib/accent-title";
@@ -11,12 +10,19 @@ import { routes, telHref } from "@/config/site";
 import { ACCESS_SITES, type AccessSite } from "@/content/access-sites";
 import { distanceMetres, formatDistance } from "@/content/pages-content";
 
-const LEGEND = [
-  { key: "rb", label: "Rond-point" },
-  { key: "route", label: "Itinéraire conseillé" },
-  { key: "pin", label: "Point de repère" },
-  { key: "exit", label: "Sortie / échangeur" },
-] as const;
+/** Legend entries for what the map actually shows. */
+function legendFor(site: AccessSite) {
+  const m = site.map;
+  const walk = site.routes.every((r) => r.mode === "walk");
+  return [
+    m.roundabouts.length ? { key: "rb", label: "Rond-point" } : null,
+    { key: "route", label: walk ? "Trajet à pied" : "Itinéraire conseillé" },
+    m.places.length ? { key: "pin", label: "Point de repère" } : null,
+    m.motorways.length ? { key: "exit", label: "Sortie / échangeur" } : null,
+    m.meeting ? { key: "meet", label: "Point de rencontre" } : null,
+    m.areas?.some((a) => a.tone === "parking" || a.tone === "parking-alt") ? { key: "park", label: "Parkings de l’aéroport" } : null,
+  ].filter((l): l is { key: string; label: string } => l !== null);
+}
 
 /* « Plan accès » of one site: switcher, address card, map or meeting point, itineraries, tips. */
 export function AccessPage({ site }: { site: AccessSite }) {
@@ -82,23 +88,6 @@ export function AccessPage({ site }: { site: AccessSite }) {
           </div>
         </section>
 
-        {site.meetingPoint ? (
-          <section className="page-wrap access-meet" aria-labelledby="meet-title">
-            <div className="access-meet__text">
-              <h2 id="meet-title" className="h2 ap-h2">{accentTitle(site.meetingPoint.title)}</h2>
-              <p>{site.meetingPoint.text}</p>
-              <ol>
-                {site.meetingPoint.steps.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ol>
-            </div>
-            <figure className="access-meet__figure">
-              <Image src={site.meetingPoint.image.src} width={site.meetingPoint.image.width} height={site.meetingPoint.image.height} alt={site.meetingPoint.alt} sizes="(min-width: 1024px) 60vw, 100vw" />
-            </figure>
-          </section>
-        ) : null}
-
         {site.map ? (
           <section className="page-wrap access-mapwrap" aria-labelledby="map-title">
             <div className="access-mapwrap__head">
@@ -108,7 +97,7 @@ export function AccessPage({ site }: { site: AccessSite }) {
                   {site.routes.map((r) => (
                     <a key={r.id} href={`#${r.id}`}>
                       <CompassIcon letter={r.compass} />
-                      {r.compass === "S" ? "Depuis le sud" : "Depuis le nord"}
+                      {r.jump ?? (r.compass === "S" ? "Depuis le sud" : "Depuis le nord")}
                     </a>
                   ))}
                 </nav>
@@ -118,7 +107,7 @@ export function AccessPage({ site }: { site: AccessSite }) {
               <AccessMap map={site.map} />
               <p className="access-mapcard__hint">Plan schématique, non à l’échelle. Sur mobile, faites glisser le plan horizontalement.</p>
               <ul className="amap-legend" aria-label="Légende du plan">
-                {LEGEND.map((l) => (
+                {legendFor(site).map((l) => (
                   <li key={l.key}>
                     <span className={`amap-legend__key amap-legend__key--${l.key}`} aria-hidden />
                     {l.label}
@@ -133,6 +122,7 @@ export function AccessPage({ site }: { site: AccessSite }) {
           <section className="page-wrap access-routes" aria-label="Itinéraires">
             {site.routes.map((r) => {
               const total = r.steps.reduce((n, s) => n + distanceMetres(s.distance), 0);
+              const summary = r.mode === "walk" ? `${r.steps.length} étapes · à pied, à quelques pas des arrivées` : `${r.steps.length} étapes · environ ${formatDistance(total)} depuis la sortie`;
               return (
                 <div key={r.id} id={r.id} className="access-route">
                   <div className="access-route__head">
@@ -144,7 +134,7 @@ export function AccessPage({ site }: { site: AccessSite }) {
                   </div>
                   <p className="access-route__total">
                     <LineIcon name="route" />
-                    {`${r.steps.length} étapes · environ ${formatDistance(total)} depuis la sortie`}
+                    {summary}
                   </p>
                   <ol className="access-steps">
                     {r.steps.map((s, i) => (
@@ -158,17 +148,21 @@ export function AccessPage({ site }: { site: AccessSite }) {
                             {s.title}
                           </h3>
                           <p>{s.text}</p>
-                          <span className="access-steps__dist">
-                            <span className="ap-sr">Distance : </span>
-                            {s.distance}
-                          </span>
+                          {s.distance ? (
+                            <span className="access-steps__dist">
+                              <span className="ap-sr">Distance : </span>
+                              {s.distance}
+                            </span>
+                          ) : null}
                         </div>
                       </li>
                     ))}
                   </ol>
-                  <div>
-                    <Button href={directions(r.origin)}>Ouvrir cet itinéraire</Button>
-                  </div>
+                  {r.origin ? (
+                    <div>
+                      <Button href={directions(r.origin)}>Ouvrir cet itinéraire</Button>
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
